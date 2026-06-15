@@ -31,7 +31,7 @@ later layer, always over the raw downloadable data.** Full rationale: `README.md
 originating research dossier lives in the vault at `wiki/sources/2026-06-15-ai-quantum-investment-ledger-research.md`
 and the vault project page at `wiki/projects/ai-quantum-investment-ledger.md`.
 
-## Current state — Stages 1 & 2 SHIPPED
+## Current state — Stages 1–4 SHIPPED (Stage 4 PROVISIONAL)
 
 - **Stage 1 (ledger):** tagged, source-linked, downloadable government-commitment table. 22 records / 14
   jurisdictions / 2 primary-source-verified. Cardinal rule enforced in code: **headlines are never summed**;
@@ -40,6 +40,21 @@ and the vault project page at `wiki/projects/ai-quantum-investment-ledger.md`.
 - **Stage 2 (normalization):** live viewer toggles — **Currency** (Market FX vs PPP-blended =
   `tradable_share·FX + (1−tradable_share)·PPP`) and **View** (Absolute / Per-capita / %GDP / ×GBARD),
   joined to `data/denominators.json` on `iso3`. PPP is a flagged sensitivity scenario, never the default.
+- **Stage 3 (realization):** new `data/realizations.jsonl` (append-only, dated observations keyed by
+  `event_key`). `build.py` joins it and computes per-record `realization_rate` (realized ÷ committed
+  headline), `expected_rate` (linear horizon schedule), and `pace_status` (ahead/on_track/behind/stalled;
+  `pace_flag` override when no $ figure exists). Viewer gains a **Realization** View, a **Tracked only**
+  filter, and a "Pledges tracked / N behind" KPI. Seeded with 5 flagged pledges (CHIPS ~$33B obligated &
+  ahead; Stargate & EU InvestAI behind; Canada & IndiaAI on-track). **Realization is event-level; nothing
+  new is summed.** Current build: 22 records / 14 jurisdictions / 2 verified / $71.0B outlays / 5 tracked.
+- **Stage 4 (composite index — PROVISIONAL):** separate generated page `composite-index.html` over the
+  raw ledger, OECD/JRC discipline. Config in `data/index-weights.json` (4 indicators: outlay %GDP 0.40,
+  ×GBARD 0.20, breadth 0.15, evidence 0.25). Min-max→[1,100], **weighted geometric mean over available
+  indicators** (n/a never imputed; coverage k/N shown), EU bloc excluded → **13 jurisdictions ranked**.
+  **Monte-Carlo audit → 90% rank CIs** (2000 draws, seed 20260615, **byte-identical builds**), jittering
+  indicator values (per-jurisdiction confidence σ) + weights (±25%). #1 USA (CI 1–1, via CHIPS $52.7B
+  appropriated); everything below sits in wide overlapping CIs — the intended "don't cite these ranks"
+  signal. By design the index rewards appropriated **outlay**, not headlines, so China/Saudi/UAE rank low.
 
 ## File map
 
@@ -49,9 +64,12 @@ and the vault project page at `wiki/projects/ai-quantum-investment-ledger.md`.
 | `methodology.md` | Public methodology — the tagging axes + normalization formulas |
 | `build.py` | Generator (stdlib only): validates data + denominator join, computes derived fields, bakes `index.html` |
 | `index.html` | The viewer (generated). **Hostable entry point** — serves at a site root |
-| `data/schema.json` | Record field contract (+ `_normalization` block) |
+| `data/schema.json` | Record field contract (+ `_normalization` and `_realization` blocks) |
 | `data/government-commitments.jsonl` | Canonical ledger — append-only, one JSON object per line |
 | `data/denominators.json` | GDP / population / price-level-index / GBARD by ISO3 |
+| `data/realizations.jsonl` | Stage 3 — dated realization observations keyed by `event_key` (append-only) |
+| `composite-index.html` | Stage 4 — provisional composite ranking with 90% rank CIs (generated) |
+| `data/index-weights.json` | Stage 4 — indicators, fixed weights, Monte-Carlo seed/draws |
 
 ## How to preview (headless screenshot recipe)
 
@@ -74,24 +92,33 @@ that captures `#tb`.innerHTML — see git history of the old `scripts/` generato
    price-level indices from **ICP 2021**, **GBARD** from **OECD MSTI** (currently illustrative approximations,
    flagged in `_meta`).
 
-**Stage 3 (commitment → outlay reconciliation):** add a versioned "realization" field updating announced
-commitments against OECD / national-accounts outlay data on the 1–2yr statistical lag; surface a public
-**"commitment realization rate"** per major pledge (e.g. flag Stargate's reported slow start). Schema work
-+ a `realizations` history per `event_key`.
+**Stage 3 — SHIPPED (machinery; data is a seed).** Remaining Stage-3 *data* work: expand
+`data/realizations.jsonl` beyond the 5 seed pledges as official outlay stats land — pin `disbursed`
+(not just `obligated`) figures for CHIPS from the Commerce CHIPS Program Office; add OECD / national-
+accounts outlay observations for the appropriated-outlay rows (Canada, France quantum, Germany, etc.);
+trace `source_url` on the Stargate/SoftBank pace observation. The linear-schedule `expected_rate` is a
+simple baseline — a future refinement could accept a per-pledge disbursement curve if one is published.
 
-**Stage 4 (optional composite index):** only after the ledger is trusted. OECD/JRC Handbook discipline —
-fixed transparent weights, geometric aggregation, missing data as `n/a` (not imputed), and an independent
-statistical audit publishing **90% rank confidence intervals**. Never a point rank without its interval.
+**Stage 4 — SHIPPED (machinery; PROVISIONAL).** The composite-index engine is complete and disciplined
+(fixed weights, geometric aggregation, n/a never imputed, Monte-Carlo 90% rank CIs, reproducible seed).
+What it now NEEDS is **coverage, not code**: the ranks are uncitable until the ledger reaches ≥40
+jurisdictions (TODO #2 above). Optional refinements when coverage grows: add per-capita / realization
+indicators, sensitivity analysis on the weight scheme, and a correlation check across indicators (the
+three outlay-derived ones are correlated by construction). Do NOT promote the ranks off "PROVISIONAL"
+until coverage and the data-quality TODOs land.
 
-## Open decisions (were on the table when we paused)
+**Release finalization — DONE except the last cleanup.** `LICENSE` (MIT, code) and `data/LICENSE`
+(CC BY 4.0, data) are committed; README license section + folder layout updated; the dense viewer "how
+to read" note is now a collapsible `<details>` (cardinal-rule line stays visible). **The only remaining
+publish step: delete this `HANDOFF.md`** (process notes, not product docs) when spinning the folder out as
+a standalone repo. Copyright holder used: "Spencer Lee, 2026" — change if a different attribution is wanted.
 
-- **License:** README flags an intended OWID-style split (MIT for `build.py`, CC-BY-4.0 for data). Not yet
-  finalized — no `LICENSE` files committed. Offer was open to drop them in to make the standalone repo
-  publish-ready.
-- **Header polish:** the viewer's intro/"how to read" text is a bit dense at full width; an optional tidy
-  (one-liner + collapsible detail) was offered but not done.
-- **Sequence:** backfill data quality (TODOs 1–3 above) to firm up Stages 1–2 *before* Stage 3, vs. building
-  Stage 3 next. Recommendation: do TODO #1 (cheap, raises credibility) and at least start #2, then Stage 3.
+## Open decisions — RESOLVED
+
+- **License:** ✅ finalized OWID-style split — MIT for code (`LICENSE`), CC BY 4.0 for data (`data/LICENSE`).
+- **Header polish:** ✅ done — the "how to read" note collapses to a one-liner + `<details>`.
+- **Sequence:** ✅ moot — Stages 1–4 all shipped. Remaining work is data **coverage** (TODO #2, the gating
+  item for citable Stage-4 ranks) and the data-quality TODOs (#1, #3), not new stages.
 
 ## Provenance note
 

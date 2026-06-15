@@ -1,0 +1,33 @@
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+SPDX-License-Identifier: CC-BY-4.0
+
+Copyright (c) 2026 Spencer Lee
+
+The DATA in this directory — `government-commitments.jsonl`, `denominators.json`,
+`realizations.jsonl`, `index-weights.json`, and `schema.json` — is licensed under
+the Creative Commons Attribution 4.0 International License.
+
+You are free to:
+  - Share — copy and redistribute the material in any medium or format
+  - Adapt — remix, transform, and build upon the material for any purpose, even
+    commercially
+
+Under the following terms:
+  - Attribution — You must give appropriate credit (e.g. "AI/Quantum Investment
+    Ledger, Spencer Lee, CC BY 4.0"), provide a link to the license, and indicate
+    if changes were made. You may do so in any reasonable manner, but not in any
+    way that suggests the licensor endorses you or your use.
+  - No additional restrictions — You may not apply legal terms or technological
+    measures that legally restrict others from doing anything the license permits.
+
+Full legal code:  https://creativecommons.org/licenses/by/4.0/legalcode
+Human-readable deed: https://creativecommons.org/licenses/by/4.0/
+
+DISCLAIMER ON THE DATA ITSELF (not part of the license grant): every figure is
+aggregated from public announcements and official statistics and is provided
+"as reported." Many large headlines are unverified mobilization targets or
+private capital, not government outlays; the Stage-4 composite ranks are
+PROVISIONAL. Verify against primary sources before reuse. See `../methodology.md`.
+
+The SOFTWARE in the parent directory (notably `build.py`) is licensed separately
+under the MIT License — see `../LICENSE`.

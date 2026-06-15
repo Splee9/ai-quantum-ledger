@@ -35,13 +35,18 @@ GitHub Pages, Netlify, or any static host and it works.
 ```
 ai-quantum-ledger/
 ├── README.md                         # this file
+├── LICENSE                           # MIT (covers the code / build.py)
 ├── methodology.md                    # the public methodology (how figures are tagged & normalized)
-├── build.py                          # generator: validates data + bakes index.html (stdlib only)
-├── index.html                        # the viewer (generated; hostable entry point)
+├── build.py                          # generator: validates data + bakes both pages (stdlib only)
+├── index.html                        # the ledger viewer (generated; hostable entry point)
+├── composite-index.html              # Stage 4: provisional composite ranking w/ 90% rank CIs (generated)
 └── data/
-    ├── schema.json                   # the record field contract
+    ├── LICENSE                       # CC BY 4.0 (covers everything in data/)
+    ├── schema.json                   # the record field contract (+ normalization & realization blocks)
     ├── government-commitments.jsonl  # canonical ledger (append-only, one JSON object per line)
-    └── denominators.json             # GDP / population / price-level / GBARD by ISO3 (normalization)
+    ├── denominators.json             # GDP / population / price-level / GBARD by ISO3 (normalization)
+    ├── realizations.jsonl            # Stage 3: dated realization observations per event_key (append-only)
+    └── index-weights.json            # Stage 4: indicators, fixed weights, Monte-Carlo seed/draws
 ```
 
 ## The cardinal rule: headlines are not additive
@@ -65,7 +70,48 @@ The viewer joins each record to `data/denominators.json` on `iso3` and offers li
 - **Currency:** Market FX vs **PPP-blended** = `tradable_share × FX + (1 − tradable_share) × PPP`.
   Globally-priced compute/hardware stays at market FX; non-tradable talent/operations convert at PPP.
   PPP is a **sensitivity scenario, never the default**.
-- **View:** Absolute · Per-capita · % of GDP (national effort) · × GBARD (fiscal prioritization).
+- **View:** Absolute · Per-capita · % of GDP (national effort) · × GBARD (fiscal prioritization) ·
+  **Realization** (Stage 3).
+
+## Commitment → outlay reconciliation (Stage 3)
+
+Most rows are *announced commitments*, not verified disbursements. The **Realization** view tracks how
+much of a pledge has actually landed, from dated observations in `data/realizations.jsonl` (keyed by
+`event_key`, append-only):
+
+- **`realization_rate`** = latest realized USD ÷ the event's committed headline.
+- **`expected_rate`** = the fraction due by the observation date on a **linear horizon schedule**
+  (`(as_of − start) ÷ (end − start)`).
+- **`pace_status`** ∈ {ahead · on track · behind · stalled} — derived from realized-vs-expected, or set
+  explicitly per observation via `pace_flag` when no dollar figure is yet public (e.g. **Stargate**,
+  flagged *behind* on the SoftBank-reported slow start).
+- **`realized_basis`** ∈ {obligated · disbursed · deployed · reported} — *obligated* awards are **not**
+  *disbursed* cash, so the basis is always shown (e.g. CHIPS shows ~$33B **obligated**, well above
+  schedule, while cash out the door lags far behind).
+
+Realization is an event-level fact and **nothing is summed across events** — the cardinal rule holds.
+Coverage is a deliberately small, flagged seed: official outlay statistics lag 1–2 years, so most
+pledges are simply *not yet tracked* rather than silently assumed realized.
+
+## Composite index (Stage 4 — PROVISIONAL)
+
+The *optional* ranking layer ships on its own page, **`composite-index.html`**, built to OECD/JRC
+**Handbook on Constructing Composite Indicators** discipline and computed over the raw ledger:
+
+- **Fixed transparent weights** (in `data/index-weights.json`): public-outlay effort (%GDP, 0.40),
+  fiscal prioritization (×GBARD, 0.20), program breadth (0.15), evidence quality (0.25).
+- **Geometric aggregation** over min-max-normalized indicators, limiting compensability.
+- **Missing data is `n/a`, never imputed** — weights renormalize over what a jurisdiction has, and the
+  indicator **coverage (k of N) is shown on every row**.
+- **An independent Monte-Carlo audit publishes 90% rank confidence intervals** (2000 draws, fixed seed →
+  byte-identical builds), jittering both the indicator values (by per-jurisdiction data confidence) and
+  the weights (±25%). **Never a point rank without its interval.**
+
+> **Do not cite these ranks.** With 13 partial-seed jurisdictions the intervals are wide by construction —
+> only the top rank is currently distinguishable. The index exists to demonstrate the method and to
+> *expose* how uncertain ranking is at this coverage. The ledger is the product. By design, the index
+> rewards genuine **appropriated public outlay**, not announcement headlines — so sovereign-wealth /
+> private-mobilization-heavy jurisdictions score low (the cardinal rule, expressed as a ranking).
 
 ## Roadmap
 
@@ -73,8 +119,8 @@ The viewer joins each record to `data/denominators.json` on `iso3` and offers li
 |---|---|---|
 | 1 — Ledger | **shipped** | Tagged, source-linked, downloadable government-commitment table |
 | 2 — Normalization | **shipped** | Per-capita / %GDP / %GBARD + FX-vs-PPP tradable/non-tradable split |
-| 3 — Outlay reconciliation | planned | Versioned "realization rate": commitments vs. OECD/national-accounts outlays on the 1–2yr lag |
-| 4 — Composite index (optional) | planned | OECD/JRC discipline: fixed transparent weights, geometric aggregation, published 90% rank confidence intervals — always over the raw ledger |
+| 3 — Outlay reconciliation | **shipped (seed)** | Versioned realization history per `event_key` → realization rate, expected-by-schedule rate, and pace flag. Machinery complete; data is a small flagged seed pending the official-statistics lag. |
+| 4 — Composite index (optional) | **shipped (PROVISIONAL)** | OECD/JRC discipline: fixed transparent weights, geometric aggregation, n/a never imputed, Monte-Carlo 90% rank CIs. Machinery complete; ranks not citable until coverage grows (≥40 jurisdictions). |
 
 **Current coverage** is a partial seed (22 records / 14 jurisdictions). The Stage-1 advance benchmark is
 ≥40 jurisdictions with ≥3 sourced records each; next data work is pinning primary-source URLs on
@@ -98,6 +144,12 @@ honestly and leave `source_url` empty only when a primary link is still pending.
 
 ## License
 
-Intended dual license (OWID model): **code (build.py) under MIT**, **data under CC-BY-4.0** — finalize
-before public release. All figures are aggregated from public announcements and official statistics;
-attribute and verify before reuse.
+Dual license (OWID model), finalized:
+
+- **Code** — the generator (`build.py`) and viewer templates — under the **MIT License** (`LICENSE`).
+- **Data** — everything in `data/` — under **CC BY 4.0** (`data/LICENSE`). Attribute as
+  *"AI/Quantum Investment Ledger, Spencer Lee, CC BY 4.0"* and link the license.
+
+All figures are aggregated from public announcements and official statistics and are provided
+**as-reported** — many large headlines are unverified mobilization targets or private capital, and the
+Stage-4 composite ranks are **provisional**. Verify against primary sources before reuse.

@@ -43,5 +43,27 @@
       "fx": "usd_approx as stored (market FX) — appropriate for tradable compute/hardware",
       "ppp_blended": "tradable_share at FX + (1 - tradable_share) at PPP, where USD_ppp = usd_approx / price_level_index. PPP is a SENSITIVITY SCENARIO, not ground truth."
     }
+  },
+  "_realization": {
+    "description": "Stage 3 — commitment -> outlay reconciliation. A separate append-only file (realizations.jsonl) holds dated observations of how much of each pledge has actually been realized, keyed by event_key. The generator joins them to the ledger and computes per-record realization_rate, expected_rate, and pace_status. Realization is an EVENT-level fact (records sharing an event_key share the computed values) and nothing is summed across events.",
+    "file": "realizations.jsonl",
+    "join_key": "event_key",
+    "observation_record": {
+      "event_key":   {"type": "string", "description": "Must match an event_key in government-commitments.jsonl. Orphan keys are flagged by the generator."},
+      "as_of":       {"type": "string", "description": "YYYY-MM or YYYY-MM-DD of the observation. Observations are sorted by as_of; the latest drives the displayed figure."},
+      "realized_usd":   {"type": ["number", "null"], "description": "Cumulative realized amount in USD as of this date. Null when no credible dollar figure exists yet — then pace_flag must be set."},
+      "realized_basis": {"type": ["string", "null"], "enum": ["obligated", "disbursed", "deployed", "reported", null], "description": "What 'realized' means here. obligated = awarded/announced but not paid; disbursed = public cash out the door; deployed = private/SWF capital actually spent; reported = press characterization only. obligated is NOT disbursed — always surfaced in the viewer."},
+      "pace_flag":   {"type": ["string", "null"], "enum": ["ahead", "on_track", "behind", "stalled", null], "description": "Manual pace override, used when realization can't be expressed as a dollar figure (e.g. a credibly-reported slow start). When set it overrides the computed pace; when null the generator derives pace from realized-vs-expected."},
+      "verification_status": {"type": "string", "enum": ["verified", "reported", "estimate", "unconfirmed"]},
+      "confidence":  {"type": "string", "enum": ["high", "medium", "low"]},
+      "source_name": {"type": "string"},
+      "source_url":  {"type": ["string", "null"]},
+      "notes":       {"type": ["string", "null"]}
+    },
+    "computed_fields": {
+      "realization_rate": "latest realized_usd / committed (the event's max usd_approx across its ledger records). Null if no realized_usd.",
+      "expected_rate": "min(1, max(0, (as_of_year - horizon_start_year) / (horizon_end_year - horizon_start_year))) — fraction due by the observation date on a linear schedule. Null if the horizon is open-ended.",
+      "pace_status": "pace_flag if set; else from realization_rate / expected_rate: >=1.1 ahead, >=0.9 on_track, >=0.5 behind, else stalled."
+    }
   }
 }

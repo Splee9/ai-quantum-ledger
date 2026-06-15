@@ -1,4 +1,4 @@
-# AI/Quantum Investment Ledger — Methodology (Stages 1–2)
+# AI/Quantum Investment Ledger — Methodology (Stages 1–4)
 
 > Public methodology page for the government-commitments ledger. The ledger is the product;
 > a composite index is a deliberately later layer (Stage 4). See `README.md` for the project
@@ -13,11 +13,12 @@ subsets (e.g. "appropriated public outlays only").
 
 ## What this is *not* (yet)
 
-- **Not an outlay tracker.** Most rows are *announced commitments*, not verified disbursements.
-  Reconciling commitments against realized outlays is **Stage 3** (gated on the 1–2-year official-
-  statistics lag).
-- **Not a ranking.** No composite index until **Stage 4**, and only then with published 90% rank
-  confidence intervals over the raw ledger.
+- **A partial outlay tracker.** Most rows are *announced commitments*, not verified disbursements.
+  **Stage 3 (live)** reconciles commitments against realized outlays for a small, flagged seed of
+  pledges; full coverage is gated on the 1–2-year official-statistics lag.
+- **Not a ranking to cite.** **Stage 4 (live, PROVISIONAL)** ships the composite-index *machinery*
+  with published 90% rank confidence intervals — but at current coverage those intervals are wide by
+  construction and the ranks must not be cited. The index is a deliberately later layer over the ledger.
 - **Not complete.** This is a Stage-1 **seed** (currently ~22 records / ~14 jurisdictions). The
   Stage-1 advance benchmark is **≥40 jurisdictions, ≥3 sourced records each**.
 
@@ -82,6 +83,79 @@ approximations**, flagged in `denominators.json._meta` for later pinning to exac
 OECD MSTI / ICP 2021 vintages. Where GBARD is unknown (China opacity, several smaller economies) the
 × GBARD view shows `n/a` rather than imputing.
 
+## Commitment → outlay reconciliation (Stage 3, live)
+
+The ledger stores *announcements*; Stage 3 asks **how much actually happened**. Realization observations
+live in a separate append-only file, `data/realizations.jsonl`, keyed by `event_key` (the same key that
+dedups re-announcements). Each line is one **dated observation**:
+
+| Field | Meaning |
+|---|---|
+| `as_of` | When the observation was made (`YYYY-MM`); the generator keeps a per-pledge history sorted by date and shows the latest. |
+| `realized_usd` | Cumulative realized USD. **Null** when no credible dollar figure exists yet. |
+| `realized_basis` | `obligated` (awarded, not paid) · `disbursed` (public cash out) · `deployed` (private/SWF capital spent) · `reported` (press only). **Obligated ≠ disbursed** — always surfaced. |
+| `pace_flag` | Manual pace override for when realization can't yet be a number (a credibly-reported slow start). Overrides the computed pace. |
+| `verification_status` / `confidence` / `source_name` / `source_url` / `notes` | Same sourcing discipline as the ledger. |
+
+`build.py` joins these to the ledger and computes, per record:
+
+> `realization_rate = latest realized_usd ÷ committed` (the event's headline `usd_approx`).
+> `expected_rate = clamp₀¹((as_of_year − horizon_start) ÷ (horizon_end − horizon_start))` — the fraction
+> *due by now* on a **linear schedule**.
+> `pace_status` = `pace_flag` if set, else from `realization_rate ÷ expected_rate`:
+> **≥1.1 ahead · ≥0.9 on track · ≥0.5 behind · else stalled**.
+
+The viewer's **Realization** view shows the realized %, basis, and a pace tag; a **Tracked only** filter
+isolates the seeded pledges, and a KPI counts tracked pledges and how many are behind/stalled.
+
+**Integrity guards.** Realization is an **event-level** fact — records sharing an `event_key` share the
+computed values, and **nothing new is summed across events**. The linear schedule is a deliberately
+simple, transparent baseline (real disbursement curves are back-loaded; *behind early* is normal and
+labeled, not alarmist). Coverage is intentionally a **small flagged seed** — e.g. CHIPS (~$33B
+*obligated*, ahead of schedule, with cash disbursement far behind) and Stargate (flagged *behind* on the
+reported slow start) — because official outlay statistics lag 1–2 years; an untracked pledge shows as
+*not tracked*, never as silently realized.
+
+## The composite index (Stage 4, live — PROVISIONAL)
+
+Stage 4 ships the *optional* ranking layer, built strictly to OECD/JRC **Handbook on Constructing
+Composite Indicators** discipline and rendered on its own page (`composite-index.html`) over the raw
+ledger. It exists to demonstrate the method **and to show how uncertain the ranks are at current
+coverage** — not to rank countries. Every design choice is in `data/index-weights.json`.
+
+**Ranking unit.** Jurisdiction (`iso3`). The **EU bloc is excluded** to avoid double-counting member
+states. 13 jurisdictions are currently rankable.
+
+**Indicators (fixed, transparent weights).**
+
+| Indicator | Weight | Definition |
+|---|---|---|
+| Public-outlay effort (% GDP) | 0.40 | `sum(public_outlay_usd)` over outlay actors, dedup by `event_key`, ÷ GDP × 100. The cardinal-rule aggregate — headlines are never summed. |
+| Fiscal prioritization (× GBARD) | 0.20 | public outlay ÷ government R&D budget. **n/a where GBARD is unknown** (not imputed). |
+| Program breadth (domains) | 0.15 | distinct domains the jurisdiction has a record in (1–5). |
+| Evidence quality (0–1) | 0.25 | verification-weighted mean over its records (verified 1.0 / reported 0.6 / estimate 0.3 / unconfirmed 0.1). |
+
+**Normalization → aggregation.** Each indicator is **min-max normalized to [1, 100]** across the ranked
+jurisdictions (lower bound 1, not 0, so the geometric mean is well-defined). The composite is a
+**weighted geometric mean over the indicators a jurisdiction actually has** — missing indicators are
+`n/a`, the weights are **renormalized** over what's present, and the **coverage (k of N)** is reported
+on every row. Geometric (not arithmetic) aggregation deliberately limits compensability: a very weak
+dimension can't be fully offset by a strong one.
+
+**The deliberate consequence.** Because the outlay indicators reward *appropriated public outlay* and
+not announcement headlines, jurisdictions whose commitments are sovereign-wealth, state-fund, or private
+mobilization capital (Saudi Arabia, UAE, much of China, France's €109B headline) score **low by design**
+— their money is not appropriated public spend. This is the cardinal rule expressed as a ranking, not a
+flaw.
+
+**Uncertainty audit → 90% rank confidence intervals.** Point ranks are never shown alone. A Monte-Carlo
+audit (`R = 2000` draws, **fixed seed → byte-identical builds**) re-ranks the field under joint
+perturbation of (a) every indicator's underlying value by a **per-jurisdiction data-confidence σ**
+(high/medium/low → 5% / 15% / 35%) and (b) the **weights by ±25%** (renormalized), re-normalizing and
+re-ranking each draw. Each jurisdiction's **5th–95th-percentile rank is its 90% CI**. At present only
+the top rank is distinguishable; nearly everything else sits in overlapping intervals — the intended,
+honest signal that **the ledger needs far more coverage before any rank is meaningful**.
+
 ## Known caveats baked into the current seed
 
 - **China rows overlap and are partly non-additive** — the national AI fund draws from Big Fund III;
@@ -96,10 +170,14 @@ OECD MSTI / ICP 2021 vintages. Where GBARD is unknown (China opacity, several sm
 
 - Canonical data: `data/government-commitments.jsonl` (append-only; one JSON object per line).
 - Denominators: `data/denominators.json` (GDP, population, price-level index, GBARD by `iso3`).
-- Viewer: `index.html` — self-contained, dependency-free, sortable/filterable, CSV-downloadable, with
-  live FX/PPP and absolute/per-capita/%GDP/×GBARD toggles.
-- Regenerate: `python3 build.py` (validates the contract + denominator join, computes annualized USD,
-  the FX/PPP-blended figure, and the conservative outlay aggregate, then bakes data + denominators
-  inline into the HTML).
+- Realizations: `data/realizations.jsonl` (append-only; dated outlay observations keyed by `event_key`).
+- Index weights: `data/index-weights.json` (Stage 4 — indicators, fixed weights, MC seed/draws).
+- Viewers: `index.html` (the ledger — FX/PPP and absolute/per-capita/%GDP/×GBARD/Realization toggles) and
+  `composite-index.html` (the provisional Stage-4 ranking with 90% rank CIs). Both self-contained,
+  dependency-free, CSV-downloadable.
+- Regenerate: `python3 build.py` (validates the contract + denominator join + realization join, computes
+  annualized USD, the FX/PPP-blended figure, the conservative outlay aggregate, the realization
+  rate/expected-rate/pace per pledge, **and** the Stage-4 composite + Monte-Carlo rank CIs, then bakes
+  both pages).
 
 *All figures as-reported through mid-June 2026.*

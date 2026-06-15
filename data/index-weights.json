@@ -1,0 +1,26 @@
+{
+  "_meta": {
+    "title": "AI/Quantum Investment Composite Index — weighting scheme",
+    "status": "PROVISIONAL / ILLUSTRATIVE — do not cite individual ranks",
+    "discipline": "OECD/JRC Handbook on Constructing Composite Indicators",
+    "ranking_unit": "jurisdiction (iso3). The EU bloc is EXCLUDED from the ranking to avoid double-counting with its member states.",
+    "normalization": "min-max per indicator across ranked jurisdictions, rescaled to [1,100] (lower bound 1, not 0, so geometric aggregation is well-defined).",
+    "aggregation": "weighted GEOMETRIC mean over AVAILABLE indicators only. Missing indicators are n/a and are NEVER imputed; the unit's weights are renormalized over what it has, and its indicator coverage (k of N) is reported alongside the score.",
+    "uncertainty": "Monte Carlo: each draw jitters (a) every indicator's underlying value by a per-jurisdiction data-confidence sigma and (b) the weights by +-25% (renormalized), then re-normalizes and re-ranks. 90% rank confidence intervals are the 5th-95th percentile of each jurisdiction's rank across draws.",
+    "draws": 2000,
+    "seed": 20260615,
+    "reproducible": "Fixed seed -> identical output every build (stdlib random only).",
+    "warning": "N is a small, partial seed of jurisdictions, many with a single record and several core indicators missing. Rank confidence intervals are WIDE BY CONSTRUCTION. This layer exists to demonstrate the methodology and to show how uncertain the ranks are at current coverage — NOT to rank countries. The ledger is the product; this index is a deliberately later, provisional layer always computed over the raw ledger.",
+    "deliberate_design_note": "The index rewards genuine appropriated PUBLIC OUTLAY, not announcement headlines (the cardinal rule). Jurisdictions whose commitments are sovereign-wealth / private mobilization / state-fund capital (e.g. Saudi Arabia, UAE, much of China and France's headline) therefore score low on the outlay indicators by design — their figures are not appropriated public spend. This is a feature, not a bug."
+  },
+  "indicators": [
+    {"key": "outlay_gdp",   "label": "Public-outlay effort (% GDP)",   "weight": 0.40, "direction": 1,
+     "desc": "sum(public_outlay_usd) over appropriated/outlay actors, deduplicated by event_key, divided by GDP x 100. The only cardinal-rule-compliant aggregate; headline figures are never summed. A genuine measured 0 (no appropriated outlay) is kept, not treated as missing."},
+    {"key": "outlay_gbard", "label": "Fiscal prioritization (x GBARD)", "weight": 0.20, "direction": 1,
+     "desc": "public outlay / annual government budget for R&D (GBARD). n/a (NOT imputed) where GBARD is not confidently known — China, Saudi Arabia, UAE, Singapore, Australia, Israel."},
+    {"key": "breadth",      "label": "Program breadth (domains)",       "weight": 0.15, "direction": 1,
+     "desc": "count of distinct domains (ai / quantum / semiconductor / compute / ai+quantum) the jurisdiction has at least one record in (1-5). A portfolio-diversity signal."},
+    {"key": "evidence",     "label": "Evidence quality (0-1)",          "weight": 0.25, "direction": 1,
+     "desc": "verification-weighted mean across the jurisdiction's records (verified 1.0, reported 0.6, estimate 0.3, unconfirmed 0.1). Rewards well-sourced commitments over unverified mobilization headlines."}
+  ]
+}
