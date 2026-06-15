@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Note: index.html is a committed build artifact (it is the hostable entry point).
+# Regenerate with: python3 build.py

@@ -1,0 +1,25 @@
+{
+  "_meta": {
+    "description": "Normalization denominators joined to the ledger on iso3. Used to compute per-capita, per-GDP (R&D-intensity style), and per-GBARD views, plus the FX-vs-PPP currency split. GDP and population are ~2024 nominal and accurate to a few percent; price_level_index (for PPP) and gbard_usd are ILLUSTRATIVE approximations flagged for later pinning to exact World Bank WDI / OECD MSTI / ICP 2021 vintages. PPP is a sensitivity SCENARIO, not ground truth (OECD warns its PPPs are GDP-designed).",
+    "gdp_year": 2024,
+    "pop_year": 2024,
+    "pli_basis": "US = 1.00; ICP-2021-style price level index, approximate",
+    "gbard_note": "Annual government budget allocations for R&D (GBARD), USD, approximate; null where not confidently known",
+    "sources": ["World Bank WDI (GDP, population)", "ICP 2021 (price levels)", "OECD MSTI / GBARD"],
+    "status": "approximate — pin exact vintages in a later pass"
+  },
+  "USA": {"name": "United States",  "gdp_usd": 29000000000000, "population": 335000000,  "price_level_index": 1.00, "gbard_usd": 190000000000, "year": 2024},
+  "EU":  {"name": "European Union", "gdp_usd": 19400000000000, "population": 449000000,  "price_level_index": 0.90, "gbard_usd": null,         "year": 2024, "notes": "Bloc-level; member-state figures are separate records and must not be summed with EU rows."},
+  "FRA": {"name": "France",         "gdp_usd": 3170000000000,  "population": 68000000,   "price_level_index": 0.95, "gbard_usd": 20000000000,  "year": 2024},
+  "SAU": {"name": "Saudi Arabia",   "gdp_usd": 1070000000000,  "population": 37000000,   "price_level_index": 0.50, "gbard_usd": null,         "year": 2024},
+  "ARE": {"name": "United Arab Emirates", "gdp_usd": 550000000000, "population": 10000000, "price_level_index": 0.62, "gbard_usd": null,      "year": 2024},
+  "CHN": {"name": "China",          "gdp_usd": 18800000000000, "population": 1410000000, "price_level_index": 0.58, "gbard_usd": null,         "year": 2024, "notes": "Government R&D budget large but opaque; per-GBARD left null."},
+  "CAN": {"name": "Canada",         "gdp_usd": 2240000000000,  "population": 41000000,   "price_level_index": 1.00, "gbard_usd": 13000000000,  "year": 2024},
+  "GBR": {"name": "United Kingdom", "gdp_usd": 3590000000000,  "population": 69000000,   "price_level_index": 0.95, "gbard_usd": 20000000000,  "year": 2024},
+  "IND": {"name": "India",          "gdp_usd": 3940000000000,  "population": 1440000000, "price_level_index": 0.28, "gbard_usd": 8000000000,   "year": 2024},
+  "DEU": {"name": "Germany",        "gdp_usd": 4700000000000,  "population": 84000000,   "price_level_index": 0.97, "gbard_usd": 45000000000,  "year": 2024},
+  "KOR": {"name": "South Korea",    "gdp_usd": 1870000000000,  "population": 52000000,   "price_level_index": 0.80, "gbard_usd": 25000000000,  "year": 2024},
+  "SGP": {"name": "Singapore",      "gdp_usd": 530000000000,   "population": 6000000,    "price_level_index": 0.95, "gbard_usd": null,         "year": 2024},
+  "AUS": {"name": "Australia",      "gdp_usd": 1790000000000,  "population": 27000000,   "price_level_index": 1.05, "gbard_usd": null,         "year": 2024},
+  "ISR": {"name": "Israel",         "gdp_usd": 550000000000,   "population": 9900000,    "price_level_index": 1.05, "gbard_usd": null,         "year": 2024}
+}

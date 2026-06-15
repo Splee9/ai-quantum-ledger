@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI/Quantum Investment Ledger — government commitment record",
+  "description": "One row per announced government (or government-adjacent) AI/quantum investment commitment. The ledger is the product; the index is an optional layer above it. Every figure is tagged on the comparability axes BEFORE any normalization or aggregation. Public and private/mobilized capital are stored as SEPARATE fields and are NEVER summed into a single 'government investment' number.",
+  "type": "object",
+  "required": ["id", "jurisdiction", "iso3", "program", "domain", "currency", "usd_approx", "announced", "actor_type", "verification_status", "confidence", "source_name", "event_key"],
+  "properties": {
+    "id":               {"type": "string", "description": "Stable unique slug, e.g. us-stargate-2025"},
+    "jurisdiction":     {"type": "string", "description": "Country or bloc name"},
+    "iso3":             {"type": "string", "description": "ISO-3166 alpha-3, or 'EU' for the bloc. Used to join normalization denominators (GDP, population, GBARD)."},
+    "program":          {"type": "string", "description": "Program / initiative / fund name"},
+    "domain":           {"type": "string", "enum": ["ai", "quantum", "ai+quantum", "semiconductor", "compute"], "description": "Investment domain. 'semiconductor' is AI-adjacent and flagged so it can be filtered in/out."},
+    "headline_amount":  {"type": ["number", "null"], "description": "Headline figure in ORIGINAL currency units (full units, not millions/billions). Null when only a range is given."},
+    "amount_low":       {"type": ["number", "null"], "description": "Low end for vague figures ('up to', 'as much as'), original currency. Null if a point figure."},
+    "amount_high":      {"type": ["number", "null"], "description": "High end for vague figures, original currency. Null if a point figure."},
+    "currency":         {"type": "string", "description": "ISO 4217 of the headline figure (USD, EUR, CNY, CAD, GBP, ...)."},
+    "usd_approx":       {"type": "number", "description": "Headline converted to USD at (ideally) announcement-date FX. The comparable headline-stock figure."},
+    "fx_rate_to_usd":   {"type": ["number", "null"], "description": "FX rate (1 unit of currency -> USD) used for usd_approx. Null = pending (Stage 2 pins per-record announcement-date rates)."},
+    "horizon_start_year": {"type": ["integer", "null"]},
+    "horizon_end_year":   {"type": ["integer", "null"], "description": "Null = open-ended. With start_year, lets the generator annualize (usd_approx / years) for flow comparisons while preserving the headline stock."},
+    "announced":        {"type": "string", "description": "YYYY-MM-DD or YYYY-MM of the announcement."},
+    "actor_type":       {"type": "string", "enum": ["government_appropriated", "government_outlay", "state_fund", "sovereign_wealth", "mobilization_target", "public_private", "private"], "description": "Nature of the money. 'government_appropriated' = passed a budget; 'mobilization_target' / 'private' = headline is mostly NOT a public outlay."},
+    "public_outlay_usd":     {"type": ["number", "null"], "description": "Genuinely-public component of the headline, USD. Null = unknown/unspecified."},
+    "private_mobilized_usd": {"type": ["number", "null"], "description": "Private / 'mobilized' component, USD. Stored separately; NEVER added to public_outlay_usd to form a government figure."},
+    "verification_status": {"type": "string", "enum": ["verified", "reported", "estimate", "unconfirmed"], "description": "verified = traced to a primary budget/official doc; reported = credible press, URL may be pending; estimate = third-party modelled; unconfirmed = no reliable primary source."},
+    "confidence":       {"type": "string", "enum": ["high", "medium", "low"]},
+    "source_name":      {"type": "string", "description": "Publisher / issuing body."},
+    "source_url":       {"type": ["string", "null"], "description": "Primary-source URL. Empty/null = pending verification (verification_status should then be 'reported' at best)."},
+    "event_key":        {"type": "string", "description": "Stable key grouping re-announcements of the SAME money across summits, for dedup. Sum at most one record per event_key."},
+    "tradable_share":   {"type": ["number", "null"], "description": "Fraction (0-1) of the commitment that is globally-priced tradable goods (compute/GPUs/hardware), converted at MARKET FX; the remainder (talent/operations/local construction) is non-tradable and converted at PPP in the blended view. Null = use the generator's domain-default map (compute 0.90, semiconductor 0.65, ai 0.55, ai+quantum 0.50, quantum 0.45). Per-record override when line-item detail is known."},
+    "notes":            {"type": ["string", "null"], "description": "Caveats: bundling, overlap with other records, opacity, etc."}
+  },
+  "_normalization": {
+    "denominators_file": "denominators.json",
+    "join_key": "iso3",
+    "views": {
+      "absolute_usd": "usd_approx (headline stock) and annualized_usd (stock / horizon years)",
+      "per_capita": "usd_approx / population",
+      "per_gdp_pct": "annualized_usd / gdp_usd * 100 (R&D-intensity-style national effort)",
+      "per_gbard_x": "annualized_usd / gbard_usd (multiple of annual government R&D budget; null where gbard unknown)"
+    },
+    "currency_basis": {
+      "fx": "usd_approx as stored (market FX) — appropriate for tradable compute/hardware",
+      "ppp_blended": "tradable_share at FX + (1 - tradable_share) at PPP, where USD_ppp = usd_approx / price_level_index. PPP is a SENSITIVITY SCENARIO, not ground truth."
+    }
+  }
+}
