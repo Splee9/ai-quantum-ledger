@@ -171,11 +171,23 @@ def cmd_add(args):
 
 
 def cmd_list(_args):
+    """Review surface: one block per queued candidate. Open each source link to
+    verify before promoting; edit data/ingest-queue.jsonl by hand to fix a field
+    (e.g. swap a Google-News redirect for the clean publisher URL)."""
     q = load_jsonl(QUEUE)
-    print(f"review queue: {len(q)} record(s)")
+    if not q:
+        print("review queue is empty")
+        return 0
+    print(f"review queue: {len(q)} record(s) — verify sources, then `ingest.py promote <id> ...`\n")
     for r in q:
-        print(f"  {r.get('id'):32} {r.get('jurisdiction','?'):16} "
-              f"{r.get('verification_status','?'):11} {r.get('announced','?'):10} {r.get('program','')[:40]}")
+        print(f"  [{r.get('id')}]  {r.get('jurisdiction','?')} · {r.get('domain','?')} · "
+              f"{r.get('actor_type','?')} · {r.get('verification_status','?')}/{r.get('confidence','?')}")
+        print(f"     {r.get('program','')}  —  {build.b(r.get('usd_approx'))} "
+              f"({r.get('currency','?')})  announced {r.get('announced','?')}")
+        print(f"     source: {r.get('source_url') or '(no URL — add one before promoting)'}")
+        if r.get("notes"):
+            print(f"     notes:  {str(r.get('notes'))[:140]}")
+        print()
     return 0
 
 
