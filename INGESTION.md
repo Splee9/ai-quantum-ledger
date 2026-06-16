@@ -114,5 +114,34 @@ python3 scan.py run --days 2 --add
 
 **Scheduling.** Wrap `python3 scan.py run --add` in a daily cron / GitHub Action / Cowork task. It is
 idempotent on `id`, so re-runs don't create duplicates. A reviewer then works the queue
-(`ingest.py list` → `promote`) and runs `build.py` + commit on whatever cadence they trust — the
+(`ingest.py list` → `promote`) and runs `./publish.sh` on whatever cadence they trust — the
 human-review gate is deliberate and stays.
+
+## Operating the live site (runbook)
+
+This repo is the **home of the project** — clone it, run everything here, and pushing to `main`
+auto-deploys via Netlify (`netlify.toml`: keyless `python3 build.py`). The Anthropic API key lives in
+your shell env (`~/.zshenv`), never in the repo.
+
+**Daily loop:**
+
+```bash
+# 1. SCAN (automated, e.g. a daily Cowork task) — discovers + extracts -> review queue.
+python3 scan.py run --add --model claude-sonnet-4-6     # cheaper model for high-volume daily runs
+
+# 2. REVIEW (human gate — nothing auto-publishes).
+python3 ingest.py list                                  # inspect what the scanner proposed
+#    open each source_url, sanity-check actor_type / domain / USD / event_key.
+#    For a NEW jurisdiction, add its row to data/denominators.json first (ingest warns when missing).
+
+# 3. PROMOTE the rows you trust into the ledger.
+python3 ingest.py promote <id> <id> ...                 # or `promote` with no ids to take all
+
+# 4. PUBLISH -> live.
+./publish.sh                                            # build.py + commit + push -> Netlify rebuild
+```
+
+**Why the review gate matters:** `scan.py` only writes to `data/ingest-queue.jsonl` (staging) and never
+to the canonical `data/government-commitments.jsonl`. Auto-extracted rows are `reported`/`unconfirmed`
+and are *invisible to the public site* until a human runs `promote`. So a bad extraction can't reach the
+live ledger on its own — exactly the property you want for a public credibility tracker.
