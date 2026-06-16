@@ -405,52 +405,87 @@ TEMPLATE = r"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI/Quantum Investment Ledger</title>
 <style>
-:root{{--head:#16213e;--txt:#1a1f36;--mut:#6b7280;--r:10px;--gap:16px}}
+:root{{--ink:#262236;--ink2:#3c3950;--mut:#7a7989;--faint:#9b9aa8;--line:#e9eaf0;--line2:#eef0f4;--card:#ffffff;--accent:#ef4e5b;--r:14px;--r-sm:9px;--gap:18px;--mono:ui-monospace,'SF Mono','JetBrains Mono',Menlo,Consolas,monospace;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}}
 *{{margin:0;padding:0;box-sizing:border-box}}
-body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#eef1f6;color:var(--txt);line-height:1.5}}
-.wrap{{max-width:1360px;margin:0 auto;padding:var(--gap)}}
-.head{{background:var(--head);color:#fff;padding:22px 26px;border-radius:var(--r);margin-bottom:var(--gap)}}
-.head h1{{font-size:21px;font-weight:700}}.head p{{font-size:13px;color:#9fb3d1;margin-top:4px;max-width:980px}}
-.kpis{{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:var(--gap);margin-bottom:var(--gap)}}
-.kpi{{background:#fff;border-radius:var(--r);padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.08)}}
-.kpi .l{{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}}
-.kpi .v{{font-size:23px;font-weight:700;margin-top:4px}}.kpi .s{{font-size:12px;color:var(--mut);margin-top:2px}}
-.card{{background:#fff;border-radius:var(--r);padding:18px 22px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:var(--gap)}}
-.note{{font-size:12px;color:var(--mut);background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;padding:10px 12px;margin-bottom:var(--gap)}}
-.note.err{{background:#fff1f0;border-color:#ffa39e}}
-details.note summary{{cursor:pointer;color:var(--txt)}}
-details.note summary .more{{color:var(--mut);font-weight:400}}
-details.note[open] summary{{margin-bottom:6px}}
-details.note .d{{font-size:12px;line-height:1.55}}
-.lbl{{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin:0 6px 0 2px}}
-.ctl{{display:inline-flex;background:#e7ecf5;border-radius:8px;padding:3px;margin:0 10px 8px 0;flex-wrap:wrap}}
-.ctl button{{border:0;background:transparent;padding:6px 12px;border-radius:6px;font-size:12.5px;font-weight:600;color:#3a4a6b;cursor:pointer}}
-.ctl button.on{{background:var(--head);color:#fff}}
-.bar{{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:8px}}
-.bar input{{padding:6px 10px;border:1px solid #d7deea;border-radius:7px;font-size:13px;min-width:170px}}
-.dl{{margin-left:auto;background:#16213e;color:#fff;border:0;padding:7px 14px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer}}
-table{{width:100%;border-collapse:collapse;font-size:12.5px}}
-th,td{{padding:7px 9px;text-align:right;border-bottom:1px solid #eef0f4;white-space:nowrap}}
+body{{font-family:var(--sans);color:var(--ink2);line-height:1.5;background:linear-gradient(180deg,#fafbfc 0%,#f3f4f7 40%,#f1f2f6 100%);background-attachment:fixed;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}}
+.wrap{{max-width:1380px;margin:0 auto;padding:34px 26px 44px}}
+.masthead{{margin-bottom:24px}}
+.eyebrow{{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}}
+.masthead h1{{font-size:30px;line-height:1.12;font-weight:700;letter-spacing:-.02em;color:var(--ink);margin-top:10px}}
+.masthead .lede{{font-size:14px;line-height:1.6;color:var(--mut);margin-top:12px;max-width:92ch}}
+.masthead .lede b{{color:var(--ink2);font-weight:600}}
+.xlink{{display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-size:13px;font-weight:600;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 16px;text-decoration:none;box-shadow:0 1px 2px rgba(30,30,60,.05)}}
+.xlink:hover{{border-color:#d4d6e2}}.xlink .arr{{color:var(--accent);font-size:14px}}
+.note{{font-size:12.5px;color:var(--ink2);background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm);padding:13px 16px;margin-bottom:var(--gap);box-shadow:0 1px 2px rgba(30,30,60,.03)}}
+.note.err{{background:#fdeef0;border-color:#f3ccd2;color:#a3303c}}.note.err b{{color:#b6333f}}
+details.note summary{{cursor:pointer;list-style:none;color:var(--ink);font-weight:600;font-size:13px;display:flex;flex-wrap:wrap;gap:5px;align-items:baseline}}
+details.note summary::-webkit-details-marker{{display:none}}
+details.note summary .more{{color:var(--mut);font-weight:500;font-size:12px}}
+details.note[open] summary{{margin-bottom:8px}}
+details.note .d{{font-size:12.5px;line-height:1.62;color:var(--ink2);font-weight:400}}details.note .d b{{color:var(--ink)}}
+.kpis{{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:var(--gap)}}
+.kpi{{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:0 1px 2px rgba(30,30,60,.04),0 12px 28px -20px rgba(30,30,60,.14)}}
+.kpi .l{{font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.12em;font-weight:600;line-height:1.3}}
+.kpi .v{{font-family:var(--mono);font-size:25px;font-weight:600;color:var(--ink);margin-top:9px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}}
+.kpi .s{{font-size:11.5px;color:var(--mut);margin-top:6px;line-height:1.45}}
+.card{{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;box-shadow:0 1px 2px rgba(30,30,60,.04),0 18px 44px -30px rgba(30,30,60,.18);margin-bottom:var(--gap)}}
+.rhead{{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:14px}}
+.rhead h2{{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.01em}}
+.recent-grid{{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}}
+@media(max-width:720px){{.recent-grid{{grid-template-columns:1fr}}}}
+.rwin-h{{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin-bottom:8px}}
+.rbadge{{display:inline-block;background:var(--ink);color:#fff;border-radius:999px;padding:1px 8px;font-size:11px;margin-left:6px;font-weight:600;font-family:var(--mono)}}
+.rbadge.zero{{background:#eceef3;color:#9b9aa8}}
+.ritem{{font-size:12.5px;padding:7px 2px;border-bottom:1px solid var(--line2);display:flex;gap:10px;align-items:baseline}}
+.ritem .rd{{color:var(--faint);font-size:11px;white-space:nowrap;min-width:80px;font-family:var(--mono)}}
+.rempty{{color:var(--faint);font-size:12.5px;padding:9px 2px}}
+.lbl{{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);font-weight:600;margin:0 4px 0 2px}}
+.ctl{{display:inline-flex;background:#eceef3;border-radius:9px;padding:3px;margin:0 10px 8px 0;flex-wrap:wrap;gap:2px}}
+.ctl button{{border:0;background:transparent;padding:6px 12px;border-radius:7px;font-size:12.5px;font-weight:600;color:#6a6878;cursor:pointer;font-family:var(--sans)}}
+.ctl button:hover{{color:var(--ink)}}
+.ctl button.on{{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(30,30,60,.14)}}
+.bar{{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-bottom:10px}}
+.bar input{{padding:7px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px;min-width:190px;font-family:var(--sans);color:var(--ink2);background:#fbfbfd}}
+.bar input:focus{{outline:none;border-color:#c3c5d4;box-shadow:0 0 0 3px rgba(120,120,160,.10)}}
+.bar input::placeholder{{color:#a9a8b6}}
+.dl{{margin-left:auto;background:var(--ink);color:#fff;border:0;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--sans)}}
+.dl:hover{{background:#1b1830}}
+.tbl-scroll{{overflow-x:auto;max-height:78vh;border:1px solid var(--line);border-radius:10px}}
+table{{width:100%;border-collapse:collapse;font-size:12px}}
+th,td{{padding:5px 10px;text-align:right;border-bottom:1px solid var(--line2);white-space:nowrap}}
 th:first-child,td:first-child,th.l,td.l{{text-align:left;white-space:normal}}
-th{{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--mut);cursor:pointer;user-select:none;position:sticky;top:0;background:#fff}}
-td.hl{{font-weight:700}}
-tr:hover td{{background:#f7f9fc}}
-.tag{{display:inline-block;font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:10px;border:1px solid}}
-.t-public{{color:#1d6f42;border-color:#9bd5b1;background:#eaf7ef}}
-.t-private{{color:#8a5a00;border-color:#ffd591;background:#fff7e6}}
-.t-other{{color:#3a4a6b;border-color:#c3cee0;background:#eef2f9}}
-.c-high{{color:#1d6f42;font-weight:600}}.c-medium{{color:#8a5a00}}.c-low{{color:#a8071a}}
-.p-ahead{{color:#1d6f42;border-color:#9bd5b1;background:#eaf7ef}}
-.p-on_track{{color:#1f4ea8;border-color:#aac4ee;background:#eef2fb}}
-.p-behind{{color:#8a5a00;border-color:#ffd591;background:#fff7e6}}
-.p-stalled{{color:#a8071a;border-color:#ffa39e;background:#fff1f0}}
-.bn{{color:#9aa0ac;font-size:10px}}
-a{{color:#1f4ea8;text-decoration:none}}a:hover{{text-decoration:underline}}
-.foot{{font-size:11.5px;color:var(--mut);text-align:center;padding:10px}}
+th{{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#c8c9d6;cursor:pointer;user-select:none;position:sticky;top:0;background:var(--ink);font-weight:600;z-index:2;padding-top:9px;padding-bottom:9px}}
+th:hover{{color:#fff}}
+td{{font-variant-numeric:tabular-nums}}
+td:not(.l){{font-family:var(--mono);font-size:11.5px;color:var(--ink2)}}
+td.l{{color:var(--ink2)}}td.l:first-child{{font-weight:600;color:var(--ink)}}
+td.hl{{font-family:var(--mono);font-weight:600;color:var(--ink)}}
+tbody tr:nth-child(even) td{{background:#fafbfd}}
+tbody tr:hover td{{background:#eef1f9}}
+tbody tr.grp td{{background:#eceef5;border-top:1px solid var(--line);border-bottom:1px solid #dcdee9;cursor:pointer;font-family:var(--sans);color:var(--ink)}}
+tbody tr.grp:hover td{{background:#e4e6f0}}
+tr.grp .tw{{display:inline-block;width:12px;color:var(--mut);font-size:10px}}
+tr.child td:first-child{{padding-left:24px;color:var(--mut)}}
+th:nth-child(4),td:nth-child(4),th:nth-child(9),td:nth-child(9),th:nth-child(13),td:nth-child(13){{border-left:1px solid var(--line)}}
+th:nth-child(4),th:nth-child(9),th:nth-child(13){{border-left:1px solid #46435a}}
+.tag{{display:inline-block;font-weight:600;border-radius:999px;font-family:var(--sans);letter-spacing:.01em;font-size:10px;padding:1px 7px}}
+.t-public,.p-ahead{{color:#2f7d5b;background:#edf7f1}}
+.t-private,.p-behind{{color:#9a6a16;background:#fbf4e6}}
+.t-other{{color:#4a5578;background:#eef0f8}}
+.p-on_track{{color:#3f5bd0;background:#eef1fc}}
+.p-stalled{{color:#c0414b;background:#fcedef}}
+.c-high{{color:#2f7d5b;font-weight:600}}.c-medium{{color:#9a6a16}}.c-low{{color:#c0414b}}
+.bn{{color:#a9a8b6;font-size:10px;font-family:var(--sans);font-weight:500}}
+a{{color:var(--accent);text-decoration:none}}a:hover{{text-decoration:underline}}
+.foot{{font-size:11.5px;color:var(--faint);text-align:center;padding:18px 10px 4px;line-height:1.6;max-width:96ch;margin:0 auto}}
 </style></head><body>
 <div class="wrap">
-<div class="head"><h1>AI/Quantum Investment Ledger</h1>
-<p>A source-linked, downloadable ledger of national AI/quantum investment commitments, with per-capita / %GDP / %GBARD views and an FX-vs-PPP currency split. Each figure is tagged commitment-vs-outlay, public-vs-mobilized, horizon, and confidence &mdash; <b>before</b> any comparison. The ledger is the product; the index is a later layer. <a href="composite-index.html" style="color:#9fd0ff">&rarr; Provisional composite index (Stage 4)</a></p></div>
+<header class="masthead">
+ <div class="eyebrow">Government &amp; government-adjacent commitments</div>
+ <h1>AI / Quantum Investment Ledger</h1>
+ <p class="lede">An <b>all-time, source-linked tracker of national AI/quantum investment announcements</b> &mdash; one row per announcement &mdash; with per-capita / %GDP / %GBARD views and an FX-vs-PPP currency split. Each figure is tagged commitment-vs-outlay, public-vs-mobilized, horizon, and confidence <b>before</b> any comparison. Sorted newest-first; <b>Group&nbsp;&rarr;&nbsp;Jurisdiction</b> rolls announcements up by country. The ledger is the product; the index is a later layer.</p>
+ <a class="xlink" href="composite-index.html"><span class="arr">&rarr;</span> Provisional composite index (Stage&nbsp;4)</a>
+</header>
 {errnote}
 <details class="note"><summary><b>How to read this &mdash; headline figures are NOT additive.</b> The only defensible sum is <b>appropriated public outlays</b> (KPI below). <span class="more">Expand for the full guide &middot;</span></summary>
 <div class="d">Most large headlines (Stargate, InvestAI, France) are private/mobilized capital or multi-year targets, not government outlays. <b>PPP-blended</b> applies market FX to the tradable share (compute/hardware) and PPP to the rest (talent/ops) &mdash; a sensitivity scenario, not truth. Normalization denominators (GDP/pop accurate; price-levels &amp; GBARD approximate) are flagged for later pinning. <b>Realization view</b> compares what has actually been realized against the committed headline and a linear-schedule expectation, flagging pace (ahead / on&nbsp;track / behind / stalled) &mdash; <i>obligated</i> awards are not <i>disbursed</i> cash, so the basis is shown; most pledges are not yet tracked (statistics lag 1&ndash;2yr). The <a href="composite-index.html">composite index</a> is a deliberately later, PROVISIONAL layer. Partial seed (target: &ge;40 jurisdictions).</div></details>
@@ -461,6 +496,14 @@ a{{color:#1f4ea8;text-decoration:none}}a:hover{{text-decoration:underline}}
  <div class="kpi"><div class="l">Primary-source verified</div><div class="v">{n_verified}</div><div class="s">traced to a budget / official doc</div></div>
  <div class="kpi"><div class="l">Pledges tracked (realization)</div><div class="v">{n_tracked}</div><div class="s">{n_behind} flagged behind / stalled</div></div>
 </div>
+<div class="card" id="recentCard">
+ <div class="rhead"><h2>Recent announcements</h2><span class="bn" id="recentAsOf"></span>
+  <span class="bn" style="margin-left:auto">By announcement date &middot; all records &middot; <code>YYYY-MM</code> dates placed at month start</span></div>
+ <div class="recent-grid">
+  <div><div class="rwin-h">Last 7 days <span class="rbadge" id="r7n">0</span></div><div id="r7"></div></div>
+  <div><div class="rwin-h">Last 30 days <span class="rbadge" id="r30n">0</span></div><div id="r30"></div></div>
+ </div>
+</div>
 <div class="card">
  <div class="bar">
   <span class="lbl">Currency</span><span class="ctl" id="fBasis"><button data-v="fx" class="on">Market FX</button><button data-v="ppp">PPP-blended</button></span>
@@ -470,10 +513,11 @@ a{{color:#1f4ea8;text-decoration:none}}a:hover{{text-decoration:underline}}
   <span class="ctl" id="fDomain"><button data-v="" class="on">All domains</button><button data-v="ai">AI</button><button data-v="quantum">Quantum</button><button data-v="ai+quantum">AI+Q</button><button data-v="semiconductor">Semi</button><button data-v="compute">Compute</button></span>
   <span class="ctl" id="fActor"><button data-v="" class="on">All actors</button><button data-v="outlay">Public outlay</button><button data-v="private">Private/mob.</button><button data-v="state_fund">State fund</button><button data-v="sovereign_wealth">SWF</button></span>
   <span class="lbl">Realization</span><span class="ctl" id="fTrack"><button data-v="" class="on">All</button><button data-v="1">Tracked only</button></span>
+  <span class="lbl">Group</span><span class="ctl" id="fGroup"><button data-v="" class="on">None</button><button data-v="jur">Jurisdiction</button></span>
   <input id="q" placeholder="filter jurisdiction / program...">
   <button class="dl" id="dl">Download CSV</button>
  </div>
- <div style="overflow-x:auto;max-height:68vh"><table id="tbl"><thead><tr>
+ <div class="tbl-scroll"><table id="tbl"><thead><tr>
   <th class="l" data-k="jurisdiction">Jurisdiction</th>
   <th class="l" data-k="program">Program</th>
   <th data-k="domain">Domain</th>
@@ -493,7 +537,8 @@ a{{color:#1f4ea8;text-decoration:none}}a:hover{{text-decoration:underline}}
 </div>
 <script>
 const D={data},DEN={denom};
-let fBasis="fx",fView="abs",fDom="",fAct="",fTrack="",q="",sortK="_amount",sortDir=-1;
+let fBasis="fx",fView="abs",fDom="",fAct="",fTrack="",fGroup="",q="",sortK="announced",sortDir=-1;
+const collapsed=new Set();  // jurisdictions collapsed in group-by view
 const esc=s=>String(s==null?"":s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const usd=n=>{{if(n==null)return null;const a=Math.abs(n);
   if(a>=1e9)return'$'+(n/1e9).toFixed(1)+'B';if(a>=1e6)return'$'+(n/1e6).toFixed(0)+'M';return'$'+Math.round(n).toLocaleString()}};
@@ -506,6 +551,24 @@ const horizon=r=>{{if(r.horizon_start_year&&r.horizon_end_year)return r.horizon_
   if(r.horizon_start_year)return r.horizon_start_year+'+';return'open'}};
 const paceTag=p=>p?'<span class="tag p-'+p+'">'+p.replace(/_/g,' ')+'</span>':'';
 const tracked=r=>!!(r.realization_history&&r.realization_history.length);
+// Recent-announcements timeline: parse announced (YYYY-MM-DD | YYYY-MM | YYYY) to a UTC ms stamp
+function parseAnn(s){{if(!s)return null;const p=String(s).split('-');const y=+p[0],m=(+p[1]||1)-1,d=+p[2]||1;
+  return y?Date.UTC(y,m,d):null}}
+function recentItem(x){{const r=x.r;
+  const prog=r.source_url?'<a href="'+esc(r.source_url)+'" target="_blank" rel="noopener">'+esc(r.program)+'</a>':esc(r.program);
+  return '<div class="ritem"><span class="rd">'+esc(r.announced)+'</span><span>'+esc(r.jurisdiction)
+    +' &middot; '+prog+' &middot; '+(usd(r.usd_fx)||'n/a')+' '+actorTag(r.actor_type)+'</span></div>'}}
+function renderRecent(){{
+  const n=new Date(),today=Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate());
+  const items=D.map(r=>{{const t=parseAnn(r.announced);return t==null?null:{{r,ago:Math.floor((today-t)/864e5)}}}})
+    .filter(x=>x&&x.ago>=0).sort((a,c)=>a.ago-c.ago);
+  const w7=items.filter(x=>x.ago<=7),w30=items.filter(x=>x.ago<=30);
+  const set=(id,n)=>{{const e=document.getElementById(id);e.textContent=n;e.classList.toggle('zero',n===0)}};
+  set('r7n',w7.length);set('r30n',w30.length);
+  document.getElementById('r7').innerHTML=w7.length?w7.map(recentItem).join(''):'<div class="rempty">No announcements in the last 7 days.</div>';
+  document.getElementById('r30').innerHTML=w30.length?w30.map(recentItem).join(''):'<div class="rempty">No announcements in the last 30 days.</div>';
+  document.getElementById('recentAsOf').textContent='as of '+new Date(today).toISOString().slice(0,10);
+}}
 // basis amount: FX vs PPP-blended (tradable share at FX, rest at PPP)
 function amt(r){{if(fBasis==='fx')return r.usd_fx;
   const ts=r.tradable_share_resolved;return ts*r.usd_fx+(1-ts)*r.usd_ppp}}
@@ -543,32 +606,63 @@ function match(r){{
 function rows(){{return D.filter(match).sort((a,c)=>{{let x=sortVal(a),y=sortVal(c);
   if(typeof x==='string')return sortDir*x.localeCompare(y);
   if(x==null)x=-Infinity;if(y==null)y=-Infinity;return sortDir*(x-y)}})}}
+function rowHtml(r,child){{
+  const src=r.source_url?'<a href="'+esc(r.source_url)+'" target="_blank" rel="noopener">'+esc(r.source_name)+'</a>':esc(r.source_name);
+  const cls=child?(' class="child"'+(collapsed.has(child)?' style="display:none"':'')):'';
+  return '<tr'+cls+' title="'+esc(r.notes||'')+'">'
+   +'<td class="l">'+esc(r.jurisdiction)+'</td>'
+   +'<td class="l">'+esc(r.program)+'</td>'
+   +'<td>'+esc(r.domain)+'</td>'
+   +'<td class="hl">'+cell(usd(amt(r)))+'</td>'
+   +'<td>'+normFmt(r)+'</td>'
+   +'<td>'+cell(usd(r.public_outlay_usd))+'</td>'
+   +'<td>'+cell(usd(r.private_mobilized_usd))+'</td>'
+   +'<td>'+Math.round(r.tradable_share_resolved*100)+'%</td>'
+   +'<td class="l">'+actorTag(r.actor_type)+'</td>'
+   +'<td>'+esc(r.announced)+'</td>'
+   +'<td>'+horizon(r)+'</td>'
+   +'<td class="c-'+esc(r.confidence)+'">'+esc(r.confidence)+'</td>'
+   +'<td class="l">'+src+(r.verification_status!=='verified'?' <span style="color:#b0b5c0">('+esc(r.verification_status)+')</span>':'')+'</td>'
+   +'</tr>';
+}}
+// jurisdiction parent summary — respects the cardinal rule (dedup public outlay only; headlines NOT summed)
+function groupSummary(rs){{const seen=new Set();let outlay=0;
+  rs.forEach(r=>{{if(['government_appropriated','government_outlay'].includes(r.actor_type)&&!seen.has(r.event_key)){{seen.add(r.event_key);outlay+=r.public_outlay_usd||0}}}});
+  const domains=[...new Set(rs.map(r=>r.domain))].sort();
+  const latest=rs.map(r=>r.announced).filter(Boolean).sort().slice(-1)[0]||'';
+  return {{count:rs.length,outlay,domains,latest}};
+}}
+function groupHeader(j,rs){{const s=groupSummary(rs),open=!collapsed.has(j);
+  return '<tr class="grp" data-jur="'+esc(j)+'">'
+   +'<td class="l"><span class="tw">'+(open?'▾':'▸')+'</span> <b>'+esc(j)+'</b> <span class="bn">('+s.count+')</span></td>'
+   +'<td class="l bn">'+s.count+' announcement'+(s.count>1?'s':'')+'</td>'
+   +'<td class="bn">'+esc(s.domains.join(', '))+'</td>'
+   +'<td class="bn">not summed</td><td></td>'
+   +'<td class="hl">'+(usd(s.outlay)||na)+'</td>'
+   +'<td></td><td></td><td></td>'
+   +'<td>'+esc(s.latest)+'</td><td></td><td></td><td></td>'
+   +'</tr>';
+}}
 function render(){{
   document.getElementById('hAmt').textContent='Headline ('+(fBasis==='fx'?'FX':'PPP')+')';
   document.getElementById('hNorm').textContent=
     ({{abs:'Annualized',pc:'Per-capita',gdp:'% of GDP',gbard:'× ann. GBARD',realize:'Realized vs commit'}})[fView];
-  document.getElementById('tb').innerHTML=rows().map(r=>{{
-    const src=r.source_url?'<a href="'+esc(r.source_url)+'" target="_blank" rel="noopener">'+esc(r.source_name)+'</a>':esc(r.source_name);
-    return '<tr title="'+esc(r.notes||'')+'">'
-     +'<td class="l">'+esc(r.jurisdiction)+'</td>'
-     +'<td class="l">'+esc(r.program)+'</td>'
-     +'<td>'+esc(r.domain)+'</td>'
-     +'<td class="hl">'+cell(usd(amt(r)))+'</td>'
-     +'<td>'+normFmt(r)+'</td>'
-     +'<td>'+cell(usd(r.public_outlay_usd))+'</td>'
-     +'<td>'+cell(usd(r.private_mobilized_usd))+'</td>'
-     +'<td>'+Math.round(r.tradable_share_resolved*100)+'%</td>'
-     +'<td class="l">'+actorTag(r.actor_type)+'</td>'
-     +'<td>'+esc(r.announced)+'</td>'
-     +'<td>'+horizon(r)+'</td>'
-     +'<td class="c-'+esc(r.confidence)+'">'+esc(r.confidence)+'</td>'
-     +'<td class="l">'+src+(r.verification_status!=='verified'?' <span style="color:#b0b5c0">('+esc(r.verification_status)+')</span>':'')+'</td>'
-     +'</tr>'}}).join('');
+  const rs=rows();let html;
+  if(fGroup==='jur'){{
+    const g={{}};rs.forEach(r=>{{(g[r.jurisdiction]=g[r.jurisdiction]||[]).push(r)}});
+    const order=Object.keys(g).sort((a,b)=>groupSummary(g[b]).latest.localeCompare(groupSummary(g[a]).latest));
+    html=order.map(j=>groupHeader(j,g[j])+g[j].map(r=>rowHtml(r,j)).join('')).join('');
+  }} else html=rs.map(r=>rowHtml(r,null)).join('');
+  document.getElementById('tb').innerHTML=html;
 }}
 function wire(id,set){{document.getElementById(id).onclick=e=>{{if(e.target.tagName!=='BUTTON')return;
   set(e.target.dataset.v);[...e.currentTarget.children].forEach(c=>c.classList.toggle('on',c===e.target));render()}}}}
-wire('fBasis',v=>fBasis=v);wire('fView',v=>fView=v);wire('fDomain',v=>fDom=v);wire('fActor',v=>fAct=v);wire('fTrack',v=>fTrack=v);
+wire('fBasis',v=>fBasis=v);wire('fView',v=>fView=v);wire('fDomain',v=>fDom=v);wire('fActor',v=>fAct=v);wire('fTrack',v=>fTrack=v);wire('fGroup',v=>fGroup=v);
 document.getElementById('q').oninput=e=>{{q=e.target.value.toLowerCase().trim();render()}};
+renderRecent();
+// collapse/expand a jurisdiction group
+document.getElementById('tb').addEventListener('click',e=>{{const tr=e.target.closest('tr.grp');if(!tr)return;
+  const j=tr.dataset.jur;collapsed.has(j)?collapsed.delete(j):collapsed.add(j);render()}});
 document.querySelectorAll('#tbl thead th').forEach(th=>th.onclick=()=>{{
   const k=th.dataset.k;if(!k)return;if(sortK===k)sortDir*=-1;else{{sortK=k;sortDir=-1}}render()}});
 document.getElementById('dl').onclick=()=>{{
@@ -654,44 +748,62 @@ TEMPLATE_INDEX = r"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI/Quantum Investment Composite Index (PROVISIONAL)</title>
 <style>
-:root{{--head:#16213e;--txt:#1a1f36;--mut:#6b7280;--r:10px;--gap:16px}}
+:root{{--ink:#262236;--ink2:#3c3950;--mut:#7a7989;--faint:#9b9aa8;--line:#e9eaf0;--line2:#eef0f4;--card:#ffffff;--accent:#ef4e5b;--r:14px;--r-sm:9px;--gap:18px;--mono:ui-monospace,'SF Mono','JetBrains Mono',Menlo,Consolas,monospace;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}}
 *{{margin:0;padding:0;box-sizing:border-box}}
-body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#eef1f6;color:var(--txt);line-height:1.5}}
-.wrap{{max-width:1360px;margin:0 auto;padding:var(--gap)}}
-.head{{background:var(--head);color:#fff;padding:22px 26px;border-radius:var(--r);margin-bottom:var(--gap)}}
-.head h1{{font-size:21px;font-weight:700}}.head p{{font-size:13px;color:#9fb3d1;margin-top:4px;max-width:1040px}}
-.head a{{color:#9fd0ff}}
-.warn{{background:#a8071a;color:#fff;border-radius:var(--r);padding:14px 18px;margin-bottom:var(--gap);font-size:13px}}
-.warn b{{text-transform:uppercase;letter-spacing:.5px;font-size:11.5px}}
-.kpis{{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--gap);margin-bottom:var(--gap)}}
-.kpi{{background:#fff;border-radius:var(--r);padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}}
-.kpi .l{{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}}
-.kpi .v{{font-size:22px;font-weight:700;margin-top:3px}}
-.card{{background:#fff;border-radius:var(--r);padding:18px 22px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:var(--gap)}}
-.card h2{{font-size:14px;margin-bottom:10px}}
-.note{{font-size:12px;color:var(--mut);background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;padding:10px 12px;margin-bottom:var(--gap)}}
-.note.err{{background:#fff1f0;border-color:#ffa39e}}
-table{{width:100%;border-collapse:collapse;font-size:12.5px}}
-th,td{{padding:7px 9px;text-align:right;border-bottom:1px solid #eef0f4;white-space:nowrap;vertical-align:middle}}
-th:first-child,td:first-child,th.l,td.l{{text-align:left}}
-td.dom,th.dom{{white-space:normal;color:var(--mut);font-size:11px}}
-th{{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--mut)}}
-td.rk{{font-weight:700;font-size:15px}}td.hl{{font-weight:700}}
-td.cov{{color:#8a5a00;font-weight:600}}
-tr:hover td{{background:#f7f9fc}}
-.ci{{min-width:180px}}
-.cibar{{position:relative;display:inline-block;width:120px;height:8px;background:#e7ecf5;border-radius:4px;vertical-align:middle;margin-right:6px}}
-.cispan{{position:absolute;top:0;height:8px;background:#aac4ee;border-radius:4px}}
-.cimk{{position:absolute;top:-2px;width:3px;height:12px;background:#16213e;border-radius:2px}}
-.cit{{font-size:11px;color:var(--mut)}}
-.bn{{color:#9aa0ac;font-size:11px}}
-.dl{{background:#16213e;color:#fff;border:0;padding:7px 14px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer}}
-.foot{{font-size:11.5px;color:var(--mut);text-align:center;padding:10px}}
-a{{color:#1f4ea8;text-decoration:none}}a:hover{{text-decoration:underline}}
+body{{font-family:var(--sans);color:var(--ink2);line-height:1.5;background:linear-gradient(180deg,#fafbfc 0%,#f3f4f7 40%,#f1f2f6 100%);background-attachment:fixed;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}}
+.wrap{{max-width:1380px;margin:0 auto;padding:34px 26px 44px}}
+.masthead{{margin-bottom:22px}}
+.eyebrow{{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}}
+.masthead h1{{font-size:30px;line-height:1.12;font-weight:700;letter-spacing:-.02em;color:var(--ink);margin-top:10px}}
+.masthead .lede{{font-size:14px;line-height:1.6;color:var(--mut);margin-top:12px;max-width:96ch}}
+.masthead .lede b{{color:var(--ink2);font-weight:600}}
+.xlink{{display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-size:13px;font-weight:600;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 16px;text-decoration:none;box-shadow:0 1px 2px rgba(30,30,60,.05)}}
+.xlink:hover{{border-color:#d4d6e2}}.xlink .arr{{color:var(--accent);font-size:14px}}
+.warn{{background:linear-gradient(180deg,#fdeef0,#fce9ec);color:#a3303c;border:1px solid #f3ccd2;border-radius:var(--r-sm);padding:14px 18px;margin-bottom:var(--gap);font-size:12.5px;line-height:1.58}}
+.warn b{{text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:#b6333f}}
+.kpis{{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:var(--gap)}}
+.kpi{{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:15px 17px;box-shadow:0 1px 2px rgba(30,30,60,.04),0 12px 28px -20px rgba(30,30,60,.14)}}
+.kpi .l{{font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.12em;font-weight:600;line-height:1.3}}
+.kpi .v{{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--ink);margin-top:8px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}}
+.card{{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;box-shadow:0 1px 2px rgba(30,30,60,.04),0 18px 44px -30px rgba(30,30,60,.18);margin-bottom:var(--gap)}}
+.card h2{{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px;letter-spacing:-.01em}}
+.note{{font-size:12.5px;color:var(--ink2);background:#fafbfc;border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 15px;margin-bottom:var(--gap);line-height:1.6}}
+.note b{{color:var(--ink)}}
+.note.err{{background:#fdeef0;border-color:#f3ccd2;color:#a3303c}}
+.dl{{background:var(--ink);color:#fff;border:0;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--sans)}}
+.dl:hover{{background:#1b1830}}
+.ci{{min-width:190px}}
+.cibar{{position:relative;display:inline-block;width:118px;height:7px;background:#eceef3;border-radius:4px;vertical-align:middle;margin-right:8px}}
+.cispan{{position:absolute;top:0;height:7px;background:#c4ccef;border-radius:4px}}
+.cimk{{position:absolute;top:-3px;width:3px;height:13px;background:var(--ink);border-radius:2px}}
+.cit{{font-size:11px;color:var(--mut);font-family:var(--mono);font-variant-numeric:tabular-nums}}
+.bn{{color:#a9a8b6;font-size:11px;font-family:var(--sans)}}
+a{{color:var(--accent);text-decoration:none}}a:hover{{text-decoration:underline}}
+.foot{{font-size:11.5px;color:var(--faint);text-align:center;padding:18px 10px 4px;line-height:1.6;max-width:96ch;margin:0 auto}}
+td.rk{{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--ink)}}
+td.cov{{color:#9a6a16;font-weight:600;font-family:var(--mono)}}
+td.dom{{white-space:normal;color:var(--mut);font-size:11px;font-family:var(--sans)}}
+th.dom{{white-space:normal;font-size:11px;font-weight:600}}
+.tbl-scroll{{overflow-x:auto;border:1px solid var(--line);border-radius:10px}}
+table{{width:100%;border-collapse:collapse;font-size:12px}}
+th,td{{padding:6px 11px;text-align:right;border-bottom:1px solid var(--line2);white-space:nowrap;vertical-align:middle}}
+th:first-child,td:first-child,th.l,td.l{{text-align:left;white-space:normal}}
+th{{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#c8c9d6;cursor:default;background:var(--ink);font-weight:600;padding-top:9px;padding-bottom:9px}}
+th.l,th:first-child{{color:#c8c9d6}}
+td{{font-variant-numeric:tabular-nums}}
+td:not(.l):not(.dom):not(.ci){{font-family:var(--mono);font-size:11.5px;color:var(--ink2)}}
+td.l{{color:var(--ink2)}}td.l:first-child,td.hl{{color:var(--ink)}}
+td.hl{{font-family:var(--mono);font-weight:700}}
+tbody tr:nth-child(even) td{{background:#fafbfd}}
+tbody tr:hover td{{background:#eef1f9}}
 </style></head><body>
 <div class="wrap">
-<div class="head"><h1>AI/Quantum Investment Composite Index <span style="font-weight:400;color:#ff9a8b">— PROVISIONAL</span></h1>
-<p>An OECD/JRC-style composite over the <a href="index.html">raw ledger</a> &mdash; fixed transparent weights, geometric aggregation, missing data as n/a (never imputed), and an independent Monte-Carlo audit publishing <b>90% rank confidence intervals</b>. <b>Never a point rank without its interval.</b> <a href="index.html">&larr; Back to the ledger</a> &middot; <a href="methodology.md">methodology</a></p></div>
+<header class="masthead">
+ <div class="eyebrow">Stage 4 &middot; Provisional layer over the ledger</div>
+ <h1>AI / Quantum Investment Composite Index</h1>
+ <p class="lede">An OECD/JRC-style composite over the <a href="index.html">raw ledger</a> &mdash; fixed transparent weights, geometric aggregation, missing data as n/a (never imputed), and an independent Monte-Carlo audit publishing <b>90% rank confidence intervals</b>. Never a point rank without its interval. &middot; <a href="methodology.md">methodology</a></p>
+ <a class="xlink" href="index.html"><span class="arr">&larr;</span> Back to the ledger</a>
+</header>
 <div class="warn"><b>Do not cite these ranks.</b> {warning}</div>
 {errnote}
 <div class="kpis">
@@ -705,7 +817,7 @@ a{{color:#1f4ea8;text-decoration:none}}a:hover{{text-decoration:underline}}
   <h2 style="margin:0">Ranking &mdash; point rank with 90% confidence interval</h2>
   <button class="dl" id="dl" style="margin-left:auto">Download CSV</button>
  </div>
- <div style="overflow-x:auto"><table id="tbl"><thead><tr>
+ <div class="tbl-scroll"><table id="tbl"><thead><tr>
   <th>Rank</th><th>90% rank CI</th><th class="l">Jurisdiction</th><th>Composite</th>
   {head_cells}<th>Cov.</th><th>Recs</th><th class="l dom">Domains</th>
  </tr></thead><tbody>{rows}</tbody></table></div>
