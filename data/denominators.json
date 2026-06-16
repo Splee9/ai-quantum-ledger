@@ -21,5 +21,15 @@
   "KOR": {"name": "South Korea",    "gdp_usd": 1870000000000,  "population": 52000000,   "price_level_index": 0.80, "gbard_usd": 25000000000,  "year": 2024},
   "SGP": {"name": "Singapore",      "gdp_usd": 530000000000,   "population": 6000000,    "price_level_index": 0.95, "gbard_usd": null,         "year": 2024},
   "AUS": {"name": "Australia",      "gdp_usd": 1790000000000,  "population": 27000000,   "price_level_index": 1.05, "gbard_usd": null,         "year": 2024},
-  "ISR": {"name": "Israel",         "gdp_usd": 550000000000,   "population": 9900000,    "price_level_index": 1.05, "gbard_usd": null,         "year": 2024}
+  "ISR": {"name": "Israel",         "gdp_usd": 550000000000,   "population": 9900000,    "price_level_index": 1.05, "gbard_usd": null,         "year": 2024},
+  "JPN": {"name": "Japan",          "gdp_usd": 4070000000000,  "population": 124000000,  "price_level_index": 0.90, "gbard_usd": 35000000000,  "year": 2024},
+  "ITA": {"name": "Italy",          "gdp_usd": 2300000000000,  "population": 59000000,   "price_level_index": 0.78, "gbard_usd": 14000000000,  "year": 2024},
+  "ESP": {"name": "Spain",          "gdp_usd": 1730000000000,  "population": 48000000,   "price_level_index": 0.75, "gbard_usd": 12000000000,  "year": 2024},
+  "TWN": {"name": "Taiwan",         "gdp_usd": 790000000000,   "population": 23400000,   "price_level_index": 0.68, "gbard_usd": null,         "year": 2024},
+  "BRA": {"name": "Brazil",         "gdp_usd": 2170000000000,  "population": 212000000,  "price_level_index": 0.50, "gbard_usd": null,         "year": 2024},
+  "TUR": {"name": "Turkey",         "gdp_usd": 1320000000000,  "population": 86000000,   "price_level_index": 0.40, "gbard_usd": null,         "year": 2024},
+  "QAT": {"name": "Qatar",          "gdp_usd": 220000000000,   "population": 3000000,    "price_level_index": 0.60, "gbard_usd": null,         "year": 2024},
+  "MYS": {"name": "Malaysia",       "gdp_usd": 440000000000,   "population": 34000000,   "price_level_index": 0.45, "gbard_usd": null,         "year": 2024},
+  "THA": {"name": "Thailand",       "gdp_usd": 515000000000,   "population": 70000000,   "price_level_index": 0.45, "gbard_usd": null,         "year": 2024},
+  "VNM": {"name": "Vietnam",        "gdp_usd": 465000000000,   "population": 100000000,  "price_level_index": 0.38, "gbard_usd": null,         "year": 2024}
 }
