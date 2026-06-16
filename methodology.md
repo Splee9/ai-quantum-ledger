@@ -111,7 +111,7 @@ isolates the seeded pledges, and a KPI counts tracked pledges and how many are b
 **Integrity guards.** Realization is an **event-level** fact — records sharing an `event_key` share the
 computed values, and **nothing new is summed across events**. The linear schedule is a deliberately
 simple, transparent baseline (real disbursement curves are back-loaded; *behind early* is normal and
-labeled, not alarmist). Coverage is intentionally a **small flagged seed** — e.g. CHIPS (~$33B
+labeled, not alarmist). Coverage is intentionally a **small flagged seed** — e.g. CHIPS (~$25B
 *obligated*, ahead of schedule, with cash disbursement far behind) and Stargate (flagged *behind* on the
 reported slow start) — because official outlay statistics lag 1–2 years; an untracked pledge shows as
 *not tracked*, never as silently realized.
@@ -152,9 +152,11 @@ flaw.
 audit (`R = 2000` draws, **fixed seed → byte-identical builds**) re-ranks the field under joint
 perturbation of (a) every indicator's underlying value by a **per-jurisdiction data-confidence σ**
 (high/medium/low → 5% / 15% / 35%) and (b) the **weights by ±25%** (renormalized), re-normalizing and
-re-ranking each draw. Each jurisdiction's **5th–95th-percentile rank is its 90% CI**. At present only
-the top rank is distinguishable; nearly everything else sits in overlapping intervals — the intended,
-honest signal that **the ledger needs far more coverage before any rank is meaningful**.
+re-ranking each draw. Each jurisdiction's **5th–95th-percentile rank is its 90% CI**. At present even
+the top two jurisdictions tie within their intervals — a rank can flip merely from improving a country's
+source verification (e.g. verifying Germany's two programs to official docs lifted its evidence-quality
+indicator enough to tie the US) — and nearly everything else sits in wide overlapping intervals. That is
+the intended, honest signal that **the ledger needs far more coverage before any rank is meaningful**.
 
 ## Known caveats baked into the current seed
 

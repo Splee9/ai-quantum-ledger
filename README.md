@@ -1,9 +1,10 @@
 # AI/Quantum Investment Ledger
 
-A public, source-linked, **transaction-level ledger of national (and government-adjacent) AI and quantum
-investment commitments** — with a transparent normalization layer (per-capita / %GDP / %GBARD) and an
-FX-vs-PPP currency split. Think *Layoffs.fyi × Our World in Data × OECD/JRC composite-indicator rigor*,
-for government technology spend.
+A public, source-linked, **all-time tracker of national (and government-adjacent) AI and quantum
+investment announcements — one row per announcement** — with a transparent normalization layer
+(per-capita / %GDP / %GBARD), an FX-vs-PPP currency split, jurisdiction group-by, and a reviewed daily
+ingestion path. Think *Layoffs.fyi × Our World in Data × OECD/JRC composite-indicator rigor*, for
+government technology spend.
 
 **The ledger is the product. A composite ranking index is a deliberately *later* layer — and only ever
 on top of the raw, downloadable data.**
@@ -35,15 +36,19 @@ GitHub Pages, Netlify, or any static host and it works.
 ```
 ai-quantum-ledger/
 ├── README.md                         # this file
-├── LICENSE                           # MIT (covers the code / build.py)
+├── LICENSE                           # MIT (covers the code / build.py + ingest.py)
 ├── methodology.md                    # the public methodology (how figures are tagged & normalized)
+├── INGESTION.md                      # contract for the daily headline -> ledger pipeline
 ├── build.py                          # generator: validates data + bakes both pages (stdlib only)
+├── ingest.py                         # ingestion write-path: validate + dedup + append (stdlib only)
+├── scan.py                           # daily scanner: RSS discovery + Claude extraction (needs network + API key)
 ├── index.html                        # the ledger viewer (generated; hostable entry point)
 ├── composite-index.html              # Stage 4: provisional composite ranking w/ 90% rank CIs (generated)
 └── data/
     ├── LICENSE                       # CC BY 4.0 (covers everything in data/)
     ├── schema.json                   # the record field contract (+ normalization & realization blocks)
-    ├── government-commitments.jsonl  # canonical ledger (append-only, one JSON object per line)
+    ├── government-commitments.jsonl  # canonical ledger (append-only, one announcement per line)
+    ├── ingest-queue.jsonl            # staging for auto-extracted rows pending human review
     ├── denominators.json             # GDP / population / price-level / GBARD by ISO3 (normalization)
     ├── realizations.jsonl            # Stage 3: dated realization observations per event_key (append-only)
     └── index-weights.json            # Stage 4: indicators, fixed weights, Monte-Carlo seed/draws
@@ -73,6 +78,10 @@ The viewer joins each record to `data/denominators.json` on `iso3` and offers li
 - **View:** Absolute · Per-capita · % of GDP (national effort) · × GBARD (fiscal prioritization) ·
   **Realization** (Stage 3).
 
+A **Recent announcements** panel at the top of the ledger surfaces commitments announced in the last
+**7** and **30 days**, computed client-side against the viewer's date (so it stays current on a static
+host) — a *what's-new* feed that populates as fresh commitments are added.
+
 ## Commitment → outlay reconciliation (Stage 3)
 
 Most rows are *announced commitments*, not verified disbursements. The **Realization** view tracks how
@@ -86,7 +95,7 @@ much of a pledge has actually landed, from dated observations in `data/realizati
   explicitly per observation via `pace_flag` when no dollar figure is yet public (e.g. **Stargate**,
   flagged *behind* on the SoftBank-reported slow start).
 - **`realized_basis`** ∈ {obligated · disbursed · deployed · reported} — *obligated* awards are **not**
-  *disbursed* cash, so the basis is always shown (e.g. CHIPS shows ~$33B **obligated**, well above
+  *disbursed* cash, so the basis is always shown (e.g. CHIPS shows ~$25B **obligated** (Dec 2024), well above
   schedule, while cash out the door lags far behind).
 
 Realization is an event-level fact and **nothing is summed across events** — the cardinal rule holds.
@@ -108,7 +117,8 @@ The *optional* ranking layer ships on its own page, **`composite-index.html`**, 
   the weights (±25%). **Never a point rank without its interval.**
 
 > **Do not cite these ranks.** With 13 partial-seed jurisdictions the intervals are wide by construction —
-> only the top rank is currently distinguishable. The index exists to demonstrate the method and to
+> even the top two (Germany, US) tie within their intervals, and a rank can flip just from
+> improving a country's source verification. The index exists to demonstrate the method and to
 > *expose* how uncertain ranking is at this coverage. The ledger is the product. By design, the index
 > rewards genuine **appropriated public outlay**, not announcement headlines — so sovereign-wealth /
 > private-mobilization-heavy jurisdictions score low (the cardinal rule, expressed as a ranking).
@@ -135,12 +145,44 @@ The *optional* ranking layer ships on its own page, **`composite-index.html`**, 
   OECD MSTI / ICP vintages.
 - China figures carry the highest uncertainty (overlapping, partly non-additive funds; some estimates).
 
+## Updating the ledger — daily ingestion
+
+The ledger is an **all-time, append-only tracker — one row per announcement**. The viewer defaults to
+newest-first, and a **Group → Jurisdiction** toggle rolls announcements up under collapsible per-country
+parent rows (the parent shows the announcement count, distinct domains, latest date, and the **dedup'd
+public-outlay sum** — never summed headlines, per the cardinal rule).
+
+New announcements enter through a reviewed write-path so a daily headline-scanning job can feed the
+ledger safely. The full contract is [`INGESTION.md`](INGESTION.md); the write-path is `ingest.py`:
+
+```bash
+python3 ingest.py validate candidates.jsonl   # dry-run: validate + dedup, no write
+python3 ingest.py add      candidates.jsonl   # -> data/ingest-queue.jsonl (staging)
+python3 ingest.py list                        # review the queue
+python3 ingest.py promote [id ...]            # move vetted rows into the ledger
+python3 build.py                              # regenerate, then commit
+```
+
+The scanner (`scan.py`) proposes candidate records; `ingest.py` validates against `data/schema.json`,
+**dedups by `id` (reject) and `event_key` (warn — re-announcements aren't double-counted)**, and stages
+them for human review. Auto-extracted rows are `reported`/`unconfirmed`, never self-certified `verified`.
+
+```bash
+python3 scan.py run --days 2 --add   # Google News RSS -> Claude extraction -> review queue
+```
+
+`scan.py` discovers headlines via **Google News RSS** (stdlib, no key) and extracts schema-valid records
+with **Claude** (default `claude-opus-4-8`; `--model claude-sonnet-4-6` for cheaper daily runs) using
+structured outputs. It is the one component that is **not** stdlib-only/offline — it needs the network
+and `pip install anthropic` + `ANTHROPIC_API_KEY`. Schedule `scan.py run --add` daily (cron / GitHub
+Action); it's idempotent on `id`. A human still works the queue and promotes. Full contract: `INGESTION.md`.
+
 ## Contributing data
 
-Append one JSON object per line to `data/government-commitments.jsonl` following `data/schema.json`,
-then run `python3 build.py` (it validates the field contract and the denominator join and re-bakes the
-viewer). Prefer primary sources (national budgets, official press releases); set `verification_status`
-honestly and leave `source_url` empty only when a primary link is still pending.
+By hand: append one JSON object per line to `data/government-commitments.jsonl` following
+`data/schema.json`, then run `python3 build.py`. Prefer primary sources (national budgets, official
+press releases); set `verification_status` honestly and leave `source_url` empty only when a primary
+link is still pending. For batch/automated additions use `ingest.py` (above).
 
 ## License
 

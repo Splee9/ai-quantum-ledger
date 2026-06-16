@@ -34,9 +34,33 @@ and the vault project page at `wiki/projects/ai-quantum-investment-ledger.md`.
 ## Current state — Stages 1–4 SHIPPED (Stage 4 PROVISIONAL)
 
 - **Stage 1 (ledger):** tagged, source-linked, downloadable government-commitment table. 22 records / 14
-  jurisdictions / 2 primary-source-verified. Cardinal rule enforced in code: **headlines are never summed**;
-  only `public_outlay_usd` over appropriated/outlay actors aggregates (≈ **$71B**, dedup by `event_key`);
+  jurisdictions / 9 primary-source-verified. Cardinal rule enforced in code: **headlines are never summed**;
+  only `public_outlay_usd` over appropriated/outlay actors aggregates (≈ **$70.7B**, dedup by `event_key`);
   `public_outlay_usd` and `private_mobilized_usd` stay separate.
+- **All-time tracker + jurisdiction group-by (ledger page):** the viewer is framed as an all-time,
+  one-row-per-announcement tracker — **default sort is `announced` newest-first**. A **Group → Jurisdiction**
+  toggle renders collapsible parent rows per country; the parent summary respects the cardinal rule
+  (announcement count, distinct domains, latest date, and **dedup'd public-outlay sum only — headlines
+  never summed**; shows `$0` for sovereign-wealth/state-fund-only countries like China/Saudi). Logic is
+  `rowHtml()`/`groupSummary()`/`groupHeader()` in `build.py`'s ledger template; collapse state in a JS Set.
+- **Ingestion write-path (`ingest.py` + `INGESTION.md` + `data/ingest-queue.jsonl`):** the reviewed path
+  the daily scanner feeds. `ingest.py` (stdlib; reuses `build.py`'s field contract) does validate + dedup
+  (id → reject, event_key → warn) + append. `add` stages to the review queue; `promote` moves vetted rows
+  into the ledger; `list`/`validate` for inspection. Auto-extracted rows must be `reported`/`unconfirmed`,
+  never self-certified `verified`. Tested end-to-end (then data restored).
+- **Headline scanner (`scan.py`):** the left side of the pipeline. `discover` = Google News RSS (stdlib +
+  `certifi` TLS; no API key) across a `QUERIES` list → `headlines.jsonl`. `extract` = Claude via the
+  official `anthropic` SDK with **structured outputs** (default `claude-opus-4-8`, `--model` overridable)
+  → schema-valid `candidates.jsonl`. `run --add` chains discover → extract → `ingest.py add`. **NOT
+  stdlib-only/offline** — needs network + `pip install anthropic` + `ANTHROPIC_API_KEY`. Verified:
+  RSS parse + live discovery (28 real headlines) + scan-output-passes-ingest-validator; the live API
+  extract call is UNtested here (no key in this env). Working files `headlines.jsonl`/`candidates.jsonl`
+  are gitignored. Schedule `scan.py run --add` daily; human still reviews the queue + promotes.
+- **Recent-announcements panel (ledger page):** a top-of-page *what's-new* widget showing commitments
+  announced in the **last 7 / 30 days**, bucketed client-side from `announced` against the viewer's date
+  (`new Date()`, so it self-updates on a static host; `YYYY-MM` dates placed at month start). Independent
+  of the table filters; reproducible build (no date baked in). Empty on the current seed (latest
+  announcement is ~2026-04). Lives in `renderRecent()` in `build.py`'s ledger template.
 - **Stage 2 (normalization):** live viewer toggles — **Currency** (Market FX vs PPP-blended =
   `tradable_share·FX + (1−tradable_share)·PPP`) and **View** (Absolute / Per-capita / %GDP / ×GBARD),
   joined to `data/denominators.json` on `iso3`. PPP is a flagged sensitivity scenario, never the default.
@@ -44,17 +68,29 @@ and the vault project page at `wiki/projects/ai-quantum-investment-ledger.md`.
   `event_key`). `build.py` joins it and computes per-record `realization_rate` (realized ÷ committed
   headline), `expected_rate` (linear horizon schedule), and `pace_status` (ahead/on_track/behind/stalled;
   `pace_flag` override when no $ figure exists). Viewer gains a **Realization** View, a **Tracked only**
-  filter, and a "Pledges tracked / N behind" KPI. Seeded with 5 flagged pledges (CHIPS ~$33B obligated &
+  filter, and a "Pledges tracked / N behind" KPI. Seeded with 5 flagged pledges (CHIPS ~$25B obligated &
   ahead; Stargate & EU InvestAI behind; Canada & IndiaAI on-track). **Realization is event-level; nothing
-  new is summed.** Current build: 22 records / 14 jurisdictions / 2 verified / $71.0B outlays / 5 tracked.
+  new is summed.** Current build: 22 records / 14 jurisdictions / 9 verified / $70.7B outlays / 5 tracked.
 - **Stage 4 (composite index — PROVISIONAL):** separate generated page `composite-index.html` over the
   raw ledger, OECD/JRC discipline. Config in `data/index-weights.json` (4 indicators: outlay %GDP 0.40,
   ×GBARD 0.20, breadth 0.15, evidence 0.25). Min-max→[1,100], **weighted geometric mean over available
   indicators** (n/a never imputed; coverage k/N shown), EU bloc excluded → **13 jurisdictions ranked**.
   **Monte-Carlo audit → 90% rank CIs** (2000 draws, seed 20260615, **byte-identical builds**), jittering
-  indicator values (per-jurisdiction confidence σ) + weights (±25%). #1 USA (CI 1–1, via CHIPS $52.7B
-  appropriated); everything below sits in wide overlapping CIs — the intended "don't cite these ranks"
+  indicator values (per-jurisdiction confidence σ) + weights (±25%). top two (Germany, USA) tie within their CIs (Germany #1 CI 1–2 after its programs were
+  primary-source-verified, edging USA on evidence quality); everything below sits in wide overlapping CIs — the intended "don't cite these ranks"
   signal. By design the index rewards appropriated **outlay**, not headlines, so China/Saudi/UAE rank low.
+
+## Design system (adopted 2026-06-16)
+
+Both viewers use Spencer's Claude-designed system, ported into the `build.py` templates (it is **CSS +
+header markup only** — all JS/functionality unchanged). Tokens live in `:root` of each template's
+`<style>`: ink `#262236`, accent (coral) `#ef4e5b`, hairline `#e9eaf0`, mono `ui-monospace` for all
+numerics (tabular-nums), sans `system-ui`; gradient page bg, layered card shadows, masthead
+(eyebrow/lede/pill-link), **dark sticky table headers**, zebra rows, pill tags. Fully self-contained (no
+external fonts/CDNs). The reference mockup is the (gitignored-by-intent) nested `ai-quantum-ledger/`
+folder Spencer generates in Claude design — treat it as the **design source of truth**; re-port tokens
+from it if it changes. To restyle: edit the `<style>` blocks in `build.py` (remember `{{`/`}}` escaping)
+and re-run `python3 build.py`.
 
 ## File map
 
@@ -63,6 +99,10 @@ and the vault project page at `wiki/projects/ai-quantum-investment-ledger.md`.
 | `README.md` | Project front door (overview, quick-start, roadmap, license note) |
 | `methodology.md` | Public methodology — the tagging axes + normalization formulas |
 | `build.py` | Generator (stdlib only): validates data + denominator join, computes derived fields, bakes `index.html` |
+| `ingest.py` | Ingestion write-path (stdlib): validate + dedup + append; `add`/`promote`/`list`/`validate` |
+| `scan.py` | Daily scanner: Google News RSS discovery + Claude extraction → candidates (needs network + API key) |
+| `INGESTION.md` | Contract for the daily headline → ledger pipeline (scanner + write-path) |
+| `data/ingest-queue.jsonl` | Staging for auto-extracted rows pending human review (empty until used) |
 | `index.html` | The viewer (generated). **Hostable entry point** — serves at a site root |
 | `data/schema.json` | Record field contract (+ `_normalization` and `_realization` blocks) |
 | `data/government-commitments.jsonl` | Canonical ledger — append-only, one JSON object per line |
@@ -83,8 +123,11 @@ that captures `#tb`.innerHTML — see git history of the old `scripts/` generato
 ## What's NEXT (pick up here)
 
 **Immediate data-quality TODOs (to truly close Stage 1):**
-1. **Pin primary-source URLs** on every `verification_status: "reported"` row with an empty `source_url`
-   (Germany, South Korea, Singapore, Australia, Israel national strategies). Promote to `verified` once traced.
+1. **Pin primary-source URLs** — ✅ DONE (2026-06-15). All 22 commitment records now carry a `source_url`;
+   9 rows promoted to `verified` against official docs. Israel revised down (~ILS1B per OECD.AI) and the CHIPS
+   realization corrected to ~$25B obligated (NIST, Dec 2024). Still worth deepening: replace the China news-wire
+   links with official Chinese registrations if found; the Saudi "Project Transcendence" Bloomberg scoop has no
+   official counterpart; trace `source_url` for the Stargate realization pace flag.
 2. **Expand coverage 14 → ≥40 jurisdictions**, ≥3 records each — seed from **OECD STIP Compass** and the
    **OECD.AI policy dashboards** (both free). Candidates not yet in: Japan, Taiwan, Italy, Spain, Netherlands,
    Brazil, Switzerland, Finland, Nordics, etc.
