@@ -10,6 +10,18 @@ venv/
 .vscode/
 *.swp
 
+# Secrets / credentials — NEVER commit. The Anthropic API key lives in your shell
+# env (~/.zshenv), not the repo; these patterns are defense-in-depth for the
+# automated daily cadence that pushes to a PUBLIC repo.
+.env
+.env.*
+*.pem
+*.key
+*.p12
+.netrc
+*credentials*
+*.token
+
 # Scanner working files (transient; staged into data/ingest-queue.jsonl via ingest.py)
 headlines.jsonl
 candidates.jsonl
