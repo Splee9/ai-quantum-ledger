@@ -10,5 +10,13 @@ venv/
 .vscode/
 *.swp
 
+# Scanner working files (transient; staged into data/ingest-queue.jsonl via ingest.py)
+headlines.jsonl
+candidates.jsonl
+
+# Design-reference mockup generated in Claude design (the design source of truth, but a
+# stale duplicate of the project — the live design lives in build.py's <style> blocks).
+/ai-quantum-ledger/
+
 # Note: index.html is a committed build artifact (it is the hostable entry point).
 # Regenerate with: python3 build.py
