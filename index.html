@@ -42,6 +42,13 @@ details.note .d{font-size:12.5px;line-height:1.62;color:var(--ink2);font-weight:
 .ctl button:hover{color:var(--ink)}
 .ctl button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(30,30,60,.14)}
 .bar{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-bottom:10px}
+.vhelp{font-size:12px;color:var(--mut);margin:-2px 2px 12px;line-height:1.5}
+.vhelp b{color:var(--ink2);font-weight:600}
+details.morefilters{margin:0 0 12px}
+details.morefilters summary{cursor:pointer;list-style:none;font-size:11.5px;font-weight:600;color:var(--accent);display:inline-block;padding:3px 0}
+details.morefilters summary::-webkit-details-marker{display:none}
+details.morefilters summary::before{content:'+ '}
+details.morefilters[open] summary::before{content:'\2013 '}
 .bar input{padding:7px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px;min-width:190px;font-family:var(--sans);color:var(--ink2);background:#fbfbfd}
 .bar input:focus{outline:none;border-color:#c3c5d4;box-shadow:0 0 0 3px rgba(120,120,160,.10)}
 .bar input::placeholder{color:#a9a8b6}
@@ -80,7 +87,7 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 <header class="masthead">
  <div class="eyebrow">Government &amp; government-adjacent commitments</div>
  <h1>AI / Quantum Investment Ledger</h1>
- <p class="lede">An <b>all-time, source-linked tracker of national AI/quantum investment announcements</b> &mdash; one row per announcement &mdash; with per-capita / %GDP / %GBARD views and an FX-vs-PPP currency split. Each figure is tagged commitment-vs-outlay, public-vs-mobilized, horizon, and confidence <b>before</b> any comparison. Sorted newest-first; <b>Group&nbsp;&rarr;&nbsp;Jurisdiction</b> rolls announcements up by country. The ledger is the product; the index is a later layer.</p>
+ <p class="lede">An <b>all-time, source-linked tracker of national AI/quantum investment announcements</b> &mdash; one row per announcement &mdash; with per-capita / %GDP / %GBARD views and an FX-vs-PPP currency split. Each figure is tagged commitment-vs-outlay, public-vs-mobilized, horizon, and confidence <b>before</b> any comparison. Sorted newest-first; <b>Arrange</b> as a flat list, grouped by jurisdiction, or <b>rolled up</b> to one aggregate row per country. The ledger is the product; the index is a later layer.</p>
  <a class="xlink" href="composite-index.html"><span class="arr">&rarr;</span> Provisional composite index (Stage&nbsp;4)</a>
 </header>
 
@@ -103,32 +110,23 @@ a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 </div>
 <div class="card">
  <div class="bar">
-  <span class="lbl">Currency</span><span class="ctl" id="fBasis"><button data-v="fx" class="on">Market FX</button><button data-v="ppp">PPP-blended</button></span>
-  <span class="lbl">View</span><span class="ctl" id="fView"><button data-v="abs" class="on">Absolute</button><button data-v="pc">Per-capita</button><button data-v="gdp">% of GDP</button><button data-v="gbard">&times; GBARD</button><button data-v="realize">Realization</button></span>
+  <span class="lbl" title="How rows are laid out">Arrange</span><span class="ctl" id="fGroup"><button data-v="" class="on">All rows</button><button data-v="group">By jurisdiction</button><button data-v="rollup">Roll-up</button></span>
+  <span class="lbl" title="What every value is measured in">Measure</span><span class="ctl" id="fView"><button data-v="abs" class="on">Absolute $</button><button data-v="pc">Per capita</button><button data-v="gdp">% of GDP</button><button data-v="gbard" title="vs annual government R&amp;D budget (GBARD)">&times; R&amp;D budget</button><button data-v="realize">Realization</button></span>
  </div>
+ <div class="vhelp" id="viewHelp"></div>
  <div class="bar">
-  <span class="ctl" id="fDomain"><button data-v="" class="on">All domains</button><button data-v="ai">AI</button><button data-v="quantum">Quantum</button><button data-v="ai+quantum">AI+Q</button><button data-v="semiconductor">Semi</button><button data-v="compute">Compute</button></span>
-  <span class="ctl" id="fActor"><button data-v="" class="on">All actors</button><button data-v="outlay">Public outlay</button><button data-v="private">Private/mob.</button><button data-v="state_fund">State fund</button><button data-v="sovereign_wealth">SWF</button></span>
-  <span class="lbl">Realization</span><span class="ctl" id="fTrack"><button data-v="" class="on">All</button><button data-v="1">Tracked only</button></span>
-  <span class="lbl">Group</span><span class="ctl" id="fGroup"><button data-v="" class="on">None</button><button data-v="jur">Jurisdiction</button></span>
-  <input id="q" placeholder="filter jurisdiction / program...">
+  <span class="lbl">Domain</span><span class="ctl" id="fDomain"><button data-v="" class="on">All</button><button data-v="ai">AI</button><button data-v="quantum">Quantum</button><button data-v="ai+quantum">AI+Q</button><button data-v="semiconductor">Semi</button><button data-v="compute">Compute</button></span>
+  <input id="q" placeholder="search jurisdiction / program&hellip;">
   <button class="dl" id="dl">Download CSV</button>
  </div>
- <div class="tbl-scroll"><table id="tbl"><thead><tr>
-  <th class="l" data-k="jurisdiction">Jurisdiction</th>
-  <th class="l" data-k="program">Program</th>
-  <th data-k="domain">Domain</th>
-  <th data-k="_amount" id="hAmt">Headline (FX)</th>
-  <th data-k="_norm" id="hNorm">Annualized</th>
-  <th data-k="public_outlay_usd">Public</th>
-  <th data-k="private_mobilized_usd">Private/mob.</th>
-  <th data-k="tradable_share_resolved">Trad.%</th>
-  <th class="l" data-k="actor_type">Type</th>
-  <th data-k="announced">Announced</th>
-  <th data-k="horizon_end_year">Horizon</th>
-  <th data-k="confidence">Conf.</th>
-  <th class="l" data-k="source_name">Source</th>
- </tr></thead><tbody id="tb"></tbody></table></div>
+ <details class="morefilters"><summary>More filters &amp; currency basis</summary>
+  <div class="bar" style="margin-top:10px">
+   <span class="lbl" title="PPP is a sensitivity scenario, not the default">Currency</span><span class="ctl" id="fBasis"><button data-v="fx" class="on">Market FX</button><button data-v="ppp">PPP-blended</button></span>
+   <span class="lbl">Actor</span><span class="ctl" id="fActor"><button data-v="" class="on">All</button><button data-v="outlay">Public outlay</button><button data-v="private">Private / mobilized</button><button data-v="state_fund">State fund</button><button data-v="sovereign_wealth">Sovereign wealth</button></span>
+   <span class="lbl">Realization</span><span class="ctl" id="fTrack"><button data-v="" class="on">All</button><button data-v="1">Tracked only</button></span>
+  </div>
+ </details>
+ <div class="tbl-scroll"><table id="tbl"><thead id="thead"></thead><tbody id="tb"></tbody></table></div>
 </div>
 <div class="foot">Self-contained (no external libraries). Generated by build.py from data/government-commitments.jsonl + data/denominators.json. Methodology: methodology.md. All figures as-reported; many are unverified mobilization targets; PPP &amp; GBARD views are approximate scenarios.</div>
 </div>
@@ -240,12 +238,71 @@ function groupHeader(j,rs){const s=groupSummary(rs),open=!collapsed.has(j);
    +'<td>'+esc(s.latest)+'</td><td></td><td></td><td></td>'
    +'</tr>';
 }
+// plain-English description of the current Measure + basis (the clarity line under the controls)
+function updateHelper(){
+  const basis=fBasis==='fx'?'market FX':'PPP-blended (a sensitivity scenario)';
+  let m;
+  if(fGroup==='rollup')
+    m='<b>Roll-up:</b> one row per jurisdiction, showing appropriated <b>public outlay only</b> (deduplicated by event &mdash; headlines are never summed). The value column follows the Measure toggle.';
+  else
+    m=({abs:'<b>Absolute $:</b> the headline commitment in USD.',
+        pc:'<b>Per capita:</b> committed USD &divide; population.',
+        gdp:'<b>% of GDP:</b> annualized commitment as a share of GDP (national effort).',
+        gbard:'<b>&times; R&amp;D budget:</b> annualized commitment vs the annual government R&amp;D budget (GBARD).',
+        realize:'<b>Realization:</b> how much of each pledge has actually been realized vs a linear-schedule expectation.'})[fView]
+      +' Currency basis: '+basis+'.';
+  document.getElementById('viewHelp').innerHTML=m;
+}
+function detailHead(){
+  const amt='Headline ('+(fBasis==='fx'?'FX':'PPP')+')';
+  const norm=({abs:'Annualized',pc:'Per-capita',gdp:'% of GDP',gbard:'× ann. GBARD',realize:'Realized vs commit'})[fView];
+  return '<tr><th class="l" data-k="jurisdiction">Jurisdiction</th><th class="l" data-k="program">Program</th>'
+   +'<th data-k="domain">Domain</th><th data-k="_amount">'+amt+'</th><th data-k="_norm">'+norm+'</th>'
+   +'<th data-k="public_outlay_usd">Public</th><th data-k="private_mobilized_usd">Private/mob.</th>'
+   +'<th data-k="tradable_share_resolved">Trad.%</th><th class="l" data-k="actor_type">Type</th>'
+   +'<th data-k="announced">Announced</th><th data-k="horizon_end_year">Horizon</th>'
+   +'<th data-k="confidence">Conf.</th><th class="l" data-k="source_name">Source</th></tr>';
+}
+function rollupHead(){
+  const vl=({abs:'Public outlay',pc:'Outlay / capita',gdp:'Outlay % GDP',gbard:'Outlay × GBARD',realize:'Public outlay'})[fView];
+  return '<tr><th class="l" data-k="_jur">Jurisdiction</th><th data-k="_count">Announcements</th>'
+   +'<th data-k="_val">'+vl+'</th><th class="l" data-k="_domains">Domains</th>'
+   +'<th data-k="_verified">Verified</th><th data-k="_latest">Latest</th></tr>';
+}
+// aggregate filtered rows to one object per jurisdiction (iso3); reuses the cardinal-rule groupSummary
+function jurAgg(rs){const g={};
+  rs.forEach(r=>{(g[r.iso3]=g[r.iso3]||{iso3:r.iso3,jur:r.jurisdiction,recs:[]}).recs.push(r)});
+  return Object.values(g).map(o=>{const s=groupSummary(o.recs);
+    o.count=s.count;o.outlay=s.outlay;o.domains=s.domains;o.latest=s.latest;
+    o.verified=o.recs.filter(r=>r.verification_status==='verified').length;o.den=DEN[o.iso3]||{};return o});
+}
+function rollupVal(o){
+  if(fView==='pc')return o.den.population?o.outlay/o.den.population:null;
+  if(fView==='gdp')return o.den.gdp_usd?o.outlay/o.den.gdp_usd*100:null;
+  if(fView==='gbard')return o.den.gbard_usd?o.outlay/o.den.gbard_usd:null;
+  return o.outlay}
+function rollupValFmt(o){const v=rollupVal(o);
+  if(fView==='pc')return v==null?na:'$'+(v>=1e3?(v/1e3).toFixed(1)+'k':v.toFixed(0))+'/cap';
+  if(fView==='gdp')return v==null?na:v.toFixed(v<1?3:2)+'%';
+  if(fView==='gbard')return v==null?na:v.toFixed(2)+'×';
+  return usd(o.outlay)||'$0'}
+function rollupRow(o){return '<tr title="'+o.count+' announcement'+(o.count>1?'s':'')+', '+esc(o.iso3)+'">'
+   +'<td class="l">'+esc(o.jur)+'</td><td>'+o.count+'</td><td class="hl">'+rollupValFmt(o)+'</td>'
+   +'<td class="l">'+esc(o.domains.join(', '))+'</td><td>'+o.verified+'</td><td>'+esc(o.latest||'')+'</td></tr>'}
+function aggSortVal(o){
+  if(sortK==='_jur')return o.jur;if(sortK==='_count')return o.count;
+  if(sortK==='_val'){const v=rollupVal(o);return v==null?-Infinity:v}
+  if(sortK==='_domains')return o.domains.length;if(sortK==='_verified')return o.verified;
+  if(sortK==='_latest')return o.latest||'';return o.outlay}
 function render(){
-  document.getElementById('hAmt').textContent='Headline ('+(fBasis==='fx'?'FX':'PPP')+')';
-  document.getElementById('hNorm').textContent=
-    ({abs:'Annualized',pc:'Per-capita',gdp:'% of GDP',gbard:'× ann. GBARD',realize:'Realized vs commit'})[fView];
+  updateHelper();
+  document.getElementById('thead').innerHTML=fGroup==='rollup'?rollupHead():detailHead();
   const rs=rows();let html;
-  if(fGroup==='jur'){
+  if(fGroup==='rollup'){
+    html=jurAgg(rs).sort((a,c)=>{let x=aggSortVal(a),y=aggSortVal(c);
+      if(typeof x==='string')return sortDir*x.localeCompare(y);
+      if(x==null)x=-Infinity;if(y==null)y=-Infinity;return sortDir*(x-y)}).map(rollupRow).join('');
+  } else if(fGroup==='group'){
     const g={};rs.forEach(r=>{(g[r.jurisdiction]=g[r.jurisdiction]||[]).push(r)});
     const order=Object.keys(g).sort((a,b)=>groupSummary(g[b]).latest.localeCompare(groupSummary(g[a]).latest));
     html=order.map(j=>groupHeader(j,g[j])+g[j].map(r=>rowHtml(r,j)).join('')).join('');
@@ -254,14 +311,17 @@ function render(){
 }
 function wire(id,set){document.getElementById(id).onclick=e=>{if(e.target.tagName!=='BUTTON')return;
   set(e.target.dataset.v);[...e.currentTarget.children].forEach(c=>c.classList.toggle('on',c===e.target));render()}}
-wire('fBasis',v=>fBasis=v);wire('fView',v=>fView=v);wire('fDomain',v=>fDom=v);wire('fActor',v=>fAct=v);wire('fTrack',v=>fTrack=v);wire('fGroup',v=>fGroup=v);
+wire('fBasis',v=>fBasis=v);wire('fView',v=>fView=v);wire('fDomain',v=>fDom=v);wire('fActor',v=>fAct=v);wire('fTrack',v=>fTrack=v);
+// switching arrange mode resets the sort to a sensible default for that mode
+wire('fGroup',v=>{fGroup=v;if(v==='rollup'){sortK='_val';sortDir=-1}else{sortK='announced';sortDir=-1}});
 document.getElementById('q').oninput=e=>{q=e.target.value.toLowerCase().trim();render()};
 renderRecent();
 // collapse/expand a jurisdiction group
 document.getElementById('tb').addEventListener('click',e=>{const tr=e.target.closest('tr.grp');if(!tr)return;
   const j=tr.dataset.jur;collapsed.has(j)?collapsed.delete(j):collapsed.add(j);render()});
-document.querySelectorAll('#tbl thead th').forEach(th=>th.onclick=()=>{
-  const k=th.dataset.k;if(!k)return;if(sortK===k)sortDir*=-1;else{sortK=k;sortDir=-1}render()});
+// delegated sort — survives the dynamic <thead> rebuild on every render
+document.getElementById('thead').addEventListener('click',e=>{const th=e.target.closest('th');
+  if(!th||!th.dataset.k)return;const k=th.dataset.k;if(sortK===k)sortDir*=-1;else{sortK=k;sortDir=-1}render()});
 document.getElementById('dl').onclick=()=>{
   const cols=['id','jurisdiction','iso3','program','domain','headline_amount','currency','usd_approx',
     'annualized_usd','tradable_share_resolved','usd_fx','usd_ppp','public_outlay_usd','private_mobilized_usd',

@@ -1,0 +1,13 @@
+# Netlify deploy config for the AI/Quantum Investment Ledger.
+#
+# build.py is STDLIB-ONLY — it regenerates index.html + composite-index.html from
+# the data/ files. It needs no pip install and NO secrets.
+#
+# The daily scanner (scan.py) runs separately on the maintainer's machine, never
+# in this build, so the Anthropic API key is NOT set here and must never be.
+[build]
+  command = "python3 build.py"
+  publish = "."
+
+[build.environment]
+  PYTHON_VERSION = "3.12"

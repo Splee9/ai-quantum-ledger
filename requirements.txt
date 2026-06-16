@@ -1,0 +1,11 @@
+# Runtime dependencies for the AI/Quantum Investment Ledger.
+#
+# build.py and ingest.py are STDLIB-ONLY — they need nothing here.
+# Only scan.py (the daily headline scanner) has dependencies:
+#   - anthropic: the official SDK for the Claude extraction stage
+#   - certifi:   CA bundle for TLS verification of the Google News RSS discovery
+#
+# Install with:  python3 -m pip install -r requirements.txt
+# The scanner also needs ANTHROPIC_API_KEY in the environment (never commit it).
+anthropic>=0.40
+certifi>=2024.2.2
