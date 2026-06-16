@@ -82,6 +82,36 @@ A **Recent announcements** panel at the top of the ledger surfaces commitments a
 **7** and **30 days**, computed client-side against the viewer's date (so it stays current on a static
 host) — a *what's-new* feed that populates as fresh commitments are added.
 
+## Three views, country profiles & the credibility spine
+
+The viewer offers three **Views**:
+
+- **List** — every announcement, newest-first (the raw ledger).
+- **By country** — collapsible per-country groups (count, distinct domains, latest date, dedup'd
+  public-outlay sum — never summed headlines).
+- **Compare** — a cross-country **normalization dashboard** on a *public-outlay-only spine*
+  (appropriated/outlay actors, deduplicated by `event_key`), shown across four normalizers at once —
+  absolute · % of GDP · per-capita · × government R&D budget — with **mobilized / SWF capital in a
+  separate, non-comparable column**. This is the report's recommended dashboard: never rank on a
+  single basis, and never pool leveraged/sovereign-fund money with fiscal outlays.
+
+**Click any country name** (anywhere it appears) to open its **profile card**: a modal with the
+country's normalized snapshot, theme-by-theme summaries (AI / Quantum / Semiconductors / Compute) with
+the dedup'd public outlay per theme, and every commitment **citing and linking its primary source** —
+filterable by theme and actor.
+
+Two new per-row tags back the *credibility-first* promise:
+
+- **`source_tier`** — the trust spine: **T1** primary/audited gov (budget docs, Commerce-OIG/NIST
+  status reports), **T2** supranational (OECD/EU/IMF/EC), **T3** specialist tracker/think tank
+  (CSIS, ITIF, Bruegel, Stanford HAI), **T4** tier-one press only (no budgetary backing). Shown as a
+  badge and filterable; treat T4-only figures (Gulf mandates, unconfirmed buildouts) as provisional.
+- **`status`** — the money's lifecycle, distinct from verification of the figure: *announced ·
+  authorized* (legislated ceiling, **not** appropriated — e.g. the US CHIPS Science Division) ·
+  *obligated* (awarded/milestone-gated, not paid) · *disbursed* (cash out) · *stalled* · *cancelled*
+  (e.g. Intel Magdeburg). Surfaced as a badge and filterable, so "announced ≠ delivered" is visible
+  at a glance.
+
 ## Commitment → outlay reconciliation (Stage 3)
 
 Most rows are *announced commitments*, not verified disbursements. The **Realization** view tracks how
@@ -132,9 +162,10 @@ The *optional* ranking layer ships on its own page, **`composite-index.html`**, 
 | 3 — Outlay reconciliation | **shipped (seed)** | Versioned realization history per `event_key` → realization rate, expected-by-schedule rate, and pace flag. Machinery complete; data is a small flagged seed pending the official-statistics lag. |
 | 4 — Composite index (optional) | **shipped (PROVISIONAL)** | OECD/JRC discipline: fixed transparent weights, geometric aggregation, n/a never imputed, Monte-Carlo 90% rank CIs. Machinery complete; ranks not citable until coverage grows (≥40 jurisdictions). |
 
-**Current coverage** is a partial seed (22 records / 14 jurisdictions). The Stage-1 advance benchmark is
-≥40 jurisdictions with ≥3 sourced records each; next data work is pinning primary-source URLs on
-`reported` rows and expanding jurisdictions (OECD STIP Compass + OECD.AI dashboards).
+**Current coverage** is **68 records across 22 jurisdictions** (2018–2026, with a comprehensive
+2020–present sweep). The Stage-1 advance benchmark is ≥40 jurisdictions with ≥3 sourced records each;
+next data work is upgrading `source_tier` T4→T1 by pinning primary budget URLs and expanding
+jurisdictions (OECD STIP Compass + OECD.AI dashboards).
 
 ## Data quality & caveats
 

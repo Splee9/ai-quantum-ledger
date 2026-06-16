@@ -485,12 +485,58 @@ th:nth-child(4),th:nth-child(9),th:nth-child(13){{border-left:1px solid #46435a}
 .bn{{color:#a9a8b6;font-size:10px;font-family:var(--sans);font-weight:500}}
 a{{color:var(--accent);text-decoration:none}}a:hover{{text-decoration:underline}}
 .foot{{font-size:11.5px;color:var(--faint);text-align:center;padding:18px 10px 4px;line-height:1.6;max-width:96ch;margin:0 auto}}
+/* clickable jurisdiction */
+.jl{{color:inherit;text-decoration:none;cursor:pointer;border-bottom:1px dotted #c2c4d2}}
+.jl:hover{{color:var(--accent);border-bottom-color:var(--accent)}}
+td.l:first-child .jl{{color:var(--ink)}}
+/* source-tier + status badges */
+.tier{{display:inline-block;font-family:var(--mono);font-size:9.5px;font-weight:600;border-radius:4px;padding:0 5px;letter-spacing:.02em;vertical-align:middle}}
+.tier-T1{{color:#2f7d5b;background:#e9f5ee}}.tier-T2{{color:#3f5bd0;background:#eaeefb}}.tier-T3{{color:#9a6a16;background:#f7efe0}}.tier-T4{{color:#8a6d3b;background:#f0ece4}}
+.st{{display:inline-block;font-size:9.5px;font-weight:600;border-radius:999px;padding:1px 7px;letter-spacing:.01em;text-transform:capitalize}}
+.st-announced{{color:#5b5a6b;background:#eef0f5}}.st-authorized{{color:#7a5b16;background:#f7efe0}}.st-obligated{{color:#3f5bd0;background:#eef1fc}}
+.st-disbursed{{color:#2f7d5b;background:#edf7f1}}.st-stalled{{color:#b85c12;background:#fbf0e4}}.st-cancelled{{color:#c0414b;background:#fcedef;text-decoration:line-through}}
+/* compare dashboard */
+table.cmp td.spine{{font-family:var(--mono);font-weight:600;color:var(--ink)}}
+table.cmp .sep{{border-left:1px solid var(--line)}}
+table.cmp th.sep{{border-left:1px solid #46435a}}
+.cmpnote{{font-size:11.5px;color:var(--mut);margin:-2px 2px 10px;line-height:1.5}}
+/* jurisdiction modal card */
+.modal{{position:fixed;inset:0;background:rgba(28,26,42,.46);backdrop-filter:blur(2px);z-index:50;display:none;padding:28px 16px;overflow-y:auto}}
+.modal.open{{display:flex;align-items:flex-start;justify-content:center}}
+.mcard{{background:var(--card);border-radius:16px;max-width:920px;width:100%;box-shadow:0 30px 80px -24px rgba(20,18,40,.5);margin:auto;overflow:hidden}}
+.mhead{{display:flex;align-items:flex-start;gap:14px;padding:20px 24px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card);z-index:2}}
+.mhead h2{{font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.01em}}
+.mhead .iso{{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:3px}}
+.mx{{margin-left:auto;border:0;background:#eceef3;color:#6a6878;width:30px;height:30px;border-radius:8px;font-size:18px;cursor:pointer;line-height:1;flex:none}}
+.mx:hover{{background:#e0e2ea;color:var(--ink)}}
+.mbody{{padding:18px 24px 26px}}
+.mstats{{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}}
+.mstat{{background:#fafbfd;border:1px solid var(--line);border-radius:10px;padding:10px 12px}}
+.mstat .l{{font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);font-weight:600}}
+.mstat .v{{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--ink);margin-top:4px}}
+.mstat .s{{font-size:10.5px;color:var(--mut);margin-top:2px}}
+.mfilt{{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:14px}}
+.mfilt .ctl{{margin:0 6px 0 0}}
+.theme{{margin-bottom:16px}}
+.theme-h{{display:flex;align-items:baseline;gap:8px;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:8px}}
+.theme-h .nm{{font-size:13px;font-weight:700;color:var(--ink);text-transform:capitalize}}
+.theme-h .ct{{font-size:11px;color:var(--faint);font-family:var(--mono)}}
+.theme-h .ou{{margin-left:auto;font-size:11px;color:var(--mut)}}.theme-h .ou b{{font-family:var(--mono);color:var(--ink2)}}
+.tsum{{font-size:12px;color:var(--mut);line-height:1.55;margin:-2px 0 9px;background:#fafbfd;border-left:3px solid var(--line);padding:7px 11px;border-radius:0 6px 6px 0}}
+.ent{{padding:8px 2px;border-bottom:1px solid var(--line2)}}
+.ent .e1{{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}}
+.ent .ep{{font-size:13px;font-weight:600;color:var(--ink)}}
+.ent .ea{{font-family:var(--mono);font-size:12px;color:var(--ink2);margin-left:auto;white-space:nowrap}}
+.ent .e2{{font-size:11px;color:var(--mut);margin-top:4px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}}
+.ent .e2 .src{{margin-left:auto}}
+.mempty{{color:var(--faint);font-size:12.5px;padding:14px 2px}}
+@media(max-width:640px){{.mhead h2{{font-size:17px}}.ea{{margin-left:0!important}}}}
 </style></head><body>
 <div class="wrap">
 <header class="masthead">
  <div class="eyebrow">Government &amp; government-adjacent commitments</div>
  <h1>AI / Quantum Investment Ledger</h1>
- <p class="lede">An <b>all-time, source-linked tracker of national AI/quantum investment announcements</b> &mdash; one row per announcement &mdash; with per-capita / %GDP / %GBARD views and an FX-vs-PPP currency split. Each figure is tagged commitment-vs-outlay, public-vs-mobilized, horizon, and confidence <b>before</b> any comparison. Sorted newest-first; <b>Arrange</b> as a flat list, grouped by jurisdiction, or <b>rolled up</b> to one aggregate row per country. The ledger is the product; the index is a later layer.</p>
+ <p class="lede">An <b>all-time, source-linked tracker of national AI/quantum investment announcements</b> &mdash; one row per announcement &mdash; with per-capita / %GDP / %GBARD views and an FX-vs-PPP currency split. Each figure is tagged commitment-vs-outlay, public-vs-mobilized, source tier, status, horizon, and confidence <b>before</b> any comparison. Three views: <b>List</b> (every announcement, newest-first), <b>By country</b> (collapsible groups), and <b>Compare</b> (a normalized cross-country dashboard on a public-outlay spine). <b>Click any country name</b> to open its full profile card. The ledger is the product; the index is a later layer.</p>
  <a class="xlink" href="composite-index.html"><span class="arr">&rarr;</span> Provisional composite index (Stage&nbsp;4)</a>
 </header>
 {errnote}
@@ -513,8 +559,8 @@ a{{color:var(--accent);text-decoration:none}}a:hover{{text-decoration:underline}
 </div>
 <div class="card">
  <div class="bar">
-  <span class="lbl" title="How rows are laid out">Arrange</span><span class="ctl" id="fGroup"><button data-v="" class="on">All rows</button><button data-v="group">By jurisdiction</button><button data-v="rollup">Roll-up</button></span>
-  <span class="lbl" title="What every value is measured in">Measure</span><span class="ctl" id="fView"><button data-v="abs" class="on">Absolute $</button><button data-v="pc">Per capita</button><button data-v="gdp">% of GDP</button><button data-v="gbard" title="vs annual government R&amp;D budget (GBARD)">&times; R&amp;D budget</button><button data-v="realize">Realization</button></span>
+  <span class="lbl" title="How rows are laid out">View</span><span class="ctl" id="fGroup"><button data-v="" class="on">List</button><button data-v="group">By country</button><button data-v="compare">Compare</button></span>
+  <span class="lbl" id="lblMeasure" title="What every value is measured in">Measure</span><span class="ctl" id="fView"><button data-v="abs" class="on">Absolute $</button><button data-v="pc">Per capita</button><button data-v="gdp">% of GDP</button><button data-v="gbard" title="vs annual government R&amp;D budget (GBARD)">&times; R&amp;D budget</button><button data-v="realize">Realization</button></span>
  </div>
  <div class="vhelp" id="viewHelp"></div>
  <div class="bar">
@@ -528,14 +574,21 @@ a{{color:var(--accent);text-decoration:none}}a:hover{{text-decoration:underline}
    <span class="lbl">Actor</span><span class="ctl" id="fActor"><button data-v="" class="on">All</button><button data-v="outlay">Public outlay</button><button data-v="private">Private / mobilized</button><button data-v="state_fund">State fund</button><button data-v="sovereign_wealth">Sovereign wealth</button></span>
    <span class="lbl">Realization</span><span class="ctl" id="fTrack"><button data-v="" class="on">All</button><button data-v="1">Tracked only</button></span>
   </div>
+  <div class="bar" style="margin-top:2px">
+   <span class="lbl" title="Credibility of the best source (T1 primary/audited &rarr; T4 press-only)">Source tier</span><span class="ctl" id="fTier"><button data-v="" class="on">All</button><button data-v="T1">T1</button><button data-v="T2">T2</button><button data-v="T3">T3</button><button data-v="T4">T4</button></span>
+   <span class="lbl" title="Lifecycle of the money">Status</span><span class="ctl" id="fStatus"><button data-v="" class="on">All</button><button data-v="announced">Announced</button><button data-v="authorized">Authorized</button><button data-v="obligated">Obligated</button><button data-v="disbursed">Disbursed</button><button data-v="stalled">Stalled</button><button data-v="cancelled">Cancelled</button></span>
+  </div>
  </details>
  <div class="tbl-scroll"><table id="tbl"><thead id="thead"></thead><tbody id="tb"></tbody></table></div>
 </div>
+<div class="modal" id="jcard"><div class="mcard"><div class="mhead"><div><h2 id="jcTitle"></h2><div class="iso" id="jcIso"></div></div><button class="mx" id="jcClose" title="Close (Esc)">&times;</button></div><div class="mbody" id="jcBody"></div></div></div>
 <div class="foot">Self-contained (no external libraries). Generated by build.py from data/government-commitments.jsonl + data/denominators.json. Methodology: methodology.md. All figures as-reported; many are unverified mobilization targets; PPP &amp; GBARD views are approximate scenarios.</div>
 </div>
 <script>
 const D={data},DEN={denom};
-let fBasis="fx",fView="abs",fDom="",fAct="",fTrack="",fGroup="",q="",sortK="announced",sortDir=-1;
+let fBasis="fx",fView="abs",fDom="",fAct="",fTrack="",fTier="",fStatus="",fGroup="",q="",sortK="announced",sortDir=-1;
+let cmpK="_outlay",cmpDir=-1;                  // compare-dashboard sort
+let cardJur=null,cardDom="",cardAct="";        // open jurisdiction card + its internal filters
 const collapsed=new Set();  // jurisdictions collapsed in group-by view
 const esc=s=>String(s==null?"":s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const usd=n=>{{if(n==null)return null;const a=Math.abs(n);
@@ -549,12 +602,16 @@ const horizon=r=>{{if(r.horizon_start_year&&r.horizon_end_year)return r.horizon_
   if(r.horizon_start_year)return r.horizon_start_year+'+';return'open'}};
 const paceTag=p=>p?'<span class="tag p-'+p+'">'+p.replace(/_/g,' ')+'</span>':'';
 const tracked=r=>!!(r.realization_history&&r.realization_history.length);
+// clickable jurisdiction -> opens the profile card
+const jlink=j=>'<a class="jl" data-jur="'+esc(j)+'" href="#" onclick="return false">'+esc(j)+'</a>';
+const tierBadge=t=>t?'<span class="tier tier-'+esc(t)+'" title="source tier '+esc(t)+'">'+esc(t)+'</span>':'';
+const statusBadge=s=>s?'<span class="st st-'+esc(s)+'">'+esc(s)+'</span>':'';
 // Recent-announcements timeline: parse announced (YYYY-MM-DD | YYYY-MM | YYYY) to a UTC ms stamp
 function parseAnn(s){{if(!s)return null;const p=String(s).split('-');const y=+p[0],m=(+p[1]||1)-1,d=+p[2]||1;
   return y?Date.UTC(y,m,d):null}}
 function recentItem(x){{const r=x.r;
   const prog=r.source_url?'<a href="'+esc(r.source_url)+'" target="_blank" rel="noopener">'+esc(r.program)+'</a>':esc(r.program);
-  return '<div class="ritem"><span class="rd">'+esc(r.announced)+'</span><span>'+esc(r.jurisdiction)
+  return '<div class="ritem"><span class="rd">'+esc(r.announced)+'</span><span>'+jlink(r.jurisdiction)
     +' &middot; '+prog+' &middot; '+(usd(r.usd_fx)||'n/a')+' '+actorTag(r.actor_type)+'</span></div>'}}
 function renderRecent(){{
   const n=new Date(),today=Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate());
@@ -599,6 +656,8 @@ function match(r){{
   if(fAct==='outlay'&&!['government_appropriated','government_outlay'].includes(r.actor_type))return false;
   if(fAct&&fAct!=='outlay'&&r.actor_type!==fAct)return false;
   if(fTrack&&!tracked(r))return false;
+  if(fTier&&r.source_tier!==fTier)return false;
+  if(fStatus&&(r.status||'announced')!==fStatus)return false;
   if(q&&!(r.jurisdiction+' '+r.program+' '+r.iso3).toLowerCase().includes(q))return false;
   return true}}
 function rows(){{return D.filter(match).sort((a,c)=>{{let x=sortVal(a),y=sortVal(c);
@@ -608,7 +667,7 @@ function rowHtml(r,child){{
   const src=r.source_url?'<a href="'+esc(r.source_url)+'" target="_blank" rel="noopener">'+esc(r.source_name)+'</a>':esc(r.source_name);
   const cls=child?(' class="child"'+(collapsed.has(child)?' style="display:none"':'')):'';
   return '<tr'+cls+' title="'+esc(r.notes||'')+'">'
-   +'<td class="l">'+esc(r.jurisdiction)+'</td>'
+   +'<td class="l">'+jlink(r.jurisdiction)+'</td>'
    +'<td class="l">'+esc(r.program)+'</td>'
    +'<td>'+esc(r.domain)+'</td>'
    +'<td class="hl">'+cell(usd(amt(r)))+'</td>'
@@ -616,11 +675,11 @@ function rowHtml(r,child){{
    +'<td>'+cell(usd(r.public_outlay_usd))+'</td>'
    +'<td>'+cell(usd(r.private_mobilized_usd))+'</td>'
    +'<td>'+Math.round(r.tradable_share_resolved*100)+'%</td>'
-   +'<td class="l">'+actorTag(r.actor_type)+'</td>'
+   +'<td class="l">'+actorTag(r.actor_type)+' '+statusBadge(r.status)+'</td>'
    +'<td>'+esc(r.announced)+'</td>'
    +'<td>'+horizon(r)+'</td>'
    +'<td class="c-'+esc(r.confidence)+'">'+esc(r.confidence)+'</td>'
-   +'<td class="l">'+src+(r.verification_status!=='verified'?' <span style="color:#b0b5c0">('+esc(r.verification_status)+')</span>':'')+'</td>'
+   +'<td class="l">'+tierBadge(r.source_tier)+' '+src+(r.verification_status!=='verified'?' <span style="color:#b0b5c0">('+esc(r.verification_status)+')</span>':'')+'</td>'
    +'</tr>';
 }}
 // jurisdiction parent summary — respects the cardinal rule (dedup public outlay only; headlines NOT summed)
@@ -632,7 +691,7 @@ function groupSummary(rs){{const seen=new Set();let outlay=0;
 }}
 function groupHeader(j,rs){{const s=groupSummary(rs),open=!collapsed.has(j);
   return '<tr class="grp" data-jur="'+esc(j)+'">'
-   +'<td class="l"><span class="tw">'+(open?'▾':'▸')+'</span> <b>'+esc(j)+'</b> <span class="bn">('+s.count+')</span></td>'
+   +'<td class="l"><span class="tw">'+(open?'▾':'▸')+'</span> <b>'+jlink(j)+'</b> <span class="bn">('+s.count+')</span></td>'
    +'<td class="l bn">'+s.count+' announcement'+(s.count>1?'s':'')+'</td>'
    +'<td class="bn">'+esc(s.domains.join(', '))+'</td>'
    +'<td class="bn">not summed</td><td></td>'
@@ -644,9 +703,13 @@ function groupHeader(j,rs){{const s=groupSummary(rs),open=!collapsed.has(j);
 // plain-English description of the current Measure + basis (the clarity line under the controls)
 function updateHelper(){{
   const basis=fBasis==='fx'?'market FX':'PPP-blended (a sensitivity scenario)';
+  // hide the Measure toggle in Compare (the dashboard shows every basis at once)
+  const cmp=fGroup==='compare';
+  document.getElementById('lblMeasure').style.display=cmp?'none':'';
+  document.getElementById('fView').style.display=cmp?'none':'';
   let m;
-  if(fGroup==='rollup')
-    m='<b>Roll-up:</b> one row per jurisdiction, showing appropriated <b>public outlay only</b> (deduplicated by event &mdash; headlines are never summed). The value column follows the Measure toggle.';
+  if(cmp)
+    m='<b>Compare:</b> one row per country on a <b>public-outlay-only spine</b> (appropriated/outlay actors, deduplicated by event &mdash; headlines are never summed), shown across four normalizers at once: absolute, % of GDP, per-capita, and &times; government R&amp;D budget. <b>Mobilized / SWF</b> capital is a separate, non-comparable column. Sort by any column; click a country for its profile.';
   else
     m=({{abs:'<b>Absolute $:</b> the headline commitment in USD.',
         pc:'<b>Per capita:</b> committed USD &divide; population.',
@@ -666,62 +729,147 @@ function detailHead(){{
    +'<th data-k="announced">Announced</th><th data-k="horizon_end_year">Horizon</th>'
    +'<th data-k="confidence">Conf.</th><th class="l" data-k="source_name">Source</th></tr>';
 }}
-function rollupHead(){{
-  const vl=({{abs:'Public outlay',pc:'Outlay / capita',gdp:'Outlay % GDP',gbard:'Outlay × GBARD',realize:'Public outlay'}})[fView];
-  return '<tr><th class="l" data-k="_jur">Jurisdiction</th><th data-k="_count">Announcements</th>'
-   +'<th data-k="_val">'+vl+'</th><th class="l" data-k="_domains">Domains</th>'
-   +'<th data-k="_verified">Verified</th><th data-k="_latest">Latest</th></tr>';
-}}
+// dedup'd mobilized/private capital (kept SEPARATE from public outlay, per the cardinal rule)
+function mobSummary(rs){{const seen=new Set();let m=0;
+  rs.forEach(r=>{{if(r.private_mobilized_usd&&!seen.has(r.event_key)){{seen.add(r.event_key);m+=r.private_mobilized_usd||0}}}});
+  return m}}
+// best (lowest-numbered) source tier present in a record set
+function bestTier(rs){{const T=['T1','T2','T3','T4'].filter(t=>rs.some(r=>r.source_tier===t));return T.length?T[0]:null}}
 // aggregate filtered rows to one object per jurisdiction (iso3); reuses the cardinal-rule groupSummary
 function jurAgg(rs){{const g={{}};
   rs.forEach(r=>{{(g[r.iso3]=g[r.iso3]||{{iso3:r.iso3,jur:r.jurisdiction,recs:[]}}).recs.push(r)}});
   return Object.values(g).map(o=>{{const s=groupSummary(o.recs);
     o.count=s.count;o.outlay=s.outlay;o.domains=s.domains;o.latest=s.latest;
-    o.verified=o.recs.filter(r=>r.verification_status==='verified').length;o.den=DEN[o.iso3]||{{}};return o}});
+    o.mob=mobSummary(o.recs);o.tier=bestTier(o.recs);o.den=DEN[o.iso3]||{{}};
+    o.pc=o.den.population?o.outlay/o.den.population:null;
+    o.gdp=o.den.gdp_usd?o.outlay/o.den.gdp_usd*100:null;
+    o.gbard=o.den.gbard_usd?o.outlay/o.den.gbard_usd:null;
+    return o}});
 }}
-function rollupVal(o){{
-  if(fView==='pc')return o.den.population?o.outlay/o.den.population:null;
-  if(fView==='gdp')return o.den.gdp_usd?o.outlay/o.den.gdp_usd*100:null;
-  if(fView==='gbard')return o.den.gbard_usd?o.outlay/o.den.gbard_usd:null;
-  return o.outlay}}
-function rollupValFmt(o){{const v=rollupVal(o);
-  if(fView==='pc')return v==null?na:'$'+(v>=1e3?(v/1e3).toFixed(1)+'k':v.toFixed(0))+'/cap';
-  if(fView==='gdp')return v==null?na:v.toFixed(v<1?3:2)+'%';
-  if(fView==='gbard')return v==null?na:v.toFixed(2)+'×';
-  return usd(o.outlay)||'$0'}}
-function rollupRow(o){{return '<tr title="'+o.count+' announcement'+(o.count>1?'s':'')+', '+esc(o.iso3)+'">'
-   +'<td class="l">'+esc(o.jur)+'</td><td>'+o.count+'</td><td class="hl">'+rollupValFmt(o)+'</td>'
-   +'<td class="l">'+esc(o.domains.join(', '))+'</td><td>'+o.verified+'</td><td>'+esc(o.latest||'')+'</td></tr>'}}
-function aggSortVal(o){{
-  if(sortK==='_jur')return o.jur;if(sortK==='_count')return o.count;
-  if(sortK==='_val'){{const v=rollupVal(o);return v==null?-Infinity:v}}
-  if(sortK==='_domains')return o.domains.length;if(sortK==='_verified')return o.verified;
-  if(sortK==='_latest')return o.latest||'';return o.outlay}}
+function cmpHead(){{
+  return '<tr><th class="l" data-k="_jur">Country</th><th data-k="_count">#</th>'
+   +'<th class="sep" data-k="_outlay">Public outlay</th><th data-k="_gdp">% GDP</th>'
+   +'<th data-k="_pc">Per-capita</th><th data-k="_gbard">&times; R&amp;D</th>'
+   +'<th class="sep" data-k="_mob">Mobilized / SWF</th><th data-k="_tier">Top tier</th>'
+   +'<th class="l sep" data-k="_domains">Domains</th></tr>';
+}}
+function cmpRow(o){{
+  const pc=o.pc==null?na:'$'+(o.pc>=1e3?(o.pc/1e3).toFixed(1)+'k':o.pc.toFixed(0))+'/cap';
+  const gdp=o.gdp==null?na:o.gdp.toFixed(o.gdp<1?3:2)+'%';
+  const gbard=o.gbard==null?na:o.gbard.toFixed(2)+'×';
+  return '<tr title="'+o.count+' announcement'+(o.count>1?'s':'')+', '+esc(o.iso3)+'">'
+   +'<td class="l">'+jlink(o.jur)+'</td><td>'+o.count+'</td>'
+   +'<td class="spine sep">'+(usd(o.outlay)||'$0')+'</td><td>'+gdp+'</td><td>'+pc+'</td><td>'+gbard+'</td>'
+   +'<td class="sep">'+(o.mob?usd(o.mob):na)+'</td><td>'+(o.tier?tierBadge(o.tier):na)+'</td>'
+   +'<td class="l sep">'+esc(o.domains.join(', '))+'</td></tr>'}}
+function cmpSortVal(o){{switch(sortK){{
+  case'_jur':return o.jur;case'_count':return o.count;case'_pc':return o.pc;
+  case'_gdp':return o.gdp;case'_gbard':return o.gbard;case'_mob':return o.mob;
+  case'_tier':return o.tier||'T9';case'_domains':return o.domains.length;default:return o.outlay}}}}
+// ---- Jurisdiction profile card -------------------------------------------
+const DOM_ORDER=['ai','compute','semiconductor','quantum','ai+quantum'];
+const DOM_LABEL={{ai:'AI',compute:'Compute',semiconductor:'Semiconductors',quantum:'Quantum','ai+quantum':'AI + Quantum'}};
+function cardMatch(r){{
+  if(cardDom&&r.domain!==cardDom)return false;
+  if(cardAct==='outlay'&&!['government_appropriated','government_outlay'].includes(r.actor_type))return false;
+  if(cardAct==='private'&&!['private','mobilization_target','sovereign_wealth','public_private','state_fund'].includes(r.actor_type))return false;
+  return true}}
+function fmtPc(o){{return o.den&&o.den.population?'$'+((o.outlay/o.den.population)>=1e3?((o.outlay/o.den.population)/1e3).toFixed(1)+'k':(o.outlay/o.den.population).toFixed(0))+'/cap':na}}
+function entHtml(r){{
+  const src=r.source_url?'<a class="src" href="'+esc(r.source_url)+'" target="_blank" rel="noopener">'+esc(r.source_name)+' &#8599;</a>':'<span class="src">'+esc(r.source_name)+'</span>';
+  const conf='<span class="bn" style="color:#a9a8b6">'+esc(r.confidence)+' conf</span>';
+  return '<div class="ent"><div class="e1"><span class="ep">'+esc(r.program)+'</span>'
+    +'<span class="ea">'+(usd(r.usd_fx)||'n/a')+'</span></div>'
+    +'<div class="e2">'+actorTag(r.actor_type)+' '+statusBadge(r.status)+' '+tierBadge(r.source_tier)
+    +' <span class="bn">'+esc(r.announced)+'</span> '+conf+' '+src+'</div></div>';
+}}
+function themeHtml(dom,recs){{
+  const rs=recs.filter(r=>r.domain===dom);if(!rs.length)return'';
+  const s=groupSummary(rs),mob=mobSummary(rs);
+  let bits=[];
+  if(s.outlay)bits.push('<b>'+usd(s.outlay)+'</b> appropriated public outlay (dedup by event)');
+  if(mob)bits.push('<b>'+usd(mob)+'</b> mobilized / SWF (separate)');
+  const summary=bits.length?bits.join(' &middot; '):'no appropriated public outlay recorded for this theme';
+  return '<div class="theme"><div class="theme-h"><span class="nm">'+esc(DOM_LABEL[dom]||dom)+'</span>'
+    +'<span class="ct">'+rs.length+' commitment'+(rs.length>1?'s':'')+'</span>'
+    +(s.outlay?'<span class="ou">public outlay <b>'+usd(s.outlay)+'</b></span>':'')+'</div>'
+    +'<div class="tsum">'+summary+' &mdash; sources linked per commitment below.</div>'
+    +rs.slice().sort((a,b)=>(b.usd_fx||0)-(a.usd_fx||0)).map(entHtml).join('')+'</div>';
+}}
+function openCard(jur){{cardJur=jur;cardDom="";cardAct="";renderCard();
+  document.getElementById('jcard').classList.add('open');document.body.style.overflow='hidden'}}
+function closeCard(){{document.getElementById('jcard').classList.remove('open');document.body.style.overflow=''}}
+function renderCard(){{
+  const all=D.filter(r=>r.jurisdiction===cardJur);if(!all.length)return;
+  const iso=all[0].iso3,den=DEN[iso]||{{}};
+  const agg={{recs:all,den:den,outlay:groupSummary(all).outlay}};
+  const o=agg, dedup=groupSummary(all), mob=mobSummary(all);
+  const gdp=den.gdp_usd?(dedup.outlay/den.gdp_usd*100):null, gb=den.gbard_usd?(dedup.outlay/den.gbard_usd):null;
+  document.getElementById('jcTitle').textContent=cardJur;
+  document.getElementById('jcIso').textContent=iso+(den.name?' · pop '+(den.population/1e6).toFixed(0)+'M · GDP $'+(den.gdp_usd/1e12).toFixed(2)+'T':'');
+  const present=DOM_ORDER.filter(d=>all.some(r=>r.domain===d));
+  const shown=all.filter(cardMatch);
+  const stat=(l,v,s)=>'<div class="mstat"><div class="l">'+l+'</div><div class="v">'+v+'</div>'+(s?'<div class="s">'+s+'</div>':'')+'</div>';
+  let stats='<div class="mstats">'
+    +stat('Announcements',all.length,present.length+' domain'+(present.length>1?'s':''))
+    +stat('Public outlay',usd(dedup.outlay)||'$0','dedup by event')
+    +stat('% of GDP',gdp==null?na:gdp.toFixed(gdp<1?3:2)+'%','outlay / GDP')
+    +stat('Per-capita',o.den&&den.population?fmtPc({{outlay:dedup.outlay,den:den}}):na,'outlay / capita')
+    +stat('&times; R&amp;D budget',gb==null?na:gb.toFixed(2)+'×','outlay / GBARD')
+    +stat('Mobilized / SWF',mob?usd(mob):na,'separate, not comparable')
+    +'</div>';
+  // in-card filters
+  const domBtns='<button data-d="" class="'+(cardDom===''?'on':'')+'">All</button>'
+    +present.map(d=>'<button data-d="'+d+'" class="'+(cardDom===d?'on':'')+'">'+esc(DOM_LABEL[d]||d)+'</button>').join('');
+  const actBtns=[['','All'],['outlay','Public outlay'],['private','Private / SWF']]
+    .map(a=>'<button data-a="'+a[0]+'" class="'+(cardAct===a[0]?'on':'')+'">'+a[1]+'</button>').join('');
+  let filt='<div class="mfilt"><span class="lbl">Theme</span><span class="ctl" id="cardDomCtl">'+domBtns+'</span>'
+    +'<span class="lbl">Actor</span><span class="ctl" id="cardActCtl">'+actBtns+'</span></div>';
+  // theme sections — cardMatch applies both the domain and actor filters; themeHtml then buckets by domain
+  const themesToShow=cardDom?[cardDom]:present;
+  const fr=all.filter(cardMatch);
+  let body=themesToShow.map(d=>themeHtml(d,fr)).join('');
+  if(!body)body='<div class="mempty">No commitments match the current filters.</div>';
+  document.getElementById('jcBody').innerHTML=stats+filt+body;
+  // wire in-card filter chips
+  const wireC=(id,fn)=>{{const el=document.getElementById(id);if(el)el.onclick=e=>{{if(e.target.tagName!=='BUTTON')return;fn(e.target);renderCard()}}}};
+  wireC('cardDomCtl',b=>cardDom=b.dataset.d);
+  wireC('cardActCtl',b=>cardAct=b.dataset.a);
+}}
+document.getElementById('jcClose').onclick=closeCard;
+document.getElementById('jcard').addEventListener('click',e=>{{if(e.target.id==='jcard')closeCard()}});
+document.addEventListener('keydown',e=>{{if(e.key==='Escape')closeCard()}});
 function render(){{
   updateHelper();
-  document.getElementById('thead').innerHTML=fGroup==='rollup'?rollupHead():detailHead();
+  const cmp=fGroup==='compare';
+  document.getElementById('tbl').className=cmp?'cmp':'';
+  document.getElementById('thead').innerHTML=cmp?cmpHead():detailHead();
   const rs=rows();let html;
-  if(fGroup==='rollup'){{
-    html=jurAgg(rs).sort((a,c)=>{{let x=aggSortVal(a),y=aggSortVal(c);
+  if(cmp){{
+    html=jurAgg(rs).sort((a,c)=>{{let x=cmpSortVal(a),y=cmpSortVal(c);
       if(typeof x==='string')return sortDir*x.localeCompare(y);
-      if(x==null)x=-Infinity;if(y==null)y=-Infinity;return sortDir*(x-y)}}).map(rollupRow).join('');
+      if(x==null)x=-Infinity;if(y==null)y=-Infinity;return sortDir*(x-y)}}).map(cmpRow).join('');
   }} else if(fGroup==='group'){{
     const g={{}};rs.forEach(r=>{{(g[r.jurisdiction]=g[r.jurisdiction]||[]).push(r)}});
     const order=Object.keys(g).sort((a,b)=>groupSummary(g[b]).latest.localeCompare(groupSummary(g[a]).latest));
     html=order.map(j=>groupHeader(j,g[j])+g[j].map(r=>rowHtml(r,j)).join('')).join('');
   }} else html=rs.map(r=>rowHtml(r,null)).join('');
-  document.getElementById('tb').innerHTML=html;
+  document.getElementById('tb').innerHTML=html||'<tr><td class="l" style="padding:16px;color:#9b9aa8">No rows match the current filters.</td></tr>';
 }}
 function wire(id,set){{document.getElementById(id).onclick=e=>{{if(e.target.tagName!=='BUTTON')return;
   set(e.target.dataset.v);[...e.currentTarget.children].forEach(c=>c.classList.toggle('on',c===e.target));render()}}}}
 wire('fBasis',v=>fBasis=v);wire('fView',v=>fView=v);wire('fDomain',v=>fDom=v);wire('fActor',v=>fAct=v);wire('fTrack',v=>fTrack=v);
-// switching arrange mode resets the sort to a sensible default for that mode
-wire('fGroup',v=>{{fGroup=v;if(v==='rollup'){{sortK='_val';sortDir=-1}}else{{sortK='announced';sortDir=-1}}}});
+wire('fTier',v=>fTier=v);wire('fStatus',v=>fStatus=v);
+// switching view mode resets the sort to a sensible default for that mode
+wire('fGroup',v=>{{fGroup=v;if(v==='compare'){{sortK='_outlay';sortDir=-1}}else{{sortK='announced';sortDir=-1}}}});
 document.getElementById('q').oninput=e=>{{q=e.target.value.toLowerCase().trim();render()}};
 renderRecent();
 // collapse/expand a jurisdiction group
 document.getElementById('tb').addEventListener('click',e=>{{const tr=e.target.closest('tr.grp');if(!tr)return;
   const j=tr.dataset.jur;collapsed.has(j)?collapsed.delete(j):collapsed.add(j);render()}});
+// delegated jurisdiction-link click anywhere on the page -> open the profile card
+document.addEventListener('click',e=>{{const a=e.target.closest('.jl');if(!a)return;
+  e.preventDefault();e.stopPropagation();openCard(a.dataset.jur)}});
 // delegated sort — survives the dynamic <thead> rebuild on every render
 document.getElementById('thead').addEventListener('click',e=>{{const th=e.target.closest('th');
   if(!th||!th.dataset.k)return;const k=th.dataset.k;if(sortK===k)sortDir*=-1;else{{sortK=k;sortDir=-1}}render()}});
@@ -729,6 +877,7 @@ document.getElementById('dl').onclick=()=>{{
   const cols=['id','jurisdiction','iso3','program','domain','headline_amount','currency','usd_approx',
     'annualized_usd','tradable_share_resolved','usd_fx','usd_ppp','public_outlay_usd','private_mobilized_usd',
     'actor_type','announced','horizon_start_year','horizon_end_year','verification_status','confidence',
+    'source_tier','status',
     'realized_usd','realized_as_of','realized_basis','realization_rate','expected_rate','pace_status',
     'source_name','source_url','event_key','notes'];
   const qq=v=>v==null?'':/[",\n]/.test(String(v))?'"'+String(v).replace(/"/g,'""')+'"':String(v);
