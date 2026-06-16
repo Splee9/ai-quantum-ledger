@@ -31,5 +31,6 @@
   "QAT": {"name": "Qatar",          "gdp_usd": 220000000000,   "population": 3000000,    "price_level_index": 0.60, "gbard_usd": null,         "year": 2024},
   "MYS": {"name": "Malaysia",       "gdp_usd": 440000000000,   "population": 34000000,   "price_level_index": 0.45, "gbard_usd": null,         "year": 2024},
   "THA": {"name": "Thailand",       "gdp_usd": 515000000000,   "population": 70000000,   "price_level_index": 0.45, "gbard_usd": null,         "year": 2024},
-  "VNM": {"name": "Vietnam",        "gdp_usd": 465000000000,   "population": 100000000,  "price_level_index": 0.38, "gbard_usd": null,         "year": 2024}
+  "VNM": {"name": "Vietnam",        "gdp_usd": 465000000000,   "population": 100000000,  "price_level_index": 0.38, "gbard_usd": null,         "year": 2024},
+  "NLD": {"name": "Netherlands",    "gdp_usd": 1120000000000,  "population": 18000000,   "price_level_index": 0.95, "gbard_usd": 9000000000,   "year": 2024}
 }

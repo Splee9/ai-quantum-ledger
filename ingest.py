@@ -39,6 +39,8 @@ QUEUE = os.path.join(HERE, "data", "ingest-queue.jsonl")
 DOMAINS = {"ai", "quantum", "ai+quantum", "semiconductor", "compute"}
 VERIFICATION = {"verified", "reported", "estimate", "unconfirmed"}
 CONFIDENCE = {"high", "medium", "low"}
+SOURCE_TIERS = {"T1", "T2", "T3", "T4"}                       # credibility spine (optional)
+STATUSES = {"announced", "authorized", "obligated", "disbursed", "stalled", "cancelled"}  # money lifecycle (optional)
 # A scanner must never self-certify a row as primary-source verified.
 AUTO_FORBIDDEN_STATUS = {"verified"}
 

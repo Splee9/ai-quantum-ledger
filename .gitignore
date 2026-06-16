@@ -25,6 +25,10 @@ venv/
 # Scanner working files (transient; staged into data/ingest-queue.jsonl via ingest.py)
 headlines.jsonl
 candidates.jsonl
+candidates-report.jsonl
+
+# Local preview server config (Claude Preview / dev only)
+.claude/launch.json
 
 # Design-reference mockup generated in Claude design (the design source of truth, but a
 # stale duplicate of the project — the live design lives in build.py's <style> blocks).
