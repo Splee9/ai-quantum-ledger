@@ -1,0 +1,2066 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The AI &amp; Quantum Power Index — Demo</title>
+<!--
+  AI & Quantum Power Index — faithful demo of the design handoff
+  (design_handoff_ai_quantum_power_index). Self-contained vanilla JS;
+  no framework, no external data calls. All figures are illustrative
+  placeholders pending wiring to the live ledger (see README "Data Contract").
+  Ported 1:1 from the prototype's React.createElement renderers via a tiny
+  hyperscript; FLIP row-reorder and the normalize tween are preserved.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--bg:#f4f2ee;--panel:#fff;--panel2:#faf8f4;--ink:#1b1a1f;--ink2:#46444d;--mut:#76737d;--faint:#a6a3ac;--line:#e7e3db;--line2:#efebe3;--accent:#d8463d;--accent-weak:#fbeae7;--pos:#2f7d5b;--shadow:rgba(40,36,30,.13)}
+  [data-theme="dark"]{--bg:#121217;--panel:#1a1a21;--panel2:#202028;--ink:#f2f1f4;--ink2:#cbc9d2;--mut:#928f9a;--faint:#615f6a;--line:#2b2b34;--line2:#23232b;--accent:#ff6a5e;--accent-weak:#37201e;--pos:#5cc08e;--shadow:rgba(0,0,0,.55)}
+  body{background:var(--bg)}
+  ::selection{background:var(--accent);color:#fff}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+  input[type=range]{accent-color:var(--accent)}
+  @keyframes chipIn{from{opacity:0;transform:translateY(calc(-100% + 4px))}to{opacity:1;transform:translateY(-100%)}}
+  ::-webkit-scrollbar{height:10px;width:10px}::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}::-webkit-scrollbar-track{background:transparent}
+</style>
+</head>
+<body>
+<div id="root" data-theme="light" style="min-height:100vh;background:var(--bg);color:var(--ink2);font-family:'IBM Plex Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased">
+ <div style="max-width:1340px;margin:0 auto;padding:30px 28px 48px">
+  <header style="display:flex;gap:22px;align-items:flex-start;margin-bottom:22px">
+   <div style="flex:1;min-width:0">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+     <span style="font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)">Global Technology Jurisdiction Tracker</span>
+     <span id="demoChip" style="font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--accent);background:var(--accent-weak);border:1px solid var(--accent);border-radius:999px;padding:4px 9px">DEMO DATA</span>
+    </div>
+    <h1 style="font:700 38px/1.06 'Source Serif 4',Georgia,serif;letter-spacing:-.02em;color:var(--ink);margin-top:14px;text-wrap:balance">The AI &amp; Quantum Power Index</h1>
+    <p style="font-size:14.5px;line-height:1.6;color:var(--mut);margin-top:12px;max-width:76ch">A side-by-side reading of where the world&rsquo;s leading jurisdictions stand across the two technologies set to define strategic advantage. Compare on absolute scale, per&nbsp;capita, or per unit of GDP; build your own weighted index; and trace every figure to its source. <b id="ledeFlag" style="color:var(--ink2);font-weight:600">All figures are illustrative placeholders</b> pending wiring to the live ledger.</p>
+   </div>
+   <button id="themeBtn" title="Toggle light / dark" style="flex:none;border:1px solid var(--line);background:var(--panel);color:var(--ink2);border-radius:9px;padding:9px 14px;font:600 12px/1 'IBM Plex Sans';cursor:pointer;white-space:nowrap">&#9790;&nbsp;&nbsp;Dark</button>
+  </header>
+  <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(234px,1fr));gap:14px;margin-bottom:20px">
+   <div style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:0 1px 2px var(--shadow)">
+    <div style="font:600 28px/1 'IBM Plex Mono',monospace;color:var(--ink);letter-spacing:-.02em">$109B</div>
+    <div style="font-size:12.5px;font-weight:600;color:var(--ink2);margin-top:8px">U.S. private AI investment, 2024</div>
+    <div style="font-size:12px;line-height:1.5;color:var(--mut);margin-top:5px">About 10&times; the EU and 12&times; China &mdash; the widest private-capital gap in the set.</div>
+    <div style="font:500 10.5px/1.3 'IBM Plex Mono',monospace;color:var(--faint);margin-top:9px;letter-spacing:.02em">Stanford HAI &middot; AI Index 2025</div>
+   </div>
+   <div style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:0 1px 2px var(--shadow)">
+    <div style="font:600 28px/1 'IBM Plex Mono',monospace;color:var(--ink);letter-spacing:-.02em">$15.3B</div>
+    <div style="font-size:12.5px;font-weight:600;color:var(--ink2);margin-top:8px">China public quantum funding</div>
+    <div style="font-size:12px;line-height:1.5;color:var(--mut);margin-top:5px">The largest cumulative national commitment &mdash; ahead of the EU&rsquo;s $7.2B and 4&times; the U.S.</div>
+    <div style="font:500 10.5px/1.3 'IBM Plex Mono',monospace;color:var(--faint);margin-top:9px;letter-spacing:.02em">McKinsey Quantum Monitor 2025</div>
+   </div>
+   <div style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:0 1px 2px var(--shadow)">
+    <div style="font:600 28px/1 'IBM Plex Mono',monospace;color:var(--ink);letter-spacing:-.02em">1,180</div>
+    <div style="font-size:12.5px;font-weight:600;color:var(--ink2);margin-top:8px">Largest qubit milestone (U.S.)</div>
+    <div style="font-size:12px;line-height:1.5;color:var(--mut);margin-top:5px">More than double China&rsquo;s 504 &mdash; though China leads on quantum patents, 16.8k to 6.2k.</div>
+    <div style="font:500 10.5px/1.3 'IBM Plex Mono',monospace;color:var(--faint);margin-top:9px;letter-spacing:.02em">Qureca &middot; WIPO 2024</div>
+   </div>
+   <div style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:0 1px 2px var(--shadow)">
+    <div style="font:600 28px/1 'IBM Plex Mono',monospace;color:var(--ink);letter-spacing:-.02em">88<span style="font-size:17px;color:var(--faint)">/100</span></div>
+    <div style="font-size:12.5px;font-weight:600;color:var(--ink2);margin-top:8px">EU AI-governance maturity</div>
+    <div style="font-size:12px;line-height:1.5;color:var(--mut);margin-top:5px">The most developed regulatory posture; the U.S. scores 62 amid fragmented state-level rules.</div>
+    <div style="font:500 10.5px/1.3 'IBM Plex Mono',monospace;color:var(--faint);margin-top:9px;letter-spacing:.02em">OECD.AI 2025</div>
+   </div>
+  </section>
+  <main id="app-root"></main>
+  <footer style="margin-top:26px;border-top:1px solid var(--line);padding-top:16px;font-size:11.5px;line-height:1.6;color:var(--faint);max-width:98ch">
+   <b id="footFlag" style="color:var(--mut)">Demo dataset.</b><span id="liveNote"></span> All other values are realistic placeholders assembled for layout review and are not yet connected to the live ledger. Source labels on each figure indicate intended provenance (OECD.AI, Stanford HAI AI Index, Epoch AI, MacroPolo, McKinsey Quantum Monitor, WIPO, Qureca). Normalization denominators (population, GDP) are approximate. Self-contained &mdash; no external data calls.
+  </footer>
+ </div>
+</div>
+
+<script>
+"use strict";
+/* ===POWER-INDEX-LEDGER-DATA START=== */
+const LEDGER_DATA = {
+  "generated": "2026-06-18",
+  "live_dims": [
+    "ai_public",
+    "ai_private",
+    "q_public"
+  ],
+  "J": [
+    {
+      "iso": "CAN",
+      "name": "Canada",
+      "sh": "CA",
+      "popM": 41.0,
+      "gdpT": 2.24,
+      "col": 1,
+      "row": 1
+    },
+    {
+      "iso": "ITA",
+      "name": "Italy",
+      "sh": "IT",
+      "popM": 59.0,
+      "gdpT": 2.3,
+      "col": 1,
+      "row": 1
+    },
+    {
+      "iso": "ESP",
+      "name": "Spain",
+      "sh": "ES",
+      "popM": 48.0,
+      "gdpT": 1.73,
+      "col": 1,
+      "row": 1
+    },
+    {
+      "iso": "BRA",
+      "name": "Brazil",
+      "sh": "BR",
+      "popM": 212.0,
+      "gdpT": 2.17,
+      "col": 1,
+      "row": 1
+    },
+    {
+      "iso": "TUR",
+      "name": "Turkey",
+      "sh": "TU",
+      "popM": 86.0,
+      "gdpT": 1.32,
+      "col": 1,
+      "row": 1
+    },
+    {
+      "iso": "QAT",
+      "name": "Qatar",
+      "sh": "QA",
+      "popM": 3.0,
+      "gdpT": 0.22,
+      "col": 1,
+      "row": 1
+    },
+    {
+      "iso": "MYS",
+      "name": "Malaysia",
+      "sh": "MY",
+      "popM": 34.0,
+      "gdpT": 0.44,
+      "col": 1,
+      "row": 1
+    },
+    {
+      "iso": "THA",
+      "name": "Thailand",
+      "sh": "TH",
+      "popM": 70.0,
+      "gdpT": 0.52,
+      "col": 1,
+      "row": 1
+    },
+    {
+      "iso": "VNM",
+      "name": "Vietnam",
+      "sh": "VN",
+      "popM": 100.0,
+      "gdpT": 0.47,
+      "col": 1,
+      "row": 1
+    },
+    {
+      "iso": "NLD",
+      "name": "Netherlands",
+      "sh": "NL",
+      "popM": 18.0,
+      "gdpT": 1.12,
+      "col": 1,
+      "row": 1
+    },
+    {
+      "iso": "GBR",
+      "name": "United Kingdom",
+      "sh": "UK",
+      "popM": 69.0,
+      "gdpT": 3.59,
+      "col": 3,
+      "row": 1
+    },
+    {
+      "iso": "EU",
+      "name": "European Union",
+      "sh": "EU",
+      "popM": 449.0,
+      "gdpT": 19.4,
+      "col": 4,
+      "row": 1
+    },
+    {
+      "iso": "ISR",
+      "name": "Israel",
+      "sh": "IL",
+      "popM": 9.9,
+      "gdpT": 0.55,
+      "col": 5,
+      "row": 1
+    },
+    {
+      "iso": "CHN",
+      "name": "China",
+      "sh": "CN",
+      "popM": 1410.0,
+      "gdpT": 18.8,
+      "col": 6,
+      "row": 1
+    },
+    {
+      "iso": "KOR",
+      "name": "South Korea",
+      "sh": "KR",
+      "popM": 52.0,
+      "gdpT": 1.87,
+      "col": 7,
+      "row": 1
+    },
+    {
+      "iso": "USA",
+      "name": "United States",
+      "sh": "US",
+      "popM": 335.0,
+      "gdpT": 29.0,
+      "col": 1,
+      "row": 2
+    },
+    {
+      "iso": "FRA",
+      "name": "France",
+      "sh": "FR",
+      "popM": 68.0,
+      "gdpT": 3.17,
+      "col": 3,
+      "row": 2
+    },
+    {
+      "iso": "DEU",
+      "name": "Germany",
+      "sh": "DE",
+      "popM": 84.0,
+      "gdpT": 4.7,
+      "col": 4,
+      "row": 2
+    },
+    {
+      "iso": "SAU",
+      "name": "Saudi Arabia",
+      "sh": "SA",
+      "popM": 37.0,
+      "gdpT": 1.07,
+      "col": 5,
+      "row": 2
+    },
+    {
+      "iso": "IND",
+      "name": "India",
+      "sh": "IN",
+      "popM": 1440.0,
+      "gdpT": 3.94,
+      "col": 6,
+      "row": 2
+    },
+    {
+      "iso": "AUS",
+      "name": "Australia",
+      "sh": "AU",
+      "popM": 27.0,
+      "gdpT": 1.79,
+      "col": 7,
+      "row": 2
+    },
+    {
+      "iso": "ARE",
+      "name": "United Arab Emirates",
+      "sh": "AE",
+      "popM": 10.0,
+      "gdpT": 0.55,
+      "col": 4,
+      "row": 3
+    },
+    {
+      "iso": "TWN",
+      "name": "Taiwan",
+      "sh": "TW",
+      "popM": 23.4,
+      "gdpT": 0.79,
+      "col": 5,
+      "row": 3
+    },
+    {
+      "iso": "SGP",
+      "name": "Singapore",
+      "sh": "SG",
+      "popM": 6.0,
+      "gdpT": 0.53,
+      "col": 6,
+      "row": 3
+    },
+    {
+      "iso": "JPN",
+      "name": "Japan",
+      "sh": "JP",
+      "popM": 124.0,
+      "gdpT": 4.07,
+      "col": 7,
+      "row": 3
+    },
+    {
+      "iso": "KAZ",
+      "name": "Kazakhstan",
+      "sh": "KZ",
+      "popM": 20.3,
+      "gdpT": 0.26,
+      "col": 5,
+      "row": 4
+    }
+  ],
+  "values": {
+    "ARE": {
+      "ai_public": 0.0,
+      "ai_private": 101.5,
+      "q_public": 0.0
+    },
+    "AUS": {
+      "ai_public": 0.026,
+      "ai_private": 0.0,
+      "q_public": 1.28
+    },
+    "BRA": {
+      "ai_public": 4.2,
+      "ai_private": 0.0,
+      "q_public": 0.0
+    },
+    "CAN": {
+      "ai_public": 3.803,
+      "ai_private": 0.0,
+      "q_public": 0.507
+    },
+    "CHN": {
+      "ai_public": 8.2,
+      "ai_private": 138.0,
+      "q_public": 0.0
+    },
+    "DEU": {
+      "ai_public": 25.04,
+      "ai_private": 0.0,
+      "q_public": 21.64
+    },
+    "ESP": {
+      "ai_public": 1.62,
+      "ai_private": 0.0,
+      "q_public": 0.0
+    },
+    "EU": {
+      "ai_public": 41.088,
+      "ai_private": 157.0,
+      "q_public": 1.1
+    },
+    "FRA": {
+      "ai_public": 0.71,
+      "ai_private": 193.5,
+      "q_public": 2.54
+    },
+    "GBR": {
+      "ai_public": 5.39,
+      "ai_private": 35.0,
+      "q_public": 3.175
+    },
+    "IND": {
+      "ai_public": 1.25,
+      "ai_private": 0.0,
+      "q_public": 0.73
+    },
+    "ISR": {
+      "ai_public": 0.275,
+      "ai_private": 0.0,
+      "q_public": 0.0
+    },
+    "ITA": {
+      "ai_public": 1.08,
+      "ai_private": 2.16,
+      "q_public": 0.0
+    },
+    "JPN": {
+      "ai_public": 0.0,
+      "ai_private": 0.0,
+      "q_public": 0.0
+    },
+    "KAZ": {
+      "ai_public": 0.0,
+      "ai_private": 10.0,
+      "q_public": 0.0
+    },
+    "KOR": {
+      "ai_public": 60.9,
+      "ai_private": 54.0,
+      "q_public": 0.0
+    },
+    "MYS": {
+      "ai_public": 0.0,
+      "ai_private": 0.0,
+      "q_public": 0.0
+    },
+    "NLD": {
+      "ai_public": 0.204,
+      "ai_private": 0.0,
+      "q_public": 0.664
+    },
+    "QAT": {
+      "ai_public": 2.5,
+      "ai_private": 20.0,
+      "q_public": 0.0
+    },
+    "SAU": {
+      "ai_public": 100.0,
+      "ai_private": 110.0,
+      "q_public": 0.0
+    },
+    "SGP": {
+      "ai_public": 0.74,
+      "ai_private": 0.0,
+      "q_public": 0.0
+    },
+    "THA": {
+      "ai_public": 0.0,
+      "ai_private": 0.0,
+      "q_public": 0.0
+    },
+    "TUR": {
+      "ai_public": 3.0,
+      "ai_private": 0.0,
+      "q_public": 0.0
+    },
+    "TWN": {
+      "ai_public": 3.1,
+      "ai_private": 0.0,
+      "q_public": 0.0
+    },
+    "USA": {
+      "ai_public": 174.355,
+      "ai_private": 500.0,
+      "q_public": 2.125
+    },
+    "VNM": {
+      "ai_public": 0.0,
+      "ai_private": 0.0,
+      "q_public": 0.0
+    }
+  },
+  "sources": {
+    "ai_public": {
+      "name": "Ledger — committed public / state AI capital",
+      "date": "2026-06-18"
+    },
+    "ai_private": {
+      "name": "Ledger — committed private / mobilized AI capital",
+      "date": "2026-06-18"
+    },
+    "q_public": {
+      "name": "Ledger — committed public / state quantum capital",
+      "date": "2026-06-18"
+    }
+  },
+  "programs": {
+    "ARE": {
+      "ai_public": [],
+      "ai_private": [
+        "MGX (AUM target)",
+        "Microsoft strategic investment in G42"
+      ],
+      "q_public": []
+    },
+    "AUS": {
+      "ai_public": [
+        "Safe & Responsible AI / National AI Centre (2024-25 Budget)"
+      ],
+      "ai_private": [],
+      "q_public": [
+        "National Quantum Strategy / National Reconstruction Fund (critical tech)",
+        "PsiQuantum Brisbane facility"
+      ]
+    },
+    "BRA": {
+      "ai_public": [
+        "Plano Brasileiro de Inteligencia Artificial (PBIA) 2024-2028"
+      ],
+      "ai_private": [],
+      "q_public": []
+    },
+    "CAN": {
+      "ai_public": [
+        "Sovereign AI Compute Strategy + AI package (Budget 2024)",
+        "AI for All — National AI Strategy",
+        "Pan-Canadian AI Strategy — Phase 2 (via CIFAR)"
+      ],
+      "ai_private": [],
+      "q_public": [
+        "National Quantum Strategy",
+        "Budget 2025 — Quantum technology (research + defence/industry adoption)"
+      ]
+    },
+    "CHN": {
+      "ai_public": [
+        "National AI Industry Investment Fund"
+      ],
+      "ai_private": [
+        "State VC guidance fund (AI/quantum/hydrogen)"
+      ],
+      "q_public": []
+    },
+    "DEU": {
+      "ai_public": [
+        "High-Tech Agenda Germany (Hightech Agenda Deutschland)",
+        "National AI Strategy"
+      ],
+      "ai_private": [],
+      "q_public": [
+        "High-Tech Agenda Germany (Hightech Agenda Deutschland)",
+        "Quantum technologies program"
+      ]
+    },
+    "ESP": {
+      "ai_public": [
+        "Estrategia de Inteligencia Artificial 2024 (ENIA update)"
+      ],
+      "ai_private": [],
+      "q_public": []
+    },
+    "EU": {
+      "ai_public": [
+        "InvestAI",
+        "AI Continent Action Plan / AI Factories (EuroHPC)",
+        "Digital Europe Programme",
+        "Apply AI Strategy"
+      ],
+      "ai_private": [
+        "InvestAI"
+      ],
+      "q_public": [
+        "Quantum Flagship"
+      ]
+    },
+    "FRA": {
+      "ai_public": [
+        "Additional AI investment incl. sovereign chatbot (Lecornu)"
+      ],
+      "ai_private": [
+        "France AI investment package",
+        "SoftBank French AI data center investment"
+      ],
+      "q_public": [
+        "National Quantum Plan",
+        "PROQCIMA (quantum)"
+      ]
+    },
+    "GBR": {
+      "ai_public": [
+        "AI Opportunities Action Plan (public compute)",
+        "AI Hardware Plan (national supercomputer + chips)",
+        "Sovereign AI / AI hardware plan"
+      ],
+      "ai_private": [
+        "AI Opportunities Action Plan (public compute)"
+      ],
+      "q_public": [
+        "National Quantum Strategy"
+      ]
+    },
+    "IND": {
+      "ai_public": [
+        "IndiaAI Mission"
+      ],
+      "ai_private": [],
+      "q_public": [
+        "National Quantum Mission"
+      ]
+    },
+    "ISR": {
+      "ai_public": [
+        "National AI program"
+      ],
+      "ai_private": [],
+      "q_public": []
+    },
+    "ITA": {
+      "ai_public": [
+        "CDP Venture Capital national AI fund"
+      ],
+      "ai_private": [
+        "CDP Venture Capital national AI fund"
+      ],
+      "q_public": []
+    },
+    "JPN": {
+      "ai_public": [],
+      "ai_private": [],
+      "q_public": []
+    },
+    "KAZ": {
+      "ai_public": [],
+      "ai_private": [
+        "Data Center Valley (NVIDIA, Firebird)"
+      ],
+      "q_public": []
+    },
+    "KOR": {
+      "ai_public": [
+        "National Growth Fund (AI / strategic industries)",
+        "National AI investment (to 2027)"
+      ],
+      "ai_private": [
+        "National Growth Fund (AI / strategic industries)"
+      ],
+      "q_public": []
+    },
+    "MYS": {
+      "ai_public": [],
+      "ai_private": [],
+      "q_public": []
+    },
+    "NLD": {
+      "ai_public": [
+        "AiNed national AI programme (National Growth Fund)"
+      ],
+      "ai_private": [],
+      "q_public": [
+        "Quantum Delta NL (National Growth Fund)"
+      ]
+    },
+    "QAT": {
+      "ai_public": [
+        "Digital transformation / AI incentive package"
+      ],
+      "ai_private": [
+        "Qai + Brookfield AI infrastructure JV"
+      ],
+      "q_public": []
+    },
+    "SAU": {
+      "ai_public": [
+        "Project Transcendence"
+      ],
+      "ai_private": [
+        "HUMAIN (PIF) — full AI mandate",
+        "HUMAIN $10B AI venture fund"
+      ],
+      "q_public": []
+    },
+    "SGP": {
+      "ai_public": [
+        "National AI Strategy 2.0"
+      ],
+      "ai_private": [],
+      "q_public": []
+    },
+    "THA": {
+      "ai_public": [],
+      "ai_private": [],
+      "q_public": []
+    },
+    "TUR": {
+      "ai_public": [
+        "National AI Action Plan 2026-2030 / data-centre roadmap"
+      ],
+      "ai_private": [],
+      "q_public": []
+    },
+    "TWN": {
+      "ai_public": [
+        "Ten Major AI Infrastructure Projects ('AI island')"
+      ],
+      "ai_private": [],
+      "q_public": []
+    },
+    "USA": {
+      "ai_public": [
+        "CHIPS and Science Act — Division B science authorizations (NSF/NIST/DOE/EDA)",
+        "DOE Genesis Mission — AI infrastructure (American Science Cloud, ModCon)",
+        "NSF National AI Research Resource (NAIRR) Operations Center"
+      ],
+      "ai_private": [
+        "Stargate"
+      ],
+      "q_public": [
+        "Department of Commerce $2B Quantum Initiative",
+        "DOE National Quantum Information Science (QIS) Research Centers — next phase"
+      ]
+    },
+    "VNM": {
+      "ai_public": [],
+      "ai_private": [],
+      "q_public": []
+    }
+  },
+  "contributions": {
+    "ARE": {
+      "ai_public": [],
+      "ai_private": [
+        {
+          "program": "MGX (AUM target)",
+          "domain": "ai",
+          "amount_b": 100.0,
+          "actor_type": "sovereign_wealth",
+          "source_name": "Mubadala Investment Company",
+          "source_url": "https://www.mubadala.com/en/news/abu-dhabi-launches-comprehensive-global-investment-strategy-on-artificial-intelligence",
+          "source_tier": 1,
+          "announced": "2024-03",
+          "verification": "reported",
+          "id": "ae-mgx-2024"
+        },
+        {
+          "program": "Microsoft strategic investment in G42",
+          "domain": "ai",
+          "amount_b": 1.5,
+          "actor_type": "private",
+          "source_name": "Microsoft News",
+          "source_url": "https://news.microsoft.com/source/2024/04/16/microsoft-invests-1-5-billion-in-abu-dhabis-g42-to-accelerate-ai-development-and-global-expansion/",
+          "source_tier": "T1",
+          "announced": "2024-04-16",
+          "verification": "reported",
+          "id": "ae-microsoft-g42-2024"
+        }
+      ],
+      "q_public": []
+    },
+    "AUS": {
+      "ai_public": [
+        {
+          "program": "Safe & Responsible AI / National AI Centre (2024-25 Budget)",
+          "domain": "ai",
+          "amount_b": 0.026,
+          "actor_type": "government_appropriated",
+          "source_name": "SmartCompany — 2024-25 Federal Budget AI funding",
+          "source_url": "https://www.smartcompany.com.au/federal-budget-2024/responsible-ai-gets-39-9-million-2024-25-federal-budget/",
+          "source_tier": "T4",
+          "announced": "2024-05-14",
+          "verification": "reported",
+          "id": "au-safe-responsible-ai-2024"
+        }
+      ],
+      "ai_private": [],
+      "q_public": [
+        {
+          "program": "National Quantum Strategy / National Reconstruction Fund (critical tech)",
+          "domain": "quantum",
+          "amount_b": 0.66,
+          "actor_type": "government_appropriated",
+          "source_name": "Dept. of Industry, Science & Resources — National Quantum Strategy",
+          "source_url": "https://www.industry.gov.au/publications/national-quantum-strategy",
+          "source_tier": "T1",
+          "announced": "2023-05-03",
+          "verification": "reported",
+          "id": "au-quantum-strategy-2023"
+        },
+        {
+          "program": "PsiQuantum Brisbane facility",
+          "domain": "quantum",
+          "amount_b": 0.62,
+          "actor_type": "public_private",
+          "source_name": "Prime Minister of Australia / Queensland Government",
+          "source_url": "https://www.pm.gov.au/media/delivering-future-made-australia-400-new-technology-jobs-brisbane",
+          "source_tier": 1,
+          "announced": "2024-04",
+          "verification": "verified",
+          "id": "au-psiquantum-2024"
+        }
+      ]
+    },
+    "BRA": {
+      "ai_public": [
+        {
+          "program": "Plano Brasileiro de Inteligencia Artificial (PBIA) 2024-2028",
+          "domain": "ai",
+          "amount_b": 4.2,
+          "actor_type": "government_appropriated",
+          "source_name": "UNCTAD Investment Policy Hub",
+          "source_url": "https://investmentpolicy.unctad.org/investment-policy-monitor/measures/4930/launches-the-brazilian-artificial-intelligence-plan-2024-2028",
+          "source_tier": "T2",
+          "announced": "2024-07-30",
+          "verification": "reported",
+          "id": "br-pbia-2024"
+        }
+      ],
+      "ai_private": [],
+      "q_public": []
+    },
+    "CAN": {
+      "ai_public": [
+        {
+          "program": "Sovereign AI Compute Strategy + AI package (Budget 2024)",
+          "domain": "ai",
+          "amount_b": 1.8,
+          "actor_type": "government_appropriated",
+          "source_name": "Prime Minister of Canada / Budget 2024",
+          "source_url": "https://www.pm.gc.ca/en/news/news-releases/2024/04/07/securing-canadas-ai",
+          "source_tier": 1,
+          "announced": "2024-04-07",
+          "verification": "verified",
+          "id": "ca-sovereign-ai-2024"
+        },
+        {
+          "program": "AI for All — National AI Strategy",
+          "domain": "ai",
+          "amount_b": 1.68,
+          "actor_type": "government_appropriated",
+          "source_name": "The Globe and Mail",
+          "source_url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNa3lUWGdkeWo0UU9vMzlyS3JJMlQ4QXNtVnoxR1d0TlUxX3ZqRHlpWTNQMEp5NDZoaXo4NkhDZlNnOExkWTBKRWp4bmFCNmdYeWwxWmhVRU9CejBQYXp0bDhKdFQ0OWRvN3dVNTJuazdQb19DUVhpYVdfVldRLXRiMXJXc3BQVmN2MTQyaTVmb2pGVWk3ZjhaNFRCdkFITFhPNXAxNkRhM21tWTdjeVVnY3NR?oc=5",
+          "source_tier": 2,
+          "announced": "2026-06-04",
+          "verification": "reported",
+          "id": "ca-ai-for-all-2026"
+        },
+        {
+          "program": "Pan-Canadian AI Strategy — Phase 2 (via CIFAR)",
+          "domain": "ai",
+          "amount_b": 0.323,
+          "actor_type": "government_appropriated",
+          "source_name": "ISED — Second phase of the Pan-Canadian AI Strategy",
+          "source_url": "https://www.canada.ca/en/innovation-science-economic-development/news/2022/06/government-of-canada-launches-second-phase-of-the-pan-canadian-artificial-intelligence-strategy.html",
+          "source_tier": "T1",
+          "announced": "2022-06-22",
+          "verification": "reported",
+          "id": "ca-pcais-phase2-2021"
+        }
+      ],
+      "ai_private": [],
+      "q_public": [
+        {
+          "program": "National Quantum Strategy",
+          "domain": "quantum",
+          "amount_b": 0.263,
+          "actor_type": "government_appropriated",
+          "source_name": "ISED — Canada's National Quantum Strategy",
+          "source_url": "https://ised-isde.canada.ca/site/national-quantum-strategy/en/canadas-national-quantum-strategy",
+          "source_tier": "T1",
+          "announced": "2023-01-13",
+          "verification": "reported",
+          "id": "ca-national-quantum-strategy-2021"
+        },
+        {
+          "program": "Budget 2025 — Quantum technology (research + defence/industry adoption)",
+          "domain": "quantum",
+          "amount_b": 0.244,
+          "actor_type": "government_appropriated",
+          "source_name": "BetaKit — What's in Budget 2025 for Canadian tech",
+          "source_url": "https://betakit.com/canada-budget-2025-ai-defence-open-banking/",
+          "source_tier": "T4",
+          "announced": "2025-11-04",
+          "verification": "reported",
+          "id": "ca-budget2025-quantum"
+        }
+      ]
+    },
+    "CHN": {
+      "ai_public": [
+        {
+          "program": "National AI Industry Investment Fund",
+          "domain": "ai",
+          "amount_b": 8.2,
+          "actor_type": "state_fund",
+          "source_name": "South China Morning Post / Securities Times",
+          "source_url": "https://www.scmp.com/tech/big-tech/article/3295513/tech-war-china-creates-us82-billion-ai-investment-fund-amid-tightened-us-trade-controls",
+          "source_tier": 2,
+          "announced": "2025-01",
+          "verification": "reported",
+          "id": "cn-ai-fund-2025"
+        }
+      ],
+      "ai_private": [
+        {
+          "program": "State VC guidance fund (AI/quantum/hydrogen)",
+          "domain": "ai+quantum",
+          "amount_b": 138.0,
+          "actor_type": "mobilization_target",
+          "source_name": "Global Times / NDRC (NPC 2025-03-06)",
+          "source_url": "https://www.globaltimes.cn/page/202503/1329594.shtml",
+          "source_tier": 2,
+          "announced": "2025-03-06",
+          "verification": "reported",
+          "id": "cn-vc-guidance-2025"
+        }
+      ],
+      "q_public": []
+    },
+    "DEU": {
+      "ai_public": [
+        {
+          "program": "High-Tech Agenda Germany (Hightech Agenda Deutschland)",
+          "domain": "ai+quantum",
+          "amount_b": 19.44,
+          "actor_type": "government_appropriated",
+          "source_name": "Science|Business",
+          "source_url": "https://sciencebusiness.net/news/sovereignty/germany-launches-eu18-billion-high-tech-agenda",
+          "source_tier": "T3",
+          "announced": "2025-07",
+          "verification": "reported",
+          "id": "de-high-tech-agenda-2025"
+        },
+        {
+          "program": "National AI Strategy",
+          "domain": "ai",
+          "amount_b": 5.6,
+          "actor_type": "government_outlay",
+          "source_name": "Bundesregierung (KI-Strategie)",
+          "source_url": "https://www.ki-strategie-deutschland.de/files/downloads/Fortschreibung_KI-Strategie_engl.pdf",
+          "source_tier": 1,
+          "announced": "2018-11",
+          "verification": "verified",
+          "id": "de-ai-strategy-2018"
+        }
+      ],
+      "ai_private": [],
+      "q_public": [
+        {
+          "program": "High-Tech Agenda Germany (Hightech Agenda Deutschland)",
+          "domain": "ai+quantum",
+          "amount_b": 19.44,
+          "actor_type": "government_appropriated",
+          "source_name": "Science|Business",
+          "source_url": "https://sciencebusiness.net/news/sovereignty/germany-launches-eu18-billion-high-tech-agenda",
+          "source_tier": "T3",
+          "announced": "2025-07",
+          "verification": "reported",
+          "id": "de-high-tech-agenda-2025"
+        },
+        {
+          "program": "Quantum technologies program",
+          "domain": "quantum",
+          "amount_b": 2.2,
+          "actor_type": "government_outlay",
+          "source_name": "BMBF / BMFTR",
+          "source_url": "https://www.bmftr.bund.de/SharedDocs/Pressemitteilungen/DE/2023/04/26042023-Quantentechnologie.html",
+          "source_tier": 1,
+          "announced": "2021",
+          "verification": "verified",
+          "id": "de-quantum-2021"
+        }
+      ]
+    },
+    "ESP": {
+      "ai_public": [
+        {
+          "program": "Estrategia de Inteligencia Artificial 2024 (ENIA update)",
+          "domain": "ai",
+          "amount_b": 1.62,
+          "actor_type": "government_appropriated",
+          "source_name": "Government of Spain (La Moncloa)",
+          "source_url": "https://www.lamoncloa.gob.es/lang/en/gobierno/councilministers/paginas/2024/20240514-council-press-conference.aspx",
+          "source_tier": "T1",
+          "announced": "2024-05-14",
+          "verification": "reported",
+          "id": "es-ai-strategy-2024"
+        }
+      ],
+      "ai_private": [],
+      "q_public": []
+    },
+    "EU": {
+      "ai_public": [
+        {
+          "program": "InvestAI",
+          "domain": "ai",
+          "amount_b": 21.0,
+          "actor_type": "mobilization_target",
+          "source_name": "European Commission",
+          "source_url": "https://ec.europa.eu/commission/presscorner/detail/en/ip_25_467",
+          "source_tier": 1,
+          "announced": "2025-02-11",
+          "verification": "reported",
+          "id": "eu-investai-2025"
+        },
+        {
+          "program": "AI Continent Action Plan / AI Factories (EuroHPC)",
+          "domain": "compute",
+          "amount_b": 10.8,
+          "actor_type": "government_appropriated",
+          "source_name": "European Commission",
+          "source_url": "https://digital-strategy.ec.europa.eu/en/factpages/ai-continent-action-plan",
+          "source_tier": "T1",
+          "announced": "2025-04-09",
+          "verification": "reported",
+          "id": "eu-ai-factories-2025"
+        },
+        {
+          "program": "Digital Europe Programme",
+          "domain": "ai",
+          "amount_b": 8.208,
+          "actor_type": "government_appropriated",
+          "source_name": "European Commission — Digital Europe Programme",
+          "source_url": "https://digital-strategy.ec.europa.eu/en/activities/digital-programme",
+          "source_tier": "T1",
+          "announced": "2021",
+          "verification": "reported",
+          "id": "eu-digital-europe-programme"
+        },
+        {
+          "program": "Apply AI Strategy",
+          "domain": "ai",
+          "amount_b": 1.08,
+          "actor_type": "government_appropriated",
+          "source_name": "European Commission",
+          "source_url": "https://digital-strategy.ec.europa.eu/en/policies/apply-ai",
+          "source_tier": "T1",
+          "announced": "2025-10-08",
+          "verification": "reported",
+          "id": "eu-apply-ai-2025"
+        }
+      ],
+      "ai_private": [
+        {
+          "program": "InvestAI",
+          "domain": "ai",
+          "amount_b": 157.0,
+          "actor_type": "mobilization_target",
+          "source_name": "European Commission",
+          "source_url": "https://ec.europa.eu/commission/presscorner/detail/en/ip_25_467",
+          "source_tier": 1,
+          "announced": "2025-02-11",
+          "verification": "reported",
+          "id": "eu-investai-2025"
+        }
+      ],
+      "q_public": [
+        {
+          "program": "Quantum Flagship",
+          "domain": "quantum",
+          "amount_b": 1.1,
+          "actor_type": "government_outlay",
+          "source_name": "European Commission (DG CONNECT)",
+          "source_url": "https://digital-strategy.ec.europa.eu/en/news/european-commission-will-launch-eu1-billion-quantum-technologies-flagship",
+          "source_tier": 1,
+          "announced": "2018",
+          "verification": "verified",
+          "id": "eu-quantum-flagship-2018"
+        }
+      ]
+    },
+    "FRA": {
+      "ai_public": [
+        {
+          "program": "Additional AI investment incl. sovereign chatbot (Lecornu)",
+          "domain": "ai",
+          "amount_b": 0.71,
+          "actor_type": "government_appropriated",
+          "source_name": "BFM",
+          "source_url": "https://news.google.com/rss/articles/CBMiwAJBVV95cUxQVnEyMmQ4Ym1xS0dnZWZ0MndnczBqeUVqY0c2UDNiSVV2MFdKV1FKVGlwbnE1azl4UVEzMnRUYTJGU3B5bTJrRG0xQXVKUHlnVHBqeUVDbEdtZ1JuajV0NFNHRERNRHRYRW5pc1Fvb0g4eVhGb004ZF9RNXVVeGE5V2NQNlFVeXpsdXNTRGRTNnN5NTcxc2xkXzRXN2pQbnJybFoxb2Z2UkE2UWlPQ204R0hFajdQSTd5QlVNYjNiei16MElkNHZHbWozWm1Ob0RRZzFma2UxUlBXQllRMWhqWW5CR3VPSzU2bU5HLVFOTUw4R2Q4cWhfU0NvcHlzWjNaVFNHSjlST0lNeFpjeWpaYTFNUms3X3FtT0g4R0ItNkhPUnYwdGduclBwdDVuV0hVLXNGdkVQWWoydGM0dlRvSA?oc=5",
+          "source_tier": 2,
+          "announced": "2026-06-16",
+          "verification": "reported",
+          "id": "fra-ai-additional-2026"
+        }
+      ],
+      "ai_private": [
+        {
+          "program": "France AI investment package",
+          "domain": "ai",
+          "amount_b": 112.5,
+          "actor_type": "private",
+          "source_name": "Gouvernement francais (info.gouv.fr)",
+          "source_url": "https://www.info.gouv.fr/actualite/paris-accueille-le-sommet-pour-laction-sur-lia",
+          "source_tier": 1,
+          "announced": "2025-02-10",
+          "verification": "reported",
+          "id": "fr-109b-2025"
+        },
+        {
+          "program": "SoftBank French AI data center investment",
+          "domain": "compute",
+          "amount_b": 81.0,
+          "actor_type": "private",
+          "source_name": "Bloomberg",
+          "source_url": "https://news.google.com/rss/articles/CBMiswFBVV95cUxOdTFzR0hIOUZmSUNYU2dsX0hZLUs3dGQxZDhzQU5aYmVwTnlQTzJwcTB6N3MwaEZhWjBIRGFYeThFZmVHSS1HOGFWVFJGWktYblZaZWJtX2JuODk0V3RJZy1VOWFBeTE1Zjd5OHlIUnpNN0k4T3VLWWhBUHQzN2U5Y2ticWNUSzh5V09ydEEwNlN0SklQTWQ4Mnc4TFVXZDktYW5ONHBRaWxRb09XLWtoVEo3NA?oc=5",
+          "source_tier": 2,
+          "announced": "2026-05-30",
+          "verification": "reported",
+          "id": "fra-softbank-ai-datacenters-2026"
+        }
+      ],
+      "q_public": [
+        {
+          "program": "National Quantum Plan",
+          "domain": "quantum",
+          "amount_b": 2.0,
+          "actor_type": "government_outlay",
+          "source_name": "Elysee (Presidence de la Republique)",
+          "source_url": "https://www.elysee.fr/emmanuel-macron/2021/01/21/presentation-de-la-strategie-nationale-sur-les-technologies-quantiques",
+          "source_tier": 1,
+          "announced": "2021-01",
+          "verification": "verified",
+          "id": "fr-quantum-plan-2021"
+        },
+        {
+          "program": "PROQCIMA (quantum)",
+          "domain": "quantum",
+          "amount_b": 0.54,
+          "actor_type": "government_outlay",
+          "source_name": "Ministere des Armees / DGA (France 2030)",
+          "source_url": "https://www.defense.gouv.fr/dga/actualites/dga-notifie-accords-cadres-aupres-cinq-societes-developpement-dordinateurs-quantiques-universels",
+          "source_tier": 1,
+          "announced": "2024-03",
+          "verification": "verified",
+          "id": "fr-proqcima-2024"
+        }
+      ]
+    },
+    "GBR": {
+      "ai_public": [
+        {
+          "program": "AI Opportunities Action Plan (public compute)",
+          "domain": "compute",
+          "amount_b": 2.5,
+          "actor_type": "government_outlay",
+          "source_name": "gov.uk",
+          "source_url": "https://www.gov.uk/government/publications/ai-opportunities-action-plan",
+          "source_tier": 1,
+          "announced": "2025-01",
+          "verification": "reported",
+          "id": "uk-ai-action-plan-2025"
+        },
+        {
+          "program": "AI Hardware Plan (national supercomputer + chips)",
+          "domain": "compute",
+          "amount_b": 1.49,
+          "actor_type": "government_appropriated",
+          "source_name": "GOV.UK",
+          "source_url": "https://www.gov.uk/government/news/a-decisive-shift-to-power-british-ai-new-11-billion-plan-to-back-chip-firms-boost-computing-power-and-skills-for-the-ai-revolution",
+          "source_tier": "T1",
+          "announced": "2026-06-08",
+          "verification": "reported",
+          "id": "uk-ai-hardware-plan-2026"
+        },
+        {
+          "program": "Sovereign AI / AI hardware plan",
+          "domain": "compute",
+          "amount_b": 1.4,
+          "actor_type": "government_appropriated",
+          "source_name": "GOV.UK",
+          "source_url": "https://news.google.com/rss/articles/CBMi-AFBVV95cUxNODVodzk5M205SXd5WVFpM1FtUWhWX3UyUnM0ZDRUM2NnXzFCMktNUDNwVUhLd0FOV3NwVW1mMFNzVWxYV2Ytb29GVFdjSnpGbFFUeTVabGphbHlmNm5Yb3JmTy16UHJvMWE5bFBZS2hHcXVkUGV6bzBkR3VrVEVVZlpCbmdnRXAtekhTYUJDWDBQQjRDdGczNV9kTndTbmZKdmkyVlJMTGw0SWxSM3ZKY0hZTE5QY2ZIOW92cUVvX3FfMDh0REttU3VucnBBSW5RWGtlc243V2l5WWVMX0N3VUtSRGMwb0N2S09wblBwNGNzb2ZZQTlTaA?oc=5",
+          "source_tier": 1,
+          "announced": "2026-06-08",
+          "verification": "reported",
+          "id": "gb-sovereign-ai-2026"
+        }
+      ],
+      "ai_private": [
+        {
+          "program": "AI Opportunities Action Plan (public compute)",
+          "domain": "compute",
+          "amount_b": 35.0,
+          "actor_type": "government_outlay",
+          "source_name": "gov.uk",
+          "source_url": "https://www.gov.uk/government/publications/ai-opportunities-action-plan",
+          "source_tier": 1,
+          "announced": "2025-01",
+          "verification": "reported",
+          "id": "uk-ai-action-plan-2025"
+        }
+      ],
+      "q_public": [
+        {
+          "program": "National Quantum Strategy",
+          "domain": "quantum",
+          "amount_b": 3.175,
+          "actor_type": "government_appropriated",
+          "source_name": "UK National Quantum Technologies Programme (UKRI)",
+          "source_url": "https://uknqt.ukri.org/news/uk-government-publishes-the-national-quantum-strategy/",
+          "source_tier": "T1",
+          "announced": "2023-03-20",
+          "verification": "reported",
+          "id": "uk-national-quantum-strategy-2023"
+        }
+      ]
+    },
+    "IND": {
+      "ai_public": [
+        {
+          "program": "IndiaAI Mission",
+          "domain": "ai",
+          "amount_b": 1.25,
+          "actor_type": "government_outlay",
+          "source_name": "IndiaAI / Stanford HAI 2025",
+          "source_url": "https://indiaai.gov.in/news/cabinet-approves-india-ai-mission-at-an-outlay-of-rs-10-372-crore",
+          "source_tier": 1,
+          "announced": "2024",
+          "verification": "verified",
+          "id": "in-indiaai-2024"
+        }
+      ],
+      "ai_private": [],
+      "q_public": [
+        {
+          "program": "National Quantum Mission",
+          "domain": "quantum",
+          "amount_b": 0.73,
+          "actor_type": "government_appropriated",
+          "source_name": "Press Information Bureau (Govt of India)",
+          "source_url": "https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=1917888",
+          "source_tier": "T1",
+          "announced": "2023-04-19",
+          "verification": "reported",
+          "id": "in-quantum-mission-2023"
+        }
+      ]
+    },
+    "ISR": {
+      "ai_public": [
+        {
+          "program": "National AI program",
+          "domain": "ai",
+          "amount_b": 0.275,
+          "actor_type": "government_outlay",
+          "source_name": "OECD.AI / Israel Innovation Authority",
+          "source_url": "https://oecd.ai/en/dashboards/policy-initiatives/national-program-for-artificial-intelligence-4541",
+          "source_tier": 1,
+          "announced": "2022",
+          "verification": "reported",
+          "id": "il-national-ai-2022"
+        }
+      ],
+      "ai_private": [],
+      "q_public": []
+    },
+    "ITA": {
+      "ai_public": [
+        {
+          "program": "CDP Venture Capital national AI fund",
+          "domain": "ai",
+          "amount_b": 1.08,
+          "actor_type": "state_fund",
+          "source_name": "Digital Watch Observatory",
+          "source_url": "https://dig.watch/updates/italy-announces-e1-billion-investment-fund-to-boost-ai-projects",
+          "source_tier": "T3",
+          "announced": "2024-03-12",
+          "verification": "reported",
+          "id": "it-cdp-ai-fund-2024"
+        }
+      ],
+      "ai_private": [
+        {
+          "program": "CDP Venture Capital national AI fund",
+          "domain": "ai",
+          "amount_b": 2.16,
+          "actor_type": "state_fund",
+          "source_name": "Digital Watch Observatory",
+          "source_url": "https://dig.watch/updates/italy-announces-e1-billion-investment-fund-to-boost-ai-projects",
+          "source_tier": "T3",
+          "announced": "2024-03-12",
+          "verification": "reported",
+          "id": "it-cdp-ai-fund-2024"
+        }
+      ],
+      "q_public": []
+    },
+    "JPN": {
+      "ai_public": [],
+      "ai_private": [],
+      "q_public": []
+    },
+    "KAZ": {
+      "ai_public": [],
+      "ai_private": [
+        {
+          "program": "Data Center Valley (NVIDIA, Firebird)",
+          "domain": "compute",
+          "amount_b": 10.0,
+          "actor_type": "public_private",
+          "source_name": "PM of Republic of Kazakhstan",
+          "source_url": "https://news.google.com/rss/articles/CBMi9wFBVV95cUxOd2F6WUhmZzUxdFVXZ3p4TXhmRWxrSDgtUU5hNExJTDBqRUJWcHNubTFvUXZuVDdTX3N1Yk9rRHdXYUtVak0zYzJPanhaemk0Mm5oVjdTMDVyUUg0RzBpd1pIUzZ6LWJ2YTJQZ3lWSVBVWWdwVjdwYUxxNzVyMlJwRFp1WDhxNG5uZllOWkNzZVdrWFUwU3BTY0tDd0pQTi0wRVdwS2ZpbVgtcjloSUR5enR0cUJWNC11SVQ4Vk5vTnNUZkxnTXhlRGRTUUcyaTl4UGpUa2NUSnh4TWp1dTRKR2xBMVhTbHFyaDYtRHBBWXZpRlVNbG0w?oc=5",
+          "source_tier": 1,
+          "announced": "2026-06-15",
+          "verification": "reported",
+          "id": "kz-nvidia-firebird-2026"
+        }
+      ],
+      "q_public": []
+    },
+    "KOR": {
+      "ai_public": [
+        {
+          "program": "National Growth Fund (AI / strategic industries)",
+          "domain": "ai",
+          "amount_b": 54.0,
+          "actor_type": "public_private",
+          "source_name": "Korea Herald",
+          "source_url": "https://www.koreaherald.com/article/10640375",
+          "source_tier": "T4",
+          "announced": "2025-12-19",
+          "verification": "reported",
+          "id": "kr-national-growth-fund-2025"
+        },
+        {
+          "program": "National AI investment (to 2027)",
+          "domain": "ai",
+          "amount_b": 6.9,
+          "actor_type": "public_private",
+          "source_name": "Govt of Korea / MSIT",
+          "source_url": "https://www.pacst.go.kr/jsp/m/initiative/ai_initiative_intro.pdf",
+          "source_tier": 1,
+          "announced": "2024-04",
+          "verification": "reported",
+          "id": "kr-ai-2027"
+        }
+      ],
+      "ai_private": [
+        {
+          "program": "National Growth Fund (AI / strategic industries)",
+          "domain": "ai",
+          "amount_b": 54.0,
+          "actor_type": "public_private",
+          "source_name": "Korea Herald",
+          "source_url": "https://www.koreaherald.com/article/10640375",
+          "source_tier": "T4",
+          "announced": "2025-12-19",
+          "verification": "reported",
+          "id": "kr-national-growth-fund-2025"
+        }
+      ],
+      "q_public": []
+    },
+    "MYS": {
+      "ai_public": [],
+      "ai_private": [],
+      "q_public": []
+    },
+    "NLD": {
+      "ai_public": [
+        {
+          "program": "AiNed national AI programme (National Growth Fund)",
+          "domain": "ai",
+          "amount_b": 0.204,
+          "actor_type": "government_appropriated",
+          "source_name": "National Growth Fund / Dutch AI Coalition — AiNed",
+          "source_url": "https://aic4nl.nl/en/instrumenten/nationaal-groeifonds-op-werkbezoek-bij-ained-waar-staat-nederland-met-ai/",
+          "source_tier": "T1",
+          "announced": "2021",
+          "verification": "reported",
+          "id": "nl-ained-ai-program"
+        }
+      ],
+      "ai_private": [],
+      "q_public": [
+        {
+          "program": "Quantum Delta NL (National Growth Fund)",
+          "domain": "quantum",
+          "amount_b": 0.664,
+          "actor_type": "government_appropriated",
+          "source_name": "Quantum Delta NL — €273M third phase",
+          "source_url": "https://quantumdelta.nl/news/quantum-delta-nl-awarded-273-million-by-the-national-growth-fund-for-the-third-phase",
+          "source_tier": "T1",
+          "announced": "2021",
+          "verification": "reported",
+          "id": "nl-quantum-delta-nl"
+        }
+      ]
+    },
+    "QAT": {
+      "ai_public": [
+        {
+          "program": "Digital transformation / AI incentive package",
+          "domain": "ai",
+          "amount_b": 2.5,
+          "actor_type": "government_appropriated",
+          "source_name": "US ITA / trade.gov — Qatar AI",
+          "source_url": "https://www.trade.gov/market-intelligence/qatar-artificial-intelligence",
+          "source_tier": "T1",
+          "announced": "2024-05-14",
+          "verification": "reported",
+          "id": "qa-digital-2024"
+        }
+      ],
+      "ai_private": [
+        {
+          "program": "Qai + Brookfield AI infrastructure JV",
+          "domain": "compute",
+          "amount_b": 20.0,
+          "actor_type": "public_private",
+          "source_name": "Qatar Investment Authority",
+          "source_url": "https://www.qia.qa/en/Newsroom/Pages/Brookfield-and-Qai-Form-$20-Billion-Strategic-Investment-Partnership-for-AI-Infrastructure.aspx",
+          "source_tier": "T1",
+          "announced": "2025-12-09",
+          "verification": "reported",
+          "id": "qa-qai-brookfield-2025"
+        }
+      ],
+      "q_public": []
+    },
+    "SAU": {
+      "ai_public": [
+        {
+          "program": "Project Transcendence",
+          "domain": "ai",
+          "amount_b": 100.0,
+          "actor_type": "sovereign_wealth",
+          "source_name": "Bloomberg",
+          "source_url": "https://www.bloomberg.com/news/articles/2024-11-06/saudis-plan-100-billion-ai-powerhouse-to-rival-uae-s-tech-hub",
+          "source_tier": 2,
+          "announced": "2024-11",
+          "verification": "reported",
+          "id": "sa-transcendence-2024"
+        }
+      ],
+      "ai_private": [
+        {
+          "program": "HUMAIN (PIF) — full AI mandate",
+          "domain": "ai",
+          "amount_b": 100.0,
+          "actor_type": "sovereign_wealth",
+          "source_name": "PIF — HUMAIN portfolio",
+          "source_url": "https://www.pif.gov.sa/en/our-investments/our-portfolio/humain/",
+          "source_tier": "T1",
+          "announced": "2025-05-12",
+          "verification": "reported",
+          "id": "sa-humain-mandate-2025"
+        },
+        {
+          "program": "HUMAIN $10B AI venture fund",
+          "domain": "ai",
+          "amount_b": 10.0,
+          "actor_type": "sovereign_wealth",
+          "source_name": "PitchBook",
+          "source_url": "https://pitchbook.com/news/articles/10b-fund-signals-the-scale-of-saudis-lofty-ai-ambitions",
+          "source_tier": "T3",
+          "announced": "2025-05",
+          "verification": "reported",
+          "id": "sa-humain-vcfund-2025"
+        }
+      ],
+      "q_public": []
+    },
+    "SGP": {
+      "ai_public": [
+        {
+          "program": "National AI Strategy 2.0",
+          "domain": "ai",
+          "amount_b": 0.74,
+          "actor_type": "government_outlay",
+          "source_name": "Smart Nation Singapore (NAIS 2.0)",
+          "source_url": "https://www.sgpc.gov.sg/api/file/getfile/Press%20Release_NAIS%202_0%20and%20SCAI_4%20Dec.pdf?path=%2Fsgpcmedia%2Fmedia_releases%2Fsndgo%2Fpress_release%2FP-20231204-2%2Fattachment%2FPress+Release_NAIS+2_0+and+SCAI_4+Dec.pdf",
+          "source_tier": 1,
+          "announced": "2023-12",
+          "verification": "reported",
+          "id": "sg-nais2-2023"
+        }
+      ],
+      "ai_private": [],
+      "q_public": []
+    },
+    "THA": {
+      "ai_public": [],
+      "ai_private": [],
+      "q_public": []
+    },
+    "TUR": {
+      "ai_public": [
+        {
+          "program": "National AI Action Plan 2026-2030 / data-centre roadmap",
+          "domain": "ai",
+          "amount_b": 3.0,
+          "actor_type": "government_appropriated",
+          "source_name": "AGBI",
+          "source_url": "https://www.agbi.com/ai/2026/06/turkey-commits-3bn-to-ai-and-data-centre-roadmap/",
+          "source_tier": "T4",
+          "announced": "2026-06",
+          "verification": "reported",
+          "id": "tr-ai-roadmap-2026"
+        }
+      ],
+      "ai_private": [],
+      "q_public": []
+    },
+    "TWN": {
+      "ai_public": [
+        {
+          "program": "Ten Major AI Infrastructure Projects ('AI island')",
+          "domain": "ai",
+          "amount_b": 3.1,
+          "actor_type": "government_appropriated",
+          "source_name": "Tom's Hardware",
+          "source_url": "https://www.tomshardware.com/tech-industry/semiconductors/taiwan-to-spend-billions-on-ai-island-push-despite-grid-risks",
+          "source_tier": "T4",
+          "announced": "2025-11",
+          "verification": "reported",
+          "id": "tw-ai-island-2025"
+        }
+      ],
+      "ai_private": [],
+      "q_public": []
+    },
+    "USA": {
+      "ai_public": [
+        {
+          "program": "CHIPS and Science Act — Division B science authorizations (NSF/NIST/DOE/EDA)",
+          "domain": "ai",
+          "amount_b": 174.0,
+          "actor_type": "government_appropriated",
+          "source_name": "CSIS — Science-Related Portions of CHIPS+",
+          "source_url": "https://www.csis.org/analysis/look-science-related-portions-chips",
+          "source_tier": "T3",
+          "announced": "2022-08",
+          "verification": "reported",
+          "id": "us-chips-science-division-auth-2022"
+        },
+        {
+          "program": "DOE Genesis Mission — AI infrastructure (American Science Cloud, ModCon)",
+          "domain": "ai",
+          "amount_b": 0.32,
+          "actor_type": "government_outlay",
+          "source_name": "U.S. Department of Energy",
+          "source_url": "https://govmarketnews.com/genesis-mission-320m-ai-funding/",
+          "source_tier": "T4",
+          "announced": "2025-12",
+          "verification": "reported",
+          "id": "us-doe-genesis-mission-2025"
+        },
+        {
+          "program": "NSF National AI Research Resource (NAIRR) Operations Center",
+          "domain": "ai",
+          "amount_b": 0.035,
+          "actor_type": "government_appropriated",
+          "source_name": "NSF",
+          "source_url": "https://fedscoop.com/nsf-announces-35-million-stand-up-ai-research-resource-operations-center-nairr/",
+          "source_tier": "T1",
+          "announced": "2025-09-03",
+          "verification": "reported",
+          "id": "us-nsf-nairr-oc-2025"
+        }
+      ],
+      "ai_private": [
+        {
+          "program": "Stargate",
+          "domain": "compute",
+          "amount_b": 500.0,
+          "actor_type": "private",
+          "source_name": "OpenAI / White House",
+          "source_url": "https://openai.com/index/announcing-the-stargate-project/",
+          "source_tier": 1,
+          "announced": "2025-01-21",
+          "verification": "reported",
+          "id": "us-stargate-2025"
+        }
+      ],
+      "q_public": [
+        {
+          "program": "Department of Commerce $2B Quantum Initiative",
+          "domain": "quantum",
+          "amount_b": 2.0,
+          "actor_type": "government_appropriated",
+          "source_name": "Technology Org / Barron's",
+          "source_url": "https://news.google.com/rss/articles/CBMilwFBVV95cUxNYzJlWU5qbm1TRVJXUnc2c01FZXluNlVibGNkeHNHZjJfbmx0d211RjI0V21udEVqdUhoZUVlQWh6TUhGNExpUmNOWE5OcVMxcG41Y2k0ZWRia04xVnZaaEJaSUZSUDZFNTNvQjdvcERXSFBocU9tVmgtOWVNQ3RtRVBnbmlodWRQLThaQjRWeTdFczh2YW9J?oc=5",
+          "source_tier": 2,
+          "announced": "2026-05-29",
+          "verification": "reported",
+          "id": "usa-doc-quantum-2026"
+        },
+        {
+          "program": "DOE National Quantum Information Science (QIS) Research Centers — next phase",
+          "domain": "quantum",
+          "amount_b": 0.125,
+          "actor_type": "government_appropriated",
+          "source_name": "U.S. Department of Energy",
+          "source_url": "https://www.energy.gov/articles/energy-department-announces-625-million-advance-next-phase-national-quantum-information",
+          "source_tier": "T1",
+          "announced": "2025-11-04",
+          "verification": "reported",
+          "id": "us-doe-qis-centers-2025"
+        }
+      ]
+    },
+    "VNM": {
+      "ai_public": [],
+      "ai_private": [],
+      "q_public": []
+    }
+  },
+  "note": "Live dims = best-available committed capital by origin ($B), deduplicated by event_key, estimate/unconfirmed tiers excluded. Other dimensions in the viewer are illustrative placeholders."
+};
+/* ===POWER-INDEX-LEDGER-DATA END=== */
+/* ---------- tiny hyperscript: stands in for React.createElement ---------- */
+const FRAG = Symbol('frag');
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const SVG_TAGS = new Set(['svg','g','polygon','line','text','circle','path','rect']);
+let PENDING_REFS = [];
+function svgAttr(k){ return (k==='viewBox'||k==='preserveAspectRatio') ? k : k.replace(/[A-Z]/g, m=>'-'+m.toLowerCase()); }
+function appendKids(el, kids){
+  for(const c of kids){
+    if(c==null || c===false) continue;
+    if(Array.isArray(c)){ appendKids(el, c); continue; }
+    el.appendChild(c.nodeType ? c : document.createTextNode(String(c)));
+  }
+}
+function h(tag, props){
+  const kids = Array.prototype.slice.call(arguments, 2);
+  if(tag === FRAG){ const f=document.createDocumentFragment(); appendKids(f, kids); return f; }
+  const isSvg = SVG_TAGS.has(tag);
+  const el = isSvg ? document.createElementNS(SVG_NS, tag) : document.createElement(tag);
+  let deferValue = undefined;
+  if(props){
+    for(const k in props){
+      const v = props[k];
+      if(v==null) continue;
+      if(k==='key') continue;
+      else if(k==='ref'){ if(typeof v==='function') PENDING_REFS.push(()=>v(el)); }
+      else if(k==='style'){ if(typeof v==='string') el.setAttribute('style', v); else Object.assign(el.style, v); }
+      else if(k==='onClick') el.addEventListener('click', v);
+      else if(k==='onMouseEnter') el.addEventListener('mouseenter', v);
+      else if(k==='onMouseLeave') el.addEventListener('mouseleave', v);
+      else if(k==='onChange') el.addEventListener(tag==='select' ? 'change' : 'input', v);
+      else if(k==='value'){ deferValue = v; }
+      else if(isSvg) el.setAttribute(svgAttr(k), v);
+      else if(k==='className') el.setAttribute('class', v);
+      else if(k in el){ try{ el[k]=v; }catch(e){ el.setAttribute(k, v); } }
+      else el.setAttribute(k, v);
+    }
+  }
+  appendKids(el, kids);
+  if(deferValue !== undefined) el.value = deferValue; // after options exist (select) / type set (input)
+  return el;
+}
+
+/* ---------- component (ported from the design prototype) ---------- */
+class PowerIndex {
+  constructor(props){
+    this.h = h;
+    this.buildData();
+    const p = props || {};
+    const w = {}; this.DIMS.forEach(d => w[d.id] = 1);
+    this.state = {
+      view: ['matrix','compare','index','map'].includes(p.defaultView) ? p.defaultView : 'matrix',
+      mode: ['abs','pc','gdp'].includes(p.normalizeDefault) ? p.normalizeDefault : 'abs',
+      mt: 1, pillar: 'all', query: '', sortKey: 'composite', sortDir: -1,
+      dark: !!p.startDark, sel: ['USA','CHN'], weights: w, mapMetric: 'ai_private', chip: null, card: null
+    };
+    this._fromMode = this.state.mode;
+    this._nodes = new Map(); this._pos = {}; this._tw = null;
+    this._mounted = false;
+  }
+
+  buildData(){
+    // seeded hash + RNG (demo trends and synthetic placeholders) — defined first
+    const hash=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;};
+    const rng=seed=>{let a=seed;return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};};
+
+    // --- live ledger binding (injected by build.py; null = pure demo) ---
+    const LD = (typeof LEDGER_DATA !== 'undefined') ? LEDGER_DATA : null;
+    this.liveDims = LD ? (LD.live_dims || []) : [];
+    this.generated = LD ? LD.generated : null;
+    this.contrib = (LD && LD.contributions) || {};   // iso -> dim -> [contribution records]
+
+    this.DIMS=[
+      {id:'ai_public',pillar:'ai',short:'Public AI',full:'Public / state AI capital (committed)',unit:'$B',kind:'money',norm:true,invert:false},
+      {id:'ai_private',pillar:'ai',short:'Private AI',full:'Private / mobilized AI capital (committed)',unit:'$B',kind:'money',norm:true,invert:false},
+      {id:'ai_compute',pillar:'ai',short:'Compute',full:'Frontier compute capacity (index, US=100)',unit:'idx',kind:'count',norm:true,invert:false},
+      {id:'ai_talent',pillar:'ai',short:'Talent',full:'Top-tier AI researchers',unit:'k',kind:'count',norm:true,invert:false},
+      {id:'ai_reg',pillar:'ai',short:'AI gov.',full:'AI regulatory / governance maturity',unit:'/100',kind:'score',norm:false,invert:false},
+      {id:'ai_labs',pillar:'ai',short:'Labs',full:'Frontier labs & notable models',unit:'',kind:'count',norm:true,invert:false},
+      {id:'q_public',pillar:'q',short:'Public Q',full:'Public / state quantum capital (committed)',unit:'$B',kind:'money',norm:true,invert:false},
+      {id:'q_patents',pillar:'q',short:'Patents',full:'Quantum patent families',unit:'k',kind:'count',norm:true,invert:false},
+      {id:'q_qubits',pillar:'q',short:'Qubits',full:'Largest qubit / hardware program',unit:'',kind:'count',norm:true,invert:false},
+      {id:'q_export',pillar:'q',short:'Export risk',full:'Export-control exposure',unit:'/100',kind:'score',norm:false,invert:true},
+      {id:'q_strategy',pillar:'q',short:'Q strategy',full:'National quantum strategy maturity',unit:'/100',kind:'score',norm:false,invert:false}
+    ];
+    this.DIMS.forEach(d=>{ d.live = this.liveDims.includes(d.id); });
+
+    // Jurisdiction set: prefer the ledger's full list (build.py); fall back to the design's 12.
+    const designIso=['USA','CHN','EU','GBR','JPN','KOR','ISR','IND','CAN','ARE','SGP','TWN'];
+    const designJ=[
+      {iso:'USA',name:'United States',sh:'US',popM:335,gdpT:27.7,col:1,row:2},
+      {iso:'CHN',name:'China',sh:'CN',popM:1411,gdpT:17.8,col:5,row:1},
+      {iso:'EU',name:'European Union',sh:'EU',popM:449,gdpT:18.4,col:4,row:1},
+      {iso:'GBR',name:'United Kingdom',sh:'UK',popM:68,gdpT:3.3,col:3,row:1},
+      {iso:'JPN',name:'Japan',sh:'JP',popM:124,gdpT:4.2,col:7,row:1},
+      {iso:'KOR',name:'South Korea',sh:'KR',popM:51.7,gdpT:1.71,col:6,row:1},
+      {iso:'ISR',name:'Israel',sh:'IL',popM:9.8,gdpT:0.52,col:3,row:2},
+      {iso:'IND',name:'India',sh:'IN',popM:1429,gdpT:3.55,col:5,row:2},
+      {iso:'CAN',name:'Canada',sh:'CA',popM:40,gdpT:2.14,col:1,row:1},
+      {iso:'ARE',name:'United Arab Emirates',sh:'AE',popM:9.9,gdpT:0.51,col:4,row:2},
+      {iso:'SGP',name:'Singapore',sh:'SG',popM:5.9,gdpT:0.50,col:5,row:3},
+      {iso:'TWN',name:'Taiwan',sh:'TW',popM:23.4,gdpT:0.79,col:6,row:2}
+    ];
+    this.J = (LD && LD.J && LD.J.length)
+      ? LD.J.map(j=>({iso:j.iso,name:j.name,sh:j.sh,popM:j.popM,gdpT:j.gdpT,col:j.col,row:j.row}))
+      : designJ;
+
+    // Demo placeholder values from the prototype, keyed by iso (the original 12).
+    const Vdesign={
+      ai_public:[7.5,15.0,11.0,2.5,3.0,2.2,0.5,1.3,1.1,1.5,0.7,0.6],
+      ai_private:[109,9.3,11.0,4.5,1.5,1.4,3.2,1.4,2.6,0.5,1.0,0.4],
+      ai_compute:[100,42,28,18,22,16,9,11,14,13,12,19],
+      ai_talent:[60,47,28,9,5,4,3,14,6,1.2,2,1.5],
+      ai_reg:[62,70,88,74,66,64,48,52,71,58,76,50],
+      ai_labs:[32,18,9,6,3,3,4,2,4,2,1,1],
+      q_public:[3.8,15.3,7.2,1.5,1.8,1.0,0.4,0.9,1.1,0.3,0.4,0.3],
+      q_patents:[6.2,16.8,4.1,1.0,3.2,1.4,0.4,0.6,0.7,0.1,0.3,0.5],
+      q_qubits:[1180,504,100,256,156,20,36,6,84,2,24,5],
+      q_export:[30,92,40,35,45,55,60,50,33,70,48,65],
+      q_strategy:[82,88,80,78,70,66,58,62,72,60,68,55]
+    };
+    const demoByIso={}, demoRange={};
+    this.DIMS.forEach(d=>{ const a=Vdesign[d.id]; demoByIso[d.id]={}; designIso.forEach((iso,i)=>{demoByIso[d.id][iso]=a[i];}); demoRange[d.id]={mn:Math.min.apply(null,a),mx:Math.max.apply(null,a)}; });
+
+    this.SRC={
+      ai_public:{name:'OECD.AI Policy Observatory',date:'2025'},
+      ai_private:{name:'Stanford HAI — AI Index',date:'2025'},
+      ai_compute:{name:'Epoch AI / TOP500',date:'2025'},
+      ai_talent:{name:'MacroPolo AI Talent Tracker',date:'2024'},
+      ai_reg:{name:'OECD.AI national policies',date:'2025'},
+      ai_labs:{name:'Epoch AI — Notable Models',date:'2025'},
+      q_public:{name:'McKinsey Quantum Monitor',date:'2025'},
+      q_patents:{name:'WIPO Patent Landscape',date:'2024'},
+      q_qubits:{name:'Qureca national programmes',date:'2025'},
+      q_export:{name:'CSIS / BIS analysis',date:'2025'},
+      q_strategy:{name:'Qureca national strategies',date:'2025'}
+    };
+    if(LD && LD.sources){ this.liveDims.forEach(id=>{ if(LD.sources[id]) this.SRC[id]=LD.sources[id]; }); }
+
+    // Working per-dimension value array over the chosen jurisdiction set:
+    // live dims → ledger; demo dims → prototype value by iso, or a seeded in-range
+    // placeholder for jurisdictions the prototype never had (e.g. FRA, SAU, DEU, AUS).
+    const V={};
+    this.DIMS.forEach(d=>{
+      V[d.id]=this.J.map(j=>{
+        if(d.live && LD){ const lv=(LD.values&&LD.values[j.iso])?LD.values[j.iso][d.id]:undefined; return (lv==null)?0:lv; }
+        if(demoByIso[d.id][j.iso]!=null) return demoByIso[d.id][j.iso];
+        const rg=demoRange[d.id]; const u=rng(hash(j.iso+d.id+'demo'))();
+        const val=rg.mn+(rg.mx-rg.mn)*(0.12+0.45*u);
+        return d.kind==='score'?Math.round(val):Math.round(val*100)/100;
+      });
+    });
+
+    this.range={};
+    this.DIMS.forEach(d=>{const a=V[d.id];this.range[d.id]={mn:Math.min.apply(null,a),mx:Math.max.apply(null,a)};});
+
+    this.CELLS={};
+    this.J.forEach((j,ji)=>{
+      this.CELLS[j.iso]={};
+      this.DIMS.forEach(d=>{
+        const v=V[d.id][ji];
+        const r=rng(hash(j.iso+d.id));
+        const score=d.kind==='score';
+        const start=score?0.62+r()*0.18:0.18+r()*0.28;
+        const tr=[];
+        for(let i=0;i<8;i++){
+          const base=start+(1-start)*(i/7);
+          const jit=1+(r()-0.5)*0.13;
+          let val=v*base*jit;
+          if(score)val=Math.min(100,val);
+          tr.push(val);
+        }
+        tr[7]=v;
+        const cell={v,trend:tr,live:!!d.live};
+        if(d.live && LD && LD.programs && LD.programs[j.iso]){ const p=LD.programs[j.iso][d.id]; if(p&&p.length) cell.programs=p; }
+        this.CELLS[j.iso][d.id]=cell;
+      });
+    });
+    this.dimById={}; this.DIMS.forEach(d=>this.dimById[d.id]=d);
+    this.jByIso={}; this.J.forEach(j=>this.jByIso[j.iso]=j);
+  }
+
+  /* ---- math ---- */
+  magnitudeAt(iso,dim,mode){ const v=this.CELLS[iso][dim.id].v; if(!dim.norm)return v; const j=this.jByIso[iso]; if(mode==='pc')return v/j.popM; if(mode==='gdp')return v/j.gdpT; return v; }
+  colMaxAt(dim,mode){ let m=0; this.J.forEach(j=>{m=Math.max(m,this.magnitudeAt(j.iso,dim,mode));}); return m||1; }
+  ease(p){ return p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2; }
+  lerpMag(iso,dim){ const e=this.ease(this.state.mt); const a=this.magnitudeAt(iso,dim,this._fromMode); const b=this.magnitudeAt(iso,dim,this.state.mode); return a+(b-a)*e; }
+  lerpColMax(dim){ const e=this.ease(this.state.mt); const a=this.colMaxAt(dim,this._fromMode); const b=this.colMaxAt(dim,this.state.mode); return a+(b-a)*e; }
+  displayMag(iso,dim){ return this.lerpMag(iso,dim); }
+  barPct(iso,dim){ if(dim.kind==='score'&&!dim.norm){return this.CELLS[iso][dim.id].v/100;} const m=this.lerpMag(iso,dim)/this.lerpColMax(dim); return Math.max(0,Math.min(1,m)); }
+  dimScore(iso,dim){ const rg=this.range[dim.id]; const v=this.CELLS[iso][dim.id].v; let f=(v-rg.mn)/((rg.mx-rg.mn)||1)*100; if(dim.invert)f=100-f; return f; }
+  composite(iso){ const w=this.state.weights; let s=0,sw=0; this.DIMS.forEach(d=>{const ww=w[d.id]||0; if(ww>0){s+=ww*this.dimScore(iso,d);sw+=ww;}}); return sw?s/sw:0; }
+  visibleDims(){ const p=this.state.pillar; return this.DIMS.filter(d=>p==='all'||d.pillar===p); }
+  matrixRows(){ const q=this.state.query.trim().toLowerCase(); let arr=this.J.filter(j=> !q || j.name.toLowerCase().includes(q)||j.sh.toLowerCase().includes(q)||j.iso.toLowerCase().includes(q)); const k=this.state.sortKey,dir=this.state.sortDir;
+    arr.sort((a,b)=>{ let x,y; if(k==='name'){return dir*a.name.localeCompare(b.name);} if(k==='composite'){x=this.composite(a.iso);y=this.composite(b.iso);} else {const d=this.dimById[k]; x=this.magnitudeAt(a.iso,d,this.state.mode); y=this.magnitudeAt(b.iso,d,this.state.mode);} return dir*((x||0)-(y||0)); }); return arr; }
+
+  /* ---- formatting ---- */
+  moneyB(m){ if(m>=1000)return '$'+(m/1000).toFixed(1)+'T'; if(m>=100)return '$'+Math.round(m)+'B'; if(m>=10)return '$'+m.toFixed(0)+'B'; if(m>=1)return '$'+m.toFixed(1)+'B'; return '$'+m.toFixed(2)+'B'; }
+  trim(x){ return Number.isInteger(x)?String(x):(Math.abs(x)<10?x.toFixed(1):String(Math.round(x))); }
+  fmtAbs(mag,dim){ if(dim.kind==='money')return this.moneyB(mag); if(dim.kind==='score')return String(Math.round(mag)); if(dim.unit==='k')return this.trim(mag)+'k'; return mag>=1000?Math.round(mag).toLocaleString():this.trim(mag); }
+  sig(m){ if(m>=100)return Math.round(m).toLocaleString(); if(m>=10)return m.toFixed(1); if(m>=1)return m.toFixed(2); if(m>=0.01)return m.toFixed(3); if(m===0)return '0'; return m.toExponential(1); }
+  fmtCell(iso,dim){ const mode=this.state.mode; const mag=this.displayMag(iso,dim); if(!dim.norm||mode==='abs')return this.fmtAbs(mag,dim); return this.sig(mag); }
+  basis(dim){ const m=this.state.mode; if(!dim.norm)return dim.unit||'score'; if(m==='pc')return 'per M'; if(m==='gdp')return 'per $T'; return dim.unit||'#'; }
+
+  /* ---- lifecycle (FLIP + tween) ---- */
+  componentDidMount(){ this.flip(); this._clear=()=>{ if(this.state.chip)this.setState({chip:null}); }; window.addEventListener('scroll',this._clear,true);
+    this._key=(e)=>{ if(e.key==='Escape'&&this.state.card)this.setState({card:null}); }; window.addEventListener('keydown',this._key); }
+  componentDidUpdate(){ this.flip(); }
+  flip(){ this._nodes.forEach((n,k)=>{ if(!n)return; const top=n.offsetTop; const old=this._pos[k]; if(old!=null&&Math.abs(old-top)>0.5){ n.style.transition='none'; n.style.transform='translateY('+(old-top)+'px)'; void n.offsetWidth; requestAnimationFrame(()=>{ n.style.transition='transform .52s cubic-bezier(.2,.8,.2,1)'; n.style.transform='translateY(0)'; }); } this._pos[k]=top; }); }
+  ref(k){ return (n)=>{ if(n)this._nodes.set(k,n); else this._nodes.delete(k); }; }
+
+  /* ---- state + render runtime ---- */
+  setState(patch){
+    const next = (typeof patch==='function') ? patch(this.state) : patch;
+    this.state = Object.assign({}, this.state, next);
+    this.render();
+  }
+  render(){
+    PENDING_REFS = [];
+    this._nodes = new Map();            // refs repopulate; _pos persists for FLIP
+    const root = document.getElementById('app-root');
+    const tree = this.app();
+    root.replaceChildren(tree);
+    PENDING_REFS.forEach(fn=>fn());     // nodes now in DOM → offsetTop valid
+    // reflect theme + toggle label on the page chrome
+    const wrap = document.getElementById('root');
+    wrap.setAttribute('data-theme', this.state.dark?'dark':'light');
+    document.getElementById('themeBtn').innerHTML = this.state.dark?'☀  Light':'☾  Dark';
+    if(!this._mounted){ this._mounted=true; this.componentDidMount(); }
+    else { this.componentDidUpdate(); }
+  }
+
+  /* ---- handlers ---- */
+  setView(v){ this._pos={}; this._nodes.clear(); this.setState({view:v,chip:null}); }
+  setMode(m){ if(m===this.state.mode)return; if(this._tw)cancelAnimationFrame(this._tw); this._fromMode=this.state.mode; this.setState({mode:m,mt:0});
+    const t0=performance.now(),dur=520; const step=(now)=>{let p=Math.min(1,(now-t0)/dur); this.setState({mt:p}); if(p<1){this._tw=requestAnimationFrame(step);} else {this._tw=null;this._fromMode=this.state.mode;}}; this._tw=requestAnimationFrame(step); }
+  sort(k){ this.setState(s=>({sortKey:k,sortDir:s.sortKey===k?-s.sortDir:(k==='name'?1:-1)})); }
+  toggleSel(iso){ this.setState(s=>{ let sel=s.sel.slice(); const i=sel.indexOf(iso); if(i>=0)sel.splice(i,1); else { if(sel.length>=3)sel.shift(); sel.push(iso);} return {sel}; }); }
+  toggleTheme(){ this.setState(s=>({dark:!s.dark})); }
+  setWeight(id,v){ this.setState(s=>({weights:Object.assign({},s.weights,{[id]:v})})); }
+  preset(kind){ const w={}; this.DIMS.forEach(d=>{ w[d.id]= kind==='ai'?(d.pillar==='ai'?3:1): kind==='q'?(d.pillar==='q'?3:1): 1; }); this.setState({weights:w}); }
+  showChip(iso,dimId,el){ if(this.state.card)return; const r=el.getBoundingClientRect(); this.setState({chip:{iso,dimId,x:r.left,y:r.top}}); }
+  hideChip(){ if(this.state.chip)this.setState({chip:null}); }
+  openCard(iso){ this.setState({card:{iso},chip:null}); }
+  closeCard(){ if(this.state.card)this.setState({card:null}); }
+
+  /* ---- small UI helpers ---- */
+  seg(items,active,on){ const h=this.h; return h('div',{style:{display:'inline-flex',gap:'2px',padding:'3px',background:'var(--panel2)',border:'1px solid var(--line)',borderRadius:'9px'}},
+    items.map(it=>h('button',{key:it.v,title:it.title||'',onClick:()=>on(it.v),style:{border:0,cursor:'pointer',padding:'6px 12px',borderRadius:'7px',font:"600 12.5px/1 'IBM Plex Sans',sans-serif",color:active===it.v?'var(--ink)':'var(--mut)',background:active===it.v?'var(--panel)':'transparent',boxShadow:active===it.v?'0 1px 2px var(--shadow)':'none',transition:'color .15s'}},it.label))); }
+  lbl(t){ return this.h('span',{key:'l'+t,style:{font:"600 10px/1 'IBM Plex Sans'",letterSpacing:'.13em',textTransform:'uppercase',color:'var(--faint)'}},t); }
+  miniBtn(primary){ return {border:primary?'0':'1px solid var(--line)',background:primary?'var(--accent)':'var(--panel)',color:primary?'#fff':'var(--mut)',borderRadius:'7px',padding:'6px 11px',font:"600 11.5px/1 'IBM Plex Sans'",cursor:'pointer'}; }
+  pbtn(label,on){ return this.h('button',{key:label,onClick:on,style:{border:'1px solid var(--line)',background:'var(--panel2)',color:'var(--ink2)',borderRadius:'7px',padding:'6px 11px',font:"600 11.5px/1 'IBM Plex Sans'",cursor:'pointer'}},label); }
+  searchInput(){ return this.h('input',{key:'q',value:this.state.query,onChange:e=>this.setState({query:e.target.value}),placeholder:'Search jurisdiction…',style:{marginLeft:'auto',padding:'7px 11px',border:'1px solid var(--line)',borderRadius:'8px',background:'var(--panel2)',color:'var(--ink2)',font:"400 13px/1 'IBM Plex Sans'",minWidth:'180px'}}); }
+  metricSelect(){ const h=this.h; return h('select',{value:this.state.mapMetric,onChange:e=>this.setState({mapMetric:e.target.value}),style:{padding:'7px 10px',border:'1px solid var(--line)',borderRadius:'8px',background:'var(--panel2)',color:'var(--ink2)',font:"600 12.5px/1 'IBM Plex Sans'",cursor:'pointer'}}, this.DIMS.map(d=>h('option',{key:d.id,value:d.id},(d.pillar==='ai'?'AI · ':'Q · ')+d.full))); }
+  compareChips(){ const h=this.h,sel=this.state.sel; return h('div',{style:{display:'flex',flexWrap:'wrap',gap:'6px'}}, this.J.map(j=>{const on=sel.includes(j.iso); return h('button',{key:j.iso,onClick:()=>this.toggleSel(j.iso),style:{border:on?'1px solid var(--accent)':'1px solid var(--line)',background:on?'var(--accent-weak)':'var(--panel2)',color:on?'var(--accent)':'var(--mut)',borderRadius:'999px',padding:'5px 11px',font:"600 11.5px/1 'IBM Plex Sans'",cursor:'pointer'}},j.name);})); }
+
+  /* ---- controls ---- */
+  controls(){ const h=this.h,S=this.state;
+    const pan={background:'var(--panel)',border:'1px solid var(--line)',borderRadius:'12px',padding:'13px 15px',marginBottom:'16px',boxShadow:'0 1px 2px var(--shadow)'};
+    const row={display:'flex',flexWrap:'wrap',alignItems:'center',gap:'10px'};
+    const top=[this.lbl('View'),this.seg([{v:'matrix',label:'Matrix'},{v:'compare',label:'Compare'},{v:'index',label:'Index builder'},{v:'map',label:'Map'}],S.view,v=>this.setView(v))];
+    if(S.sel.length){ top.push(h('div',{key:'sel',style:{marginLeft:'auto',display:'flex',alignItems:'center',gap:'8px'}},
+      h('span',{style:{font:"600 11.5px/1 'IBM Plex Sans'",color:'var(--mut)'}}, S.sel.length+' selected'),
+      S.view!=='compare'?h('button',{onClick:()=>this.setView('compare'),style:this.miniBtn(true)},'Open compare →'):null,
+      h('button',{onClick:()=>this.setState({sel:[]}),style:this.miniBtn(false)},'Clear'))); }
+    const rows=[h('div',{key:'r1',style:row},top)];
+    let ctx=[];
+    if(S.view==='matrix'){ ctx=[this.lbl('Measure'),this.seg([{v:'abs',label:'Absolute'},{v:'pc',label:'Per capita',title:'per million residents'},{v:'gdp',label:'Per $T GDP'}],S.mode,v=>this.setMode(v)),this.lbl('Pillar'),this.seg([{v:'all',label:'All'},{v:'ai',label:'AI'},{v:'q',label:'Quantum'}],S.pillar,v=>this.setState({pillar:v})),this.searchInput()]; }
+    else if(S.view==='map'){ ctx=[this.lbl('Metric'),this.metricSelect(),this.lbl('Measure'),this.seg([{v:'abs',label:'Absolute'},{v:'pc',label:'Per capita'},{v:'gdp',label:'Per $T GDP'}],S.mode,v=>this.setMode(v))]; }
+    else if(S.view==='index'){ ctx=[this.lbl('Presets'),h('div',{key:'pr',style:{display:'flex',gap:'6px',flexWrap:'wrap'}},this.pbtn('Balanced',()=>this.preset('bal')),this.pbtn('AI-weighted',()=>this.preset('ai')),this.pbtn('Quantum-weighted',()=>this.preset('q'))),h('span',{key:'note',style:{font:"500 11.5px/1.4 'IBM Plex Sans'",color:'var(--mut)',marginLeft:'4px'}},'Drag the weights — the ranking recomputes and reorders live.')]; }
+    else if(S.view==='compare'){ ctx=[this.lbl('Add up to 3'),this.compareChips()]; }
+    rows.push(h('div',{key:'r2',style:Object.assign({},row,{marginTop:'12px'})},ctx));
+    return h('div',{style:pan},rows);
+  }
+
+  /* ---- matrix ---- */
+  thInner(label,active,dir,sub,left,tag){ const h=this.h; return h('div',{style:{display:'inline-flex',flexDirection:'column',gap:'2px',alignItems:left?'flex-start':'flex-end'}},
+    h('span',{style:{font:"600 10.5px/1 'IBM Plex Sans'",letterSpacing:'.04em',textTransform:'uppercase',color:active?'var(--accent)':'var(--mut)'}}, label+(active?(dir<0?' ↓':' ↑'):'')),
+    sub?h('span',{style:{font:"500 9px/1 'IBM Plex Mono'",color:'var(--faint)',letterSpacing:'.02em'}},sub):null,
+    tag?h('span',{title:tag==='live'?'Computed from the live ledger':'Illustrative placeholder — not yet sourced',style:{font:"600 8px/1 'IBM Plex Mono'",letterSpacing:'.1em',marginTop:'1px',color:tag==='live'?'var(--accent)':'var(--faint)'}}, tag==='live'?'LIVE':'DEMO'):null); }
+  nameCell(j,rank,sel){ const h=this.h; return h('div',{style:{display:'flex',alignItems:'center',gap:'9px'}},
+    h('button',{onClick:(e)=>{e.stopPropagation();this.toggleSel(j.iso);},title:'Add to compare',style:{flex:'none',width:'16px',height:'16px',borderRadius:'4px',border:sel?'0':'1.5px solid var(--line)',background:sel?'var(--accent)':'transparent',color:'#fff',cursor:'pointer',font:'700 10px/1 sans-serif',display:'flex',alignItems:'center',justifyContent:'center',padding:0}}, sel?'✓':''),
+    h('span',{style:{font:"500 10px/1 'IBM Plex Mono'",color:'var(--faint)',width:'15px',textAlign:'right'}}, rank),
+    h('button',{onClick:(e)=>{e.stopPropagation();this.openCard(j.iso);},title:'View the source articles behind '+j.name+'’s totals',
+      style:{border:0,background:'transparent',padding:0,cursor:'pointer',display:'inline-flex',alignItems:'baseline',gap:'5px',textAlign:'left'}},
+      h('span',{style:{font:"600 12.5px/1.2 'IBM Plex Sans'",color:'var(--ink)',textDecoration:'underline',textDecorationColor:'var(--line)',textUnderlineOffset:'2px'}}, j.name),
+      h('span',{style:{font:"600 9px/1 'IBM Plex Mono'",color:'var(--faint)',letterSpacing:'.06em'}}, 'SRC'))); }
+  numCell(j,d,pillarStart,sortCol){ const h=this.h; const pct=this.barPct(j.iso,d); const val=this.fmtCell(j.iso,d); const lead=pct>0.985;
+    return h('td',{key:d.id,onMouseEnter:(e)=>this.showChip(j.iso,d.id,e.currentTarget),onMouseLeave:()=>this.hideChip(),
+      style:{borderBottom:'1px solid var(--line2)',borderLeft:pillarStart?'2px solid var(--line)':'none',padding:'6px 11px',textAlign:'right',verticalAlign:'middle',background:sortCol?'var(--panel2)':'transparent',cursor:'default'}},
+      h('div',{style:{font:"500 12px/1 'IBM Plex Mono'",fontVariantNumeric:'tabular-nums',color:lead?'var(--accent)':'var(--ink2)',letterSpacing:'-.01em'}}, val),
+      h('div',{style:{marginTop:'4px',height:'3px',width:'100%',minWidth:'42px',background:'var(--line2)',borderRadius:'2px',overflow:'hidden'}},
+        h('div',{style:{height:'100%',width:(pct*100).toFixed(1)+'%',background:'var(--accent)',opacity:0.32+0.5*pct,borderRadius:'2px'}}))); }
+  compCell(j){ const h=this.h; const c=this.composite(j.iso); return h('td',{style:{borderBottom:'1px solid var(--line2)',borderLeft:'2px solid var(--ink)',padding:'6px 11px',textAlign:'right',background:'var(--panel2)'}},
+    h('div',{style:{font:"600 12.5px/1 'IBM Plex Mono'",color:'var(--ink)'}}, c.toFixed(1)),
+    h('div',{style:{marginTop:'4px',height:'3px',background:'var(--line2)',borderRadius:'2px',overflow:'hidden'}}, h('div',{style:{height:'100%',width:c.toFixed(1)+'%',background:'var(--ink)',borderRadius:'2px'}}))); }
+  matrix(){ const h=this.h,S=this.state; const dims=this.visibleDims(); const rowsJ=this.matrixRows();
+    const ranked=this.J.slice().sort((a,b)=>this.composite(b.iso)-this.composite(a.iso)); const rankOf={}; ranked.forEach((j,i)=>rankOf[j.iso]=i+1);
+    const pan={background:'var(--panel)',border:'1px solid var(--line)',borderRadius:'12px',boxShadow:'0 1px 2px var(--shadow)',overflow:'hidden'};
+    const dot=(c)=>h('span',{style:{width:'9px',height:'9px',borderRadius:'2px',background:c,display:'inline-block'}});
+    const legend=h('div',{style:{display:'flex',alignItems:'center',gap:'16px',padding:'12px 16px',flexWrap:'wrap'}},
+      h('div',{style:{display:'flex',alignItems:'center',gap:'7px'}},dot('var(--accent)'),h('span',{style:{font:"600 11px/1 'IBM Plex Sans'",color:'var(--ink2)'}},'Artificial Intelligence')),
+      h('div',{style:{display:'flex',alignItems:'center',gap:'7px'}},dot('var(--ink2)'),h('span',{style:{font:"600 11px/1 'IBM Plex Sans'",color:'var(--ink2)'}},'Quantum')),
+      h('span',{style:{marginLeft:'auto',font:"500 11px/1.4 'IBM Plex Sans'",color:'var(--faint)'}},'Click a column to sort · the ✓ adds to compare · hover a figure for its source'));
+    const thBase={position:'sticky',top:0,zIndex:2,background:'var(--panel)',borderBottom:'1.5px solid var(--ink)',padding:'9px 11px',textAlign:'right',cursor:'pointer',whiteSpace:'nowrap'};
+    const headCells=[ h('th',{key:'h0',onClick:()=>this.sort('name'),style:Object.assign({},thBase,{left:0,zIndex:4,textAlign:'left',minWidth:'200px'})}, this.thInner('Jurisdiction',S.sortKey==='name',S.sortDir,null,true)) ];
+    const tagFor=(d)=> this.liveDims.length ? (d.live?'live':'demo') : null;
+    dims.forEach((d,i)=>{ const ps=i>0&&dims[i-1].pillar!==d.pillar; headCells.push(h('th',{key:d.id,onClick:()=>this.sort(d.id),title:d.full,style:Object.assign({},thBase,{borderLeft:ps?'2px solid var(--line)':'none'})}, this.thInner(d.short,S.sortKey===d.id,S.sortDir,this.basis(d),false,tagFor(d)))); });
+    headCells.push(h('th',{key:'comp',onClick:()=>this.sort('composite'),title:'Weighted composite index — configure in the Index builder',style:Object.assign({},thBase,{borderLeft:'2px solid var(--ink)'})}, this.thInner('Index',S.sortKey==='composite',S.sortDir,'0–100')));
+    const thead=h('thead',null,h('tr',null,headCells));
+    const body=rowsJ.map(j=>{ const sel=S.sel.includes(j.iso);
+      const cells=[ h('td',{key:'c0',style:{position:'sticky',left:0,zIndex:1,background:'var(--panel)',borderBottom:'1px solid var(--line2)',borderLeft:sel?'3px solid var(--accent)':'3px solid transparent',padding:'7px 11px',textAlign:'left',minWidth:'200px'}}, this.nameCell(j,rankOf[j.iso],sel)) ];
+      dims.forEach((d,i)=>{ const ps=i>0&&dims[i-1].pillar!==d.pillar; cells.push(this.numCell(j,d,ps,S.sortKey===d.id)); });
+      cells.push(this.compCell(j));
+      return h('tr',{key:j.iso,ref:this.ref('m:'+j.iso)},cells);
+    });
+    const tbl=h('div',{style:{overflow:'auto',maxHeight:'70vh',borderTop:'1px solid var(--line)'}},
+      h('table',{style:{width:'100%',borderCollapse:'separate',borderSpacing:0,font:"400 12px/1 'IBM Plex Sans'"}}, thead, h('tbody',null,body)));
+    return h('div',{style:pan}, legend, tbl);
+  }
+
+  /* ---- compare ---- */
+  radar(series){ const h=this.h; const dims=this.DIMS; const n=dims.length; const cx=170,cy=160,R=118; const rings=[0.25,0.5,0.75,1];
+    const pt=(i,fr)=>{const ang=i/n*2*Math.PI-Math.PI/2; return [cx+Math.cos(ang)*R*fr, cy+Math.sin(ang)*R*fr];};
+    const els=[];
+    rings.forEach((rr,ri)=>{ const p=dims.map((d,i)=>pt(i,rr).join(',')).join(' '); els.push(h('polygon',{key:'r'+ri,points:p,fill:'none',stroke:'var(--line)',strokeWidth:1})); });
+    dims.forEach((d,i)=>{ const a=pt(i,1); els.push(h('line',{key:'a'+i,x1:cx,y1:cy,x2:a[0],y2:a[1],stroke:'var(--line)',strokeWidth:1})); const l=pt(i,1.17); els.push(h('text',{key:'t'+i,x:l[0],y:l[1],fontSize:9,fontWeight:600,fill:'var(--mut)',textAnchor:l[0]>cx+4?'start':l[0]<cx-4?'end':'middle',dominantBaseline:'middle',style:{fontFamily:"'IBM Plex Sans'"}},d.short)); });
+    series.forEach(s=>{ const p=dims.map((d,i)=>pt(i,Math.max(0.02,this.dimScore(s.iso,d)/100)).join(',')).join(' '); els.push(h('polygon',{key:'p'+s.iso,points:p,fill:s.color,fillOpacity:0.13,stroke:s.color,strokeWidth:2,style:{transition:'all .5s'}}));
+      dims.forEach((d,i)=>{const a=pt(i,Math.max(0.02,this.dimScore(s.iso,d)/100));els.push(h('circle',{key:'c'+s.iso+i,cx:a[0],cy:a[1],r:2.3,fill:s.color}));}); });
+    return h('svg',{viewBox:'0 0 340 320',style:{width:'100%',maxWidth:'440px',height:'auto',display:'block'}},els);
+  }
+  pairedBars(series){ const h=this.h; const cols='128px repeat('+series.length+',1fr)'; const rows=[];
+    rows.push(h('div',{key:'hd',style:{display:'grid',gridTemplateColumns:cols,gap:'10px',alignItems:'center',padding:'0 0 8px',borderBottom:'1px solid var(--line)'}},
+      h('span',{style:{font:"600 10px/1 'IBM Plex Sans'",letterSpacing:'.08em',textTransform:'uppercase',color:'var(--faint)'}},'Dimension'),
+      series.map(s=>h('span',{key:s.iso,style:{font:"600 11px/1 'IBM Plex Sans'",color:s.color}},s.name))));
+    let prevP=null;
+    this.DIMS.forEach(d=>{ if(d.pillar!==prevP){rows.push(h('div',{key:'pp'+d.pillar,style:{font:"600 10px/1 'IBM Plex Mono'",letterSpacing:'.06em',color:'var(--faint)',margin:'12px 0 4px'}}, d.pillar==='ai'?'ARTIFICIAL INTELLIGENCE':'QUANTUM'));prevP=d.pillar;}
+      rows.push(h('div',{key:d.id,style:{display:'grid',gridTemplateColumns:cols,gap:'10px',alignItems:'center',padding:'5px 0',borderBottom:'1px solid var(--line2)'}},
+        h('span',{title:d.full,style:{font:"500 11.5px/1.2 'IBM Plex Sans'",color:'var(--ink2)'}},d.short),
+        series.map(s=>{const sc=this.dimScore(s.iso,d);return h('div',{key:s.iso,style:{display:'flex',alignItems:'center',gap:'7px'}},
+          h('div',{style:{flex:1,height:'7px',background:'var(--line2)',borderRadius:'3px',overflow:'hidden'}},h('div',{style:{height:'100%',width:sc.toFixed(0)+'%',background:s.color,borderRadius:'3px',transition:'width .5s cubic-bezier(.2,.8,.2,1)'}})),
+          h('span',{style:{font:"500 10.5px/1 'IBM Plex Mono'",color:'var(--mut)',minWidth:'42px',textAlign:'right'}}, this.fmtAbs(this.CELLS[s.iso][d.id].v,d)));}))); });
+    return h('div',null,rows);
+  }
+  compare(){ const h=this.h,S=this.state; const pan={background:'var(--panel)',border:'1px solid var(--line)',borderRadius:'12px',boxShadow:'0 1px 2px var(--shadow)',padding:'20px 22px'};
+    const colors=['var(--accent)','#4f7cac','#3f9b7a'];
+    const series=S.sel.map((iso,i)=>({iso,name:this.jByIso[iso].name,sh:this.jByIso[iso].sh,color:colors[i]||'var(--mut)'}));
+    if(!series.length)return h('div',{style:pan},h('div',{style:{textAlign:'center',padding:'48px 20px',color:'var(--mut)',font:"500 14px/1.5 'IBM Plex Sans'"}},'Select 2–3 jurisdictions above to compare them head-to-head.'));
+    const legend=h('div',{key:'lg',style:{display:'flex',gap:'16px',flexWrap:'wrap',marginBottom:'10px'}}, series.map(s=>h('div',{key:s.iso,style:{display:'flex',alignItems:'center',gap:'7px'}},h('span',{style:{width:'11px',height:'11px',borderRadius:'3px',background:s.color}}),h('span',{style:{font:"600 12.5px/1 'IBM Plex Sans'",color:'var(--ink)'}},s.name))));
+    const radarCard=h('div',{key:'rc',style:{flex:'1 1 340px',minWidth:'290px'}}, h('div',{style:{font:"600 12px/1 'IBM Plex Sans'",color:'var(--mut)',marginBottom:'6px'}},'Relative strength · 0–100 across all dimensions'), this.radar(series));
+    const barsCard=h('div',{key:'bc',style:{flex:'2 1 440px',minWidth:'320px'}}, this.pairedBars(series));
+    return h('div',{style:pan}, legend, h('div',{style:{display:'flex',gap:'30px',flexWrap:'wrap',alignItems:'flex-start'}}, radarCard, barsCard));
+  }
+
+  /* ---- index builder ---- */
+  index(){ const h=this.h,S=this.state; const pan={background:'var(--panel)',border:'1px solid var(--line)',borderRadius:'12px',boxShadow:'0 1px 2px var(--shadow)',padding:'20px 22px'};
+    const sliderRow=(d)=>h('div',{key:d.id,style:{display:'grid',gridTemplateColumns:'100px 1fr 20px',gap:'10px',alignItems:'center',padding:'5px 0'}},
+      h('span',{title:d.full,style:{font:"500 11.5px/1.2 'IBM Plex Sans'",color:'var(--ink2)'}},d.short),
+      h('input',{type:'range',min:0,max:5,step:1,value:S.weights[d.id],onChange:e=>this.setWeight(d.id,+e.target.value),style:{width:'100%'}}),
+      h('span',{style:{font:"600 11px/1 'IBM Plex Mono'",color:S.weights[d.id]>0?'var(--ink)':'var(--faint)',textAlign:'right'}},S.weights[d.id]));
+    const aiD=this.DIMS.filter(d=>d.pillar==='ai'),qD=this.DIMS.filter(d=>d.pillar==='q');
+    const left=h('div',{key:'lf',style:{flex:'1 1 290px',minWidth:'272px'}},
+      h('div',{style:{font:"600 10px/1 'IBM Plex Mono'",letterSpacing:'.08em',color:'var(--accent)',marginBottom:'4px'}},'ARTIFICIAL INTELLIGENCE'), aiD.map(sliderRow),
+      h('div',{style:{font:"600 10px/1 'IBM Plex Mono'",letterSpacing:'.08em',color:'var(--ink2)',margin:'14px 0 4px'}},'QUANTUM'), qD.map(sliderRow),
+      h('div',{style:{marginTop:'12px',font:"500 11px/1.5 'IBM Plex Sans'",color:'var(--faint)'}},'Composite = weighted average of each dimension’s 0–100 min–max score. Export-control exposure is inverted (lower exposure scores higher).'));
+    const ranked=this.J.slice().map(j=>({j,c:this.composite(j.iso)})).sort((a,b)=>b.c-a.c);
+    const max=ranked.length?ranked[0].c:100;
+    const items=ranked.map((o,i)=>h('div',{key:o.j.iso,ref:this.ref('x:'+o.j.iso),style:{display:'grid',gridTemplateColumns:'24px 128px 1fr 44px',gap:'12px',alignItems:'center',padding:'8px 10px',borderRadius:'8px',background:i%2?'var(--panel2)':'transparent'}},
+      h('span',{style:{font:"600 12px/1 'IBM Plex Mono'",color:i<3?'var(--accent)':'var(--faint)'}}, i+1),
+      h('span',{style:{font:"600 12.5px/1.2 'IBM Plex Sans'",color:'var(--ink)'}}, o.j.name),
+      h('div',{style:{height:'9px',background:'var(--line2)',borderRadius:'4px',overflow:'hidden'}},h('div',{style:{height:'100%',width:(o.c/max*100).toFixed(1)+'%',background:'var(--accent)',borderRadius:'4px',transition:'width .5s cubic-bezier(.2,.8,.2,1)'}})),
+      h('span',{style:{font:"600 12px/1 'IBM Plex Mono'",color:'var(--ink2)',textAlign:'right'}}, o.c.toFixed(1))));
+    const right=h('div',{key:'rt',style:{flex:'1.35 1 360px',minWidth:'320px'}}, h('div',{style:{font:"600 12px/1 'IBM Plex Sans'",color:'var(--mut)',marginBottom:'10px'}},'Live composite ranking'), h('div',null,items));
+    return h('div',{style:pan}, h('div',{style:{display:'flex',gap:'34px',flexWrap:'wrap',alignItems:'flex-start'}}, left, right));
+  }
+
+  /* ---- map ---- */
+  map(){ const h=this.h,S=this.state; const d=this.dimById[S.mapMetric]; const cmax=this.colMaxAt(d,S.mode);
+    const pan={background:'var(--panel)',border:'1px solid var(--line)',borderRadius:'12px',boxShadow:'0 1px 2px var(--shadow)',padding:'20px 22px'};
+    const tile=(j)=>{ const mag=this.magnitudeAt(j.iso,d,S.mode); const pct=(d.kind==='score'&&!d.norm)? this.CELLS[j.iso][d.id].v/100 : mag/cmax; const op=0.10+0.85*Math.max(0,Math.min(1,pct)); const strong=pct>0.5; const seld=S.sel.includes(j.iso);
+      return h('button',{key:j.iso,onClick:()=>this.toggleSel(j.iso),onMouseEnter:(e)=>this.showChip(j.iso,d.id,e.currentTarget),onMouseLeave:()=>this.hideChip(),title:j.name,
+        style:{gridColumn:j.col,gridRow:j.row,position:'relative',aspectRatio:'1 / 1',border:seld?'2px solid var(--accent)':'1px solid var(--line)',borderRadius:'9px',overflow:'hidden',cursor:'pointer',padding:0,background:'var(--panel2)',boxShadow:seld?'0 0 0 3px var(--accent-weak)':'none'}},
+        h('div',{style:{position:'absolute',inset:0,background:'var(--accent)',opacity:op,transition:'opacity .5s'}}),
+        h('div',{style:{position:'relative',height:'100%',display:'flex',flexDirection:'column',justifyContent:'space-between',padding:'8px 9px',textAlign:'left'}},
+          h('span',{style:{font:"700 13px/1 'IBM Plex Mono'",color:strong?'#fff':'var(--ink)'}},j.sh),
+          h('span',{style:{font:"500 10px/1 'IBM Plex Mono'",color:strong?'rgba(255,255,255,.85)':'var(--mut)'}}, (!d.norm||S.mode==='abs')?this.fmtAbs(mag,d):this.sig(mag)))); };
+    const gridEl=h('div',{style:{display:'grid',gridTemplateColumns:'repeat(7,minmax(0,84px))',gridAutoRows:'84px',gap:'8px',justifyContent:'center',margin:'14px auto'}}, this.J.map(tile));
+    const legend=h('div',{style:{display:'flex',alignItems:'center',gap:'10px',justifyContent:'center',marginTop:'16px'}},
+      h('span',{style:{font:"500 11px/1 'IBM Plex Mono'",color:'var(--faint)'}},'0'),
+      h('div',{style:{width:'180px',height:'9px',borderRadius:'5px',background:'linear-gradient(90deg,var(--panel2),var(--accent))',border:'1px solid var(--line)'}}),
+      h('span',{style:{font:"500 11px/1 'IBM Plex Mono'",color:'var(--faint)'}}, (!d.norm||S.mode==='abs')?this.fmtAbs(cmax,d):this.sig(cmax)));
+    const head=h('div',{style:{textAlign:'center'}}, h('div',{style:{font:"600 14px/1.3 'IBM Plex Sans'",color:'var(--ink)'}}, d.full), h('div',{style:{font:"500 11.5px/1.4 'IBM Plex Sans'",color:'var(--mut)',marginTop:'3px'}}, 'Shaded by '+(S.mode==='abs'?'absolute value':S.mode==='pc'?'per-capita value':'value per $T GDP')+' · click a tile to add it to compare'));
+    return h('div',{style:pan}, head, gridEl, legend);
+  }
+
+  /* ---- citation chip ---- */
+  sparkline(trend){ const h=this.h; const w=232,ht=34; const mn=Math.min.apply(null,trend),mx=Math.max.apply(null,trend),rg=(mx-mn)||1; const pts=trend.map((v,i)=>[2+i/(trend.length-1)*(w-4), ht-3-((v-mn)/rg)*(ht-6)]); const dpath='M'+pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L '); const last=pts[pts.length-1];
+    return h('svg',{style:{display:'block',marginTop:'8px',width:'100%',height:ht+'px'},viewBox:'0 0 '+w+' '+ht,preserveAspectRatio:'none'},
+      h('path',{d:dpath,fill:'none',stroke:'var(--accent)',strokeWidth:1.6,strokeLinejoin:'round',strokeLinecap:'round'}),
+      h('circle',{cx:last[0],cy:last[1],r:2.6,fill:'var(--accent)'})); }
+  chipNode(){ const c=this.state.chip; if(!c)return null; const h=this.h; const d=this.dimById[c.dimId]; const j=this.jByIso[c.iso]; const cell=this.CELLS[c.iso][c.dimId]; const src=this.SRC[c.dimId];
+    const vw=(typeof window!=='undefined')?window.innerWidth:1200; const left=Math.min(Math.max(8,c.x),vw-272);
+    const live=!!cell.live;
+    const kids=[
+      h('div',{style:{display:'flex',alignItems:'center',gap:'6px'}},
+        h('span',{style:{font:"600 9.5px/1 'IBM Plex Sans'",letterSpacing:'.1em',textTransform:'uppercase',color:'var(--faint)'}}, d.full),
+        live?h('span',{style:{font:"600 8px/1 'IBM Plex Mono'",letterSpacing:'.1em',color:'var(--accent)',background:'var(--accent-weak)',border:'1px solid var(--accent)',borderRadius:'999px',padding:'2px 6px'}},'LIVE'):null),
+      h('div',{style:{display:'flex',alignItems:'baseline',justifyContent:'space-between',gap:'8px',marginTop:'6px'}},
+        h('span',{style:{font:"600 13px/1 'IBM Plex Sans'",color:'var(--ink)'}}, j.name),
+        h('span',{style:{font:"600 14px/1 'IBM Plex Mono'",color:'var(--accent)'}}, this.fmtAbs(cell.v,d)))
+    ];
+    if(!live) kids.push(this.sparkline(cell.trend));
+    kids.push(h('div',{style:{display:'flex',alignItems:'center',gap:'6px',marginTop:'8px',font:"500 10.5px/1.3 'IBM Plex Mono'",color:'var(--mut)'}},
+      h('span',{style:{width:'5px',height:'5px',borderRadius:'50%',background:'var(--pos)',flex:'none'}}), src.name+' · '+src.date));
+    kids.push(h('div',{style:{marginTop:'6px',font:"500 10px/1.3 'IBM Plex Sans'",color:'var(--faint)'}},
+      live ? ('Live ledger aggregate'+(cell.programs?' · '+cell.programs.join(', '):'')+(this.generated?' · as of '+this.generated:''))
+           : 'Demo placeholder · 2018–2025 trend · source link on launch'));
+    return h('div',{style:{position:'fixed',left:left+'px',top:(c.y-8)+'px',transform:'translateY(-100%)',width:'260px',background:'var(--panel)',border:'1px solid var(--line)',borderRadius:'10px',boxShadow:'0 14px 36px -10px var(--shadow)',padding:'12px 14px',zIndex:60,pointerEvents:'none',animation:'chipIn .14s ease-out'}}, kids);
+  }
+
+  /* ---- source drill-down card (click-pinned) ---- */
+  _actorLabel(a){ const pub=['government_appropriated','government_outlay','state_fund','sovereign_wealth','public_private'].includes(a);
+    const map={government_appropriated:'appropriated',government_outlay:'public outlay',state_fund:'state fund',sovereign_wealth:'sovereign',public_private:'public-private',mobilization_target:'mobilized',private:'private'};
+    return {text:map[a]||a, pub}; }
+  _tierBadge(t){ const h=this.h; if(t==null)return null; const one=t===1;
+    return h('span',{title:one?'Tier 1 — primary / official source':'Tier '+t+' — major secondary source',style:{font:"600 8px/1 'IBM Plex Mono'",letterSpacing:'.06em',color:one?'var(--accent)':'var(--mut)',background:one?'var(--accent-weak)':'var(--panel2)',border:'1px solid '+(one?'var(--accent)':'var(--line)'),borderRadius:'999px',padding:'1px 5px',flex:'none'}}, 'T'+t); }
+  contribRow(c){ const h=this.h; const al=this._actorLabel(c.actor_type);
+    const srcInner=c.source_name+' ↗';
+    const src = c.source_url
+      ? h('a',{href:c.source_url,target:'_blank',rel:'noopener',style:{color:'var(--accent)',textDecoration:'none'}}, srcInner)
+      : h('span',{style:{color:'var(--mut)'}}, c.source_name);
+    return h('div',{style:{padding:'8px 0',borderBottom:'1px solid var(--line2)'}},
+      h('div',{style:{display:'flex',alignItems:'baseline',gap:'7px',flexWrap:'wrap'}},
+        h('span',{style:{font:"600 12px/1.3 'IBM Plex Sans'",color:'var(--ink)'}}, c.program),
+        h('span',{style:{font:"600 12px/1 'IBM Plex Mono'",color:'var(--ink2)',marginLeft:'auto'}}, this.moneyB(c.amount_b))),
+      h('div',{style:{display:'flex',alignItems:'center',gap:'6px',marginTop:'4px',flexWrap:'wrap'}},
+        h('span',{style:{font:"500 10px/1 'IBM Plex Mono'",color:al.pub?'var(--pos)':'var(--ink2)'}}, al.text),
+        h('span',{style:{font:"500 10px/1 'IBM Plex Mono'",color:'var(--faint)'}}, '· '+c.domain),
+        this._tierBadge(c.source_tier)),
+      h('div',{style:{marginTop:'4px',font:"500 10.5px/1.3 'IBM Plex Mono'"}},
+        src,
+        h('span',{style:{color:'var(--faint)'}}, ' · '+c.announced+' · '+c.verification))); }
+  cardNode(){ const cc=this.state.card; if(!cc)return null; const h=this.h; const iso=cc.iso; const j=this.jByIso[iso]; const C=this.contrib[iso]||{};
+    const section=(dimId)=>{ const d=this.dimById[dimId]; const cell=this.CELLS[iso][dimId]; const rows=C[dimId]||[];
+      return h('div',{style:{marginTop:'14px'}},
+        h('div',{style:{display:'flex',alignItems:'baseline',justifyContent:'space-between',gap:'8px',paddingBottom:'4px',borderBottom:'1.5px solid var(--ink)'}},
+          h('span',{style:{font:"600 11px/1 'IBM Plex Sans'",letterSpacing:'.04em',textTransform:'uppercase',color:d.pillar==='ai'?'var(--accent)':'var(--ink2)'}}, d.short),
+          h('span',{style:{font:"600 13px/1 'IBM Plex Mono'",color:'var(--ink)'}}, this.fmtAbs(cell.v,d))),
+        rows.length ? rows.map(c=>this.contribRow(c))
+                    : h('div',{style:{padding:'8px 0',font:"500 11px/1.4 'IBM Plex Sans'",color:'var(--faint)'}}, '— no committed capital on record')); };
+    const backdrop=h('div',{onClick:()=>this.closeCard(),style:{position:'fixed',inset:0,background:'rgba(20,18,16,.34)',zIndex:70}});
+    const card=h('div',{onClick:(e)=>e.stopPropagation(),style:{position:'fixed',top:'50%',left:'50%',transform:'translate(-50%,-50%)',width:'min(384px,92vw)',maxHeight:'78vh',overflow:'auto',background:'var(--panel)',border:'1px solid var(--line)',borderRadius:'12px',boxShadow:'0 24px 60px -16px var(--shadow)',padding:'16px 18px',zIndex:71,animation:'chipIn .14s ease-out'}},
+      h('div',{style:{display:'flex',alignItems:'baseline',gap:'8px'}},
+        h('span',{style:{font:"700 16px/1.1 'Source Serif 4',Georgia,serif",color:'var(--ink)'}}, j.name),
+        h('span',{style:{font:"600 10px/1 'IBM Plex Mono'",letterSpacing:'.12em',textTransform:'uppercase',color:'var(--faint)'}}, 'sources'),
+        h('button',{onClick:()=>this.closeCard(),title:'Close (Esc)',style:{marginLeft:'auto',border:0,background:'transparent',color:'var(--mut)',cursor:'pointer',font:"600 16px/1 'IBM Plex Sans'",padding:'0 2px'}}, '✕')),
+      h('div',{style:{marginTop:'4px',font:"500 11px/1.5 'IBM Plex Sans'",color:'var(--mut)'}}, 'The commitments behind this jurisdiction’s live totals — deduplicated by event, public and private kept separate.'),
+      this.liveDims.map(section),
+      h('div',{style:{marginTop:'14px',paddingTop:'10px',borderTop:'1px solid var(--line)',font:"500 10px/1.5 'IBM Plex Sans'",color:'var(--faint)'}},
+        'Totals = best-available committed capital by origin'+(this.generated?', as of '+this.generated:'')+'. The other 8 dimensions are illustrative placeholders (not yet sourced).'));
+    return h(FRAG,null, backdrop, card);
+  }
+
+  /* ---- assemble ---- */
+  app(){ const h=this.h; const v=this.state.view; const view = v==='matrix'?this.matrix():v==='compare'?this.compare():v==='index'?this.index():this.map();
+    return h(FRAG,null, this.controls(), view, this.chipNode(), this.cardNode()); }
+}
+
+/* ---------- mount ---------- */
+const APP = new PowerIndex({ defaultView:'matrix', normalizeDefault:'abs', startDark:false });
+document.getElementById('themeBtn').addEventListener('click', ()=>APP.toggleTheme());
+APP.render();
+
+// When build.py has bound live dims, reflect partial-live state in the chrome.
+if(APP.liveDims && APP.liveDims.length){
+  const n=APP.liveDims.length, tot=APP.DIMS.length;
+  const labels=APP.liveDims.map(id=>APP.dimById[id].short).join(', ');
+  document.getElementById('demoChip').textContent = n+' / '+tot+' DIMENSIONS LIVE';
+  document.getElementById('ledeFlag').textContent = n+' of '+tot+' dimensions ('+labels+') are now wired to the live ledger; the rest remain illustrative placeholders';
+  const ln=document.getElementById('liveNote');
+  if(ln) ln.textContent = ' Live dimensions ('+labels+') are computed from the ledger'+(APP.generated?' as of '+APP.generated:'')+' — public dims count appropriated outlay only (deduplicated by event_key), never announcement headlines.';
+}
+</script>
+</body>
+</html>

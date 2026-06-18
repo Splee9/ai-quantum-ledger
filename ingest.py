@@ -39,8 +39,6 @@ QUEUE = os.path.join(HERE, "data", "ingest-queue.jsonl")
 DOMAINS = {"ai", "quantum", "ai+quantum", "semiconductor", "compute"}
 VERIFICATION = {"verified", "reported", "estimate", "unconfirmed"}
 CONFIDENCE = {"high", "medium", "low"}
-SOURCE_TIERS = {"T1", "T2", "T3", "T4"}                       # credibility spine (optional)
-STATUSES = {"announced", "authorized", "obligated", "disbursed", "stalled", "cancelled"}  # money lifecycle (optional)
 # A scanner must never self-certify a row as primary-source verified.
 AUTO_FORBIDDEN_STATUS = {"verified"}
 
@@ -86,7 +84,7 @@ def existing_keys():
     return ids, events
 
 
-def validate(rec, denom, ids, events):
+def validate(rec, denom, ids, events, allow_low_tier=False):
     """Return (errors, warnings). errors block ingestion; warnings do not."""
     errors, warnings = [], []
     rid = rec.get("id", "?")
@@ -105,6 +103,16 @@ def validate(rec, denom, ids, events):
         errors.append("usd_approx must be a number")
     if rec.get("id") in ids:
         errors.append(f"duplicate id '{rid}' (already in ledger/queue)")
+    # source-fidelity tier gate (see data/schema.json#_source_tiers)
+    tier = rec.get("source_tier")
+    if tier is None:
+        warnings.append("source_tier unset — fidelity unknown; scanned rows must carry a tier 1-4 "
+                        "(legacy rows may omit it)")
+    elif tier not in build.SOURCE_TIERS:
+        errors.append(f"bad source_tier '{tier}' (must be 1, 2, 3, or 4)")
+    elif tier > build.SOURCE_TIER_MIN and not allow_low_tier:
+        errors.append(f"source_tier {tier} is below the tier-{build.SOURCE_TIER_MIN} fidelity gate "
+                      f"(use --allow-low-tier only for hand-curated rows)")
     # soft signals — accepted, but surfaced for the reviewer
     if rec.get("event_key") in events:
         warnings.append(f"event_key '{rec.get('event_key')}' already exists "
@@ -120,12 +128,12 @@ def validate(rec, denom, ids, events):
     return errors, warnings
 
 
-def _check_batch(recs, denom):
+def _check_batch(recs, denom, allow_low_tier=False):
     """Validate a batch, dedup within the batch too. Returns (accepted, rejected)."""
     ids, events = existing_keys()
     accepted, rejected = [], []
     for i, rec in enumerate(recs):
-        errs, warns = validate(rec, denom, ids, events)
+        errs, warns = validate(rec, denom, ids, events, allow_low_tier=allow_low_tier)
         rid = rec.get("id", f"<row {i+1}>")
         if errs:
             rejected.append((rid, errs))
@@ -146,21 +154,24 @@ def append_jsonl(path, recs):
 
 
 def cmd_validate(args):
-    recs = read_candidates(args[0])
+    allow_low_tier = "--allow-low-tier" in args
+    files = [a for a in args if not a.startswith("--")]
+    recs = read_candidates(files[0])
     denom = build.load_denominators()
-    accepted, rejected = _check_batch(recs, denom)
+    accepted, rejected = _check_batch(recs, denom, allow_low_tier=allow_low_tier)
     print(f"validate: {len(accepted)} ok / {len(rejected)} rejected (of {len(recs)})")
     return 1 if rejected else 0
 
 
 def cmd_add(args):
     to_ledger = "--to-ledger" in args
+    allow_low_tier = "--allow-low-tier" in args
     files = [a for a in args if not a.startswith("--")]
     if not files:
-        raise SystemExit("usage: ingest.py add <file> [--to-ledger]")
+        raise SystemExit("usage: ingest.py add <file> [--to-ledger] [--allow-low-tier]")
     recs = read_candidates(files[0])
     denom = build.load_denominators()
-    accepted, rejected = _check_batch(recs, denom)
+    accepted, rejected = _check_batch(recs, denom, allow_low_tier=allow_low_tier)
     target = LEDGER if to_ledger else QUEUE
     if accepted:
         append_jsonl(target, accepted)
@@ -173,27 +184,17 @@ def cmd_add(args):
 
 
 def cmd_list(_args):
-    """Review surface: one block per queued candidate. Open each source link to
-    verify before promoting; edit data/ingest-queue.jsonl by hand to fix a field
-    (e.g. swap a Google-News redirect for the clean publisher URL)."""
     q = load_jsonl(QUEUE)
-    if not q:
-        print("review queue is empty")
-        return 0
-    print(f"review queue: {len(q)} record(s) — verify sources, then `ingest.py promote <id> ...`\n")
+    print(f"review queue: {len(q)} record(s)")
     for r in q:
-        print(f"  [{r.get('id')}]  {r.get('jurisdiction','?')} · {r.get('domain','?')} · "
-              f"{r.get('actor_type','?')} · {r.get('verification_status','?')}/{r.get('confidence','?')}")
-        print(f"     {r.get('program','')}  —  {build.b(r.get('usd_approx'))} "
-              f"({r.get('currency','?')})  announced {r.get('announced','?')}")
-        print(f"     source: {r.get('source_url') or '(no URL — add one before promoting)'}")
-        if r.get("notes"):
-            print(f"     notes:  {str(r.get('notes'))[:140]}")
-        print()
+        print(f"  {r.get('id'):32} {r.get('jurisdiction','?'):16} "
+              f"{r.get('verification_status','?'):11} {r.get('announced','?'):10} {r.get('program','')[:40]}")
     return 0
 
 
 def cmd_promote(args):
+    allow_low_tier = "--allow-low-tier" in args
+    args = [a for a in args if not a.startswith("--")]
     q = load_jsonl(QUEUE)
     if not q:
         print("review queue is empty")
@@ -207,7 +208,7 @@ def cmd_promote(args):
     events = {r.get("event_key") for r in load_jsonl(LEDGER)}
     promoted, blocked = [], []
     for r in take:
-        errs, _ = validate(r, denom, ids, events)
+        errs, _ = validate(r, denom, ids, events, allow_low_tier=allow_low_tier)
         if errs:
             blocked.append((r.get("id"), errs))
             keep.append(r)

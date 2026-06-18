@@ -10,10 +10,12 @@ the canonical ledger. This doc is the contract between the *scanner* (which you 
 
 ```
  headlines / articles
-        │   ① scan + extract   (scan.py — Google News RSS + Claude extraction)
+        │   ① scan + extract + tier-gate   (scan.py — Google News RSS + Claude extraction;
+        │                                    assigns source_tier, drops tier > 2)
         ▼
- candidates.jsonl  (records following data/schema.json)
+ candidates.jsonl  (records following data/schema.json; source_tier ≤ 2 only)
         │   ② python3 ingest.py add candidates.jsonl   (scan.py run --add does ①+②)
+        │      (the write-path re-checks the tier gate)
         ▼
  data/ingest-queue.jsonl   (staging — nothing is live yet)
         │   ③ human review  (read the queue, check sources)
@@ -36,10 +38,16 @@ away from a human's eyes. The scanner is where the cleverness (and the risk) liv
 python3 ingest.py validate candidates.jsonl     # dry-run: validate only, no write
 python3 ingest.py add      candidates.jsonl     # validate + dedup -> append to the REVIEW QUEUE
 python3 ingest.py add      candidates.jsonl --to-ledger   # straight to the ledger (vetted rows only)
+python3 ingest.py add      candidates.jsonl --allow-low-tier  # bypass the tier-2 gate (hand-curated only)
 python3 ingest.py list                          # show the review queue
 python3 ingest.py promote                        # move ALL queue rows into the ledger
 python3 ingest.py promote us-foo-2026 eu-bar-2026  # move specific rows by id
 ```
+
+**The tier-2 gate is enforced here too:** `validate`/`add`/`promote` reject any row with
+`source_tier > 2` (or a bad/missing tier on a scanned row) unless `--allow-low-tier` is passed.
+This is the same gate the scanner applies — defense in depth, so a low-fidelity row can't slip in
+by editing a candidate file by hand.
 
 Input may be **JSONL** (one record per line) or a **JSON array**. The default `add` lands rows in
 the queue, never the live ledger — use `--to-ledger` only for rows you have already vetted by hand.
@@ -61,6 +69,7 @@ One record per announcement, following [`data/schema.json`](data/schema.json). R
 | `verification_status` | **Auto-extracted rows: use `reported` (credible press) or `unconfirmed`. Never `verified`** — `verified` means a human traced a primary budget/official doc. |
 | `confidence` | `high · medium · low`. Default `low`/`medium` for auto-extracted rows. |
 | `source_name` | Publisher / issuing body. |
+| `source_tier` | **Outlet fidelity `1–4`** (1 primary/official · 2 major secondary · 3 trade/regional/aggregator · 4 low). **The tier-2 gate: only `≤ 2` is ingestible** — tier 3/4 is rejected (override `--allow-low-tier`). Separate axis from `verification_status`. Scanned rows must carry a tier; see `data/schema.json#_source_tiers`. |
 | `event_key` | Stable key grouping re-announcements of the **same** money (e.g. a pledge repeated at a later summit). This is the dedup axis — see below. |
 
 Strongly encouraged (the ledger's whole value is the tagging — fill these when the source supports it):
@@ -95,53 +104,33 @@ writes only candidate files + the review queue, never the canonical ledger.
 ```bash
 # Stage 1 only — Google News RSS, NO API key needed:
 python3 scan.py discover --days 2 --out headlines.jsonl
+python3 scan.py discover --days 2 --international   # sweep all editions (global reach)
 
-# Stage 2 only — Claude extraction (needs ANTHROPIC_API_KEY):
-python3 scan.py extract --headlines headlines.jsonl --out candidates.jsonl
+# Stage 2 only — Claude extraction + tier gate (needs ANTHROPIC_API_KEY):
+python3 scan.py extract --headlines headlines.jsonl --out candidates.jsonl --min-tier 2
 
 # Both, and stage into the review queue in one shot:
 python3 scan.py run --days 2 --add
-#   -> discover -> extract -> ingest.py add  (lands in data/ingest-queue.jsonl)
+python3 scan.py run --days 2 --international --add   # comprehensive daily sweep
+#   -> discover -> extract -> tier-gate -> ingest.py add  (lands in data/ingest-queue.jsonl)
 ```
 
-- **Discovery** queries Google News RSS across a set of AI/quantum government-investment search terms
-  (stdlib `urllib` + `xml`; verifies TLS via `certifi` when present). Tune the `QUERIES` list or add
-  another source by editing `discover()`.
+- **Discovery** queries Google News RSS across **20 AI/quantum search terms** spanning public *and*
+  private commitments — national strategies, sovereign-AI compute/data-centers, research institutes,
+  summit pledges, quantum initiatives, and enabling compute/semiconductor (the full collection scope).
+  `--international` additionally sweeps 8 Google News editions (US/GB/IN/FR/DE/JP/KR/CN) for global
+  reach. Stdlib `urllib` + `xml`; verifies TLS via `certifi` when present. Tune `QUERIES` / `EDITIONS`
+  in `scan.py`.
 - **Extraction** calls Claude (default `claude-opus-4-8`; `--model claude-sonnet-4-6` for a cheaper
-  daily run) with **structured outputs** so it returns schema-valid candidate records, and a system
-  prompt that bakes in the rules above (reported/unconfirmed only, separate public/private, no headline
-  summing, stable `id`/`event_key`). Install the SDK with `pip install anthropic`.
+  daily run) with **structured outputs** so it returns schema-valid candidate records. The system prompt
+  bakes in the rules above (collect public *and* private with the split kept separate, no headline
+  summing, reported/unconfirmed only, stable `id`/`event_key`) **and assigns `source_tier`** per record.
+  Headlines are processed in batches of `MAX_HEADLINES` so a comprehensive sweep doesn't overflow one
+  response. Install the SDK with `pip install anthropic`.
+- **The tier gate** (`--min-tier 2`, default) drops every candidate whose `source_tier` is worse than 2
+  *before* it reaches the queue. The run prints how many were kept vs. dropped below the gate.
 
-**Scheduling.** Wrap `python3 scan.py run --add` in a daily cron / GitHub Action / Cowork task. It is
-idempotent on `id`, so re-runs don't create duplicates. A reviewer then works the queue
-(`ingest.py list` → `promote`) and runs `./publish.sh` on whatever cadence they trust — the
+**Scheduling.** Wrap `python3 scan.py run --international --add` in a daily cron / GitHub Action / Cowork
+task. It is idempotent on `id`, so re-runs don't create duplicates. A reviewer then works the queue
+(`ingest.py list` → `promote`) and runs `build.py` + commit on whatever cadence they trust — the
 human-review gate is deliberate and stays.
-
-## Operating the live site (runbook)
-
-This repo is the **home of the project** — clone it, run everything here, and pushing to `main`
-auto-deploys via Netlify (`netlify.toml`: keyless `python3 build.py`). The Anthropic API key lives in
-your shell env (`~/.zshenv`), never in the repo.
-
-**Daily loop:**
-
-```bash
-# 1. SCAN (automated, e.g. a daily Cowork task) — discovers + extracts -> review queue.
-python3 scan.py run --add --model claude-sonnet-4-6     # cheaper model for high-volume daily runs
-
-# 2. REVIEW (human gate — nothing auto-publishes).
-python3 ingest.py list                                  # inspect what the scanner proposed
-#    open each source_url, sanity-check actor_type / domain / USD / event_key.
-#    For a NEW jurisdiction, add its row to data/denominators.json first (ingest warns when missing).
-
-# 3. PROMOTE the rows you trust into the ledger.
-python3 ingest.py promote <id> <id> ...                 # or `promote` with no ids to take all
-
-# 4. PUBLISH -> live.
-./publish.sh                                            # build.py + commit + push -> Netlify rebuild
-```
-
-**Why the review gate matters:** `scan.py` only writes to `data/ingest-queue.jsonl` (staging) and never
-to the canonical `data/government-commitments.jsonl`. Auto-extracted rows are `reported`/`unconfirmed`
-and are *invisible to the public site* until a human runs `promote`. So a bad extraction can't reach the
-live ledger on its own — exactly the property you want for a public credibility tracker.
