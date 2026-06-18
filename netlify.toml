@@ -11,3 +11,17 @@
 
 [build.environment]
   PYTHON_VERSION = "3.12"
+
+# Front door: serve the editorial Power Index at the site root. The raw ledger
+# stays at /index.html and /ledger; the composite index at /composite-index.html.
+# status 200 = rewrite (URL stays "/"), force = override the static index.html.
+[[redirects]]
+  from = "/"
+  to = "/power-index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/ledger"
+  to = "/index.html"
+  status = 200

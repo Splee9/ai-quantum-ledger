@@ -503,6 +503,7 @@ a{{color:var(--accent);text-decoration:none}}a:hover{{text-decoration:underline}
  <div class="eyebrow">Government &amp; government-adjacent commitments</div>
  <h1>AI / Quantum Investment Ledger</h1>
  <p class="lede">An <b>all-time, source-linked tracker of national AI/quantum investment announcements</b> &mdash; one row per announcement &mdash; with per-capita / %GDP / %GBARD views and an FX-vs-PPP currency split. Each figure is tagged commitment-vs-outlay, public-vs-mobilized, horizon, and confidence <b>before</b> any comparison. Sorted newest-first; <b>Arrange</b> as a flat list, grouped by jurisdiction, or <b>rolled up</b> to one aggregate row per country. The ledger is the product; the index is a later layer.</p>
+ <a class="xlink" href="power-index.html"><span class="arr">&larr;</span> The AI &amp; Quantum Power Index</a>
  <a class="xlink" href="composite-index.html"><span class="arr">&rarr;</span> Provisional composite index (Stage&nbsp;4)</a>
 </header>
 {errnote}
@@ -874,6 +875,7 @@ tbody tr:hover td{{background:#eef1f9}}
  <div class="eyebrow">Stage 4 &middot; Provisional layer over the ledger</div>
  <h1>AI / Quantum Investment Composite Index</h1>
  <p class="lede">An OECD/JRC-style composite over the <a href="index.html">raw ledger</a> &mdash; fixed transparent weights, geometric aggregation, missing data as n/a (never imputed), and an independent Monte-Carlo audit publishing <b>90% rank confidence intervals</b>. Never a point rank without its interval. &middot; <a href="methodology.md">methodology</a></p>
+ <a class="xlink" href="power-index.html"><span class="arr">&larr;</span> The AI &amp; Quantum Power Index</a>
  <a class="xlink" href="index.html"><span class="arr">&larr;</span> Back to the ledger</a>
 </header>
 <div class="warn"><b>Do not cite these ranks.</b> {warning}</div>
