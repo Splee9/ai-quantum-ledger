@@ -1,0 +1,166 @@
+{
+  "_meta": {
+    "description": "Sourced values for the 8 Power Index dimensions that are NOT in the commitment ledger. Each dimension uses ONE canonical public dataset. Generated from a per-dimension research sweep 2026-06-18. Confidence and notes are honest: 'high' = read directly from the source; 'med'/'low' = proxy, derived, or judgment. Cells absent from a dimension's `values` map are genuinely unsourceable (no fabrication) and must render as n/a, never as a number.",
+    "as_of": "2026-06-18",
+    "quality_grades": {
+      "ai_reg": "SOLID — single authoritative index, native 0-100, 25/26 direct",
+      "ai_labs": "SOLID for leaders; tail are genuine zeros (below frontier threshold)",
+      "ai_talent": "SOLID for 17; CHINA MISSING by source methodology; 9 unsourced",
+      "q_patents": "SOLID for 11 majors + EU; 14 jurisdictions genuinely unsourceable",
+      "ai_compute": "PARTIAL — HPC proxy, NOT AI-specific; China distorted; 5 no-data",
+      "q_qubits": "PARTIAL — data exists but cross-modality non-comparable; raw count misleading",
+      "q_strategy": "CONSTRUCTED — transparent rubric over citable facts (strategy year, budget, institute)",
+      "q_export": "ANALYST CONSTRUCT — no published index; best framework rescinded May-2025; only CHN defensible"
+    }
+  },
+  "dimensions": {
+    "ai_reg": {
+      "label": "AI governance maturity",
+      "unit": "/100",
+      "source": "Oxford Insights — Government AI Readiness Index 2024 (Government pillar)",
+      "url": "https://oxfordinsights.com/wp-content/uploads/2024/12/2024-Government-AI-Readiness-Index-2.pdf",
+      "method": "Native 0-100 Government pillar, used directly. EU = mean of DEU/FRA/ITA/ESP/NLD (proxy).",
+      "values": {
+        "USA": {"v": 89.26, "c": "high"}, "CHN": {"v": 72.90, "c": "med", "note": "Oxford flags limited transparency; likely understated"},
+        "EU": {"v": 80.47, "c": "low", "note": "derived proxy (member mean); EU AI Act arguably warrants higher"},
+        "GBR": {"v": 84.47, "c": "high"}, "DEU": {"v": 79.24, "c": "high"}, "FRA": {"v": 85.29, "c": "high"},
+        "ITA": {"v": 78.64, "c": "high"}, "ESP": {"v": 74.58, "c": "high"}, "NLD": {"v": 84.58, "c": "high"},
+        "JPN": {"v": 80.31, "c": "high"}, "KOR": {"v": 84.59, "c": "high"}, "IND": {"v": 73.32, "c": "high"},
+        "CAN": {"v": 85.48, "c": "high"}, "AUS": {"v": 86.18, "c": "high"}, "ISR": {"v": 79.30, "c": "high"},
+        "SGP": {"v": 90.96, "c": "high"}, "TWN": {"v": 82.98, "c": "high"}, "ARE": {"v": 83.89, "c": "high"},
+        "SAU": {"v": 80.72, "c": "high"}, "QAT": {"v": 76.07, "c": "high"}, "BRA": {"v": 74.51, "c": "high"},
+        "TUR": {"v": 70.73, "c": "high"}, "MYS": {"v": 82.47, "c": "high"}, "THA": {"v": 75.78, "c": "high"},
+        "VNM": {"v": 75.02, "c": "high"}, "KAZ": {"v": 54.75, "c": "high"}
+      }
+    },
+    "ai_labs": {
+      "label": "Frontier AI models",
+      "unit": "#",
+      "source": "Epoch AI / Our World in Data — cumulative large-scale AI systems (>1e23 FLOP) by lead-developer country, 2020-2025",
+      "url": "https://ourworldindata.org/grapher/cumulative-number-of-large-scale-ai-systems-by-country",
+      "method": "Count of frontier-scale models by country of lead developer. Zeros = genuine absence above threshold, not 'no AI sector'. EU = sum of member rows (overlaps members).",
+      "values": {
+        "USA": {"v": 223, "c": "high"}, "CHN": {"v": 192, "c": "high"}, "EU": {"v": 28, "c": "med", "note": "sum of member rows; overlaps members"},
+        "FRA": {"v": 20, "c": "high", "note": "Mistral-driven"}, "KOR": {"v": 17, "c": "high"},
+        "GBR": {"v": 8, "c": "low", "note": "understated — DeepMind attributed to US parent"},
+        "ARE": {"v": 8, "c": "high", "note": "G42/TII Falcon"}, "CAN": {"v": 7, "c": "high", "note": "Cohere"},
+        "JPN": {"v": 4, "c": "high"}, "DEU": {"v": 4, "c": "high"}, "ISR": {"v": 4, "c": "high", "note": "AI21"},
+        "SGP": {"v": 2, "c": "high"}, "SAU": {"v": 2, "c": "high"}, "AUS": {"v": 1, "c": "high"},
+        "TWN": {"v": 0, "c": "med"}, "IND": {"v": 0, "c": "med", "note": "active ecosystem, no >1e23 FLOP model yet"},
+        "ESP": {"v": 0, "c": "med"}, "ITA": {"v": 0, "c": "med"}, "NLD": {"v": 0, "c": "med"},
+        "BRA": {"v": 0, "c": "med"}, "TUR": {"v": 0, "c": "med"}, "MYS": {"v": 0, "c": "med"},
+        "THA": {"v": 0, "c": "med"}, "VNM": {"v": 0, "c": "med"}, "KAZ": {"v": 0, "c": "med"}, "QAT": {"v": 0, "c": "med"}
+      }
+    },
+    "ai_talent": {
+      "label": "Top AI researchers",
+      "unit": "k",
+      "source": "Stanford HAI AI Index 2026 / Zeki 2025 — top AI authors & inventors by work country (Fig 1.8.1)",
+      "url": "https://hai.stanford.edu/assets/files/ai_index_report_2026_chapter_1_research_development.pdf",
+      "method": "Absolute count (thousands) by country of work, read from chart. CHINA EXCLUDED by Zeki methodology — left n/a, NOT imputed.",
+      "values": {
+        "USA": {"v": 220.52, "c": "high"}, "IND": {"v": 50.46, "c": "high"}, "DEU": {"v": 48.52, "c": "high"},
+        "GBR": {"v": 34.37, "c": "high"}, "CAN": {"v": 31.45, "c": "high"}, "FRA": {"v": 18.82, "c": "high"},
+        "AUS": {"v": 14.54, "c": "high"}, "NLD": {"v": 13.96, "c": "high"}, "ITA": {"v": 13.23, "c": "high"},
+        "BRA": {"v": 11.10, "c": "high"}, "ESP": {"v": 9.17, "c": "high"}, "SGP": {"v": 6.61, "c": "high"},
+        "JPN": {"v": 6.28, "c": "high"}, "KOR": {"v": 5.96, "c": "high"}, "ISR": {"v": 5.19, "c": "high"},
+        "SAU": {"v": 3.43, "c": "high"}, "ARE": {"v": 3.09, "c": "high"}
+      },
+      "missing": ["CHN", "EU", "TWN", "QAT", "TUR", "MYS", "THA", "VNM", "KAZ"],
+      "missing_note": "CHN is a major hole (top-2 AI-talent power, excluded by Zeki). Needs a separately-sourced estimate or stays n/a."
+    },
+    "q_patents": {
+      "label": "Quantum patent families",
+      "unit": "k",
+      "source": "EPO/OECD — Mapping the Global Quantum Ecosystem (Dec 2025), all patent families by applicant country, 2005-2024",
+      "url": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2025/12/mapping-the-global-quantum-ecosystem_47891dd2/20251217-0001.pdf",
+      "method": "All patent families (thousands). NB: by international-family (IPF) metric, CHN drops to ~0.95 and USA leads — metric choice reshapes ranking. EU overlaps members.",
+      "values": {
+        "CHN": {"v": 16.285, "c": "high", "note": "all families; IPF-only=0.947 (4th)"},
+        "USA": {"v": 6.443, "c": "high", "note": "IPF-only=3.330 (1st)"}, "JPN": {"v": 2.636, "c": "high"},
+        "EU": {"v": 1.923, "c": "med", "note": "bloc; overlaps DEU/FRA/NLD/ESP/ITA"}, "KOR": {"v": 1.608, "c": "high"},
+        "DEU": {"v": 0.705, "c": "high"}, "GBR": {"v": 0.606, "c": "high"}, "CAN": {"v": 0.534, "c": "high"},
+        "FRA": {"v": 0.361, "c": "high"}, "ISR": {"v": 0.186, "c": "high"}, "NLD": {"v": 0.143, "c": "high"},
+        "AUS": {"v": 0.143, "c": "high"}
+      },
+      "missing": ["ESP", "ITA", "IND", "SGP", "TWN", "ARE", "SAU", "QAT", "BRA", "TUR", "MYS", "THA", "VNM", "KAZ"],
+      "missing_note": "Long tail dumped into 'Rest of World' in every authoritative report; genuinely unsourceable, not fabricated."
+    },
+    "ai_compute": {
+      "label": "Compute capacity",
+      "unit": "idx US=100",
+      "source": "TOP500 Nov-2025 Rmax (HPC proxy); Epoch AI GPU-cluster share for AI-specific cross-check",
+      "url": "https://www.top500.org/lists/top500/2025/11/highs/",
+      "method": "HPC FP64 proxy normalized US=100 — NOT AI-specific. Read as rank-order. China/Korea/France distorted vs AI reality (see notes).",
+      "values": {
+        "USA": {"v": 100, "c": "high"}, "JPN": {"v": 19, "c": "high", "note": "HPC-heavy, AI-light; Epoch AI-specific ~2"},
+        "DEU": {"v": 17, "c": "high"}, "ITA": {"v": 12, "c": "med"}, "EU": {"v": 6.4, "c": "med", "note": "Epoch AI-cluster share; overlaps members"},
+        "GBR": {"v": 5, "c": "med"}, "NLD": {"v": 3.8, "c": "low"}, "ESP": {"v": 3, "c": "med"},
+        "FRA": {"v": 3, "c": "med", "note": "proxy understates — Epoch ranks FRA #5 in AI clusters"},
+        "KOR": {"v": 3, "c": "low", "note": "proxy SEVERELY understates — Epoch ranks KOR #4 in AI clusters"},
+        "SAU": {"v": 2, "c": "low"}, "ARE": {"v": 2, "c": "low"}, "ISR": {"v": 2, "c": "low"},
+        "CHN": {"v": 1.4, "c": "low", "note": "DISPUTED — TOP500 undercount (China stopped submitting); Epoch AI-specific ~19. Do not trust 1.4."},
+        "IND": {"v": 1.3, "c": "low"}, "BRA": {"v": 1.1, "c": "low"}, "CAN": {"v": 0.6, "c": "low"},
+        "AUS": {"v": 0.4, "c": "low"}, "KAZ": {"v": 0.3, "c": "low"}, "TWN": {"v": 0.3, "c": "low"}, "TUR": {"v": 0.05, "c": "low"}
+      },
+      "missing": ["SGP", "QAT", "MYS", "THA", "VNM"],
+      "missing_note": "No public per-country AI-compute breakdown; Singapore especially is a data gap, not zero."
+    },
+    "q_qubits": {
+      "label": "Largest qubit program",
+      "unit": "#",
+      "source": "Per-vendor primary announcements 2024-2026 (Atom Computing, IBM, USTC, Fujitsu/RIKEN, Pasqal, IQM, D-Wave, Quantinuum, etc.)",
+      "url": "https://thequantuminsider.com/2025/09/24/caltech-team-sets-record-with-6100-qubit-array/",
+      "method": "Largest physical-qubit gate-model processor by country of DEVELOPER. WARNING: cross-modality non-comparable (annealing/superconducting/trapped-ion/neutral-atom not equivalent). Raw count misleads — consider ordinal tiers.",
+      "values": {
+        "USA": {"v": 1180, "c": "high", "note": "Atom Computing neutral-atom; IBM Condor 1121 superconducting; Caltech 6100 array not yet a computer"},
+        "CHN": {"v": 504, "c": "med", "note": "Xiaohong test platform; Zuchongzhi 3.0=105 is the validated advantage processor"},
+        "JPN": {"v": 256, "c": "high", "note": "Fujitsu/RIKEN superconducting"},
+        "CAN": {"v": 4400, "c": "high", "note": "D-Wave ANNEALER — not gate-model, not comparable; gate-model CAN peak far lower"},
+        "FRA": {"v": 324, "c": "med", "note": "Pasqal neutral-atom"}, "DEU": {"v": 150, "c": "med", "note": "IQM(FIN) hardware hosted in DE"},
+        "EU": {"v": 324, "c": "med", "note": "bloc max (Pasqal)"}, "GBR": {"v": 98, "c": "med", "note": "Quantinuum trapped-ion; shared US/UK attribution"},
+        "ITA": {"v": 140, "c": "low", "note": "Pasqal(FRA)-built, hosted in IT — not indigenous"}, "IND": {"v": 25, "c": "high"},
+        "KOR": {"v": 20, "c": "med"}, "TWN": {"v": 20, "c": "high"}, "ISR": {"v": 20, "c": "med"},
+        "NLD": {"v": 5, "c": "low", "note": "leads on spin-qubit quality not count"}, "AUS": {"v": 3, "c": "low", "note": "silicon spin-qubit leader; count understates"},
+        "SAU": {"v": 200, "c": "low", "note": "Pasqal(FRA) deployed, not developed"}, "ARE": {"v": 10, "c": "low", "note": "indigenous under construction"},
+        "ESP": {"v": 5, "c": "low"}, "SGP": {"v": 0, "c": "low", "note": "strong ecosystem, no indigenous processor"},
+        "QAT": {"v": 0, "c": "low", "note": "access/investment only"}, "BRA": {"v": 0, "c": "low", "note": "imported Chinese hardware, not yet operational"}
+      },
+      "missing": ["TUR", "MYS", "THA", "VNM", "KAZ"],
+      "missing_note": "No operating domestically-developed quantum processor."
+    },
+    "q_strategy": {
+      "label": "Quantum strategy maturity",
+      "unit": "/100",
+      "source": "Qureca Quantum Initiatives Worldwide 2026 + OECD national-strategies (Dec 2025) — constructed rubric",
+      "url": "https://www.qureca.com/quantum-initiatives-worldwide/",
+      "method": "Transparent rubric over CITABLE facts: strategy existence+age (40) + committed budget tier (25) + national institute (20) + coordination body (15). The facts are hard; the 0-100 mapping is constructed.",
+      "values": {
+        "USA": {"v": 98, "c": "high"}, "CHN": {"v": 92, "c": "med"}, "EU": {"v": 90, "c": "high"}, "GBR": {"v": 95, "c": "high"},
+        "DEU": {"v": 88, "c": "high"}, "FRA": {"v": 88, "c": "high"}, "NLD": {"v": 85, "c": "high"}, "JPN": {"v": 85, "c": "high"},
+        "KOR": {"v": 80, "c": "high"}, "CAN": {"v": 82, "c": "high"}, "AUS": {"v": 78, "c": "high"}, "IND": {"v": 80, "c": "high"},
+        "ITA": {"v": 68, "c": "med"}, "ESP": {"v": 70, "c": "high"}, "ISR": {"v": 80, "c": "high"}, "SGP": {"v": 83, "c": "high"},
+        "TWN": {"v": 70, "c": "med"}, "ARE": {"v": 55, "c": "med"}, "SAU": {"v": 48, "c": "med"}, "QAT": {"v": 35, "c": "low"},
+        "BRA": {"v": 50, "c": "med"}, "TUR": {"v": 42, "c": "med"}, "MYS": {"v": 22, "c": "low"}, "THA": {"v": 35, "c": "low"},
+        "VNM": {"v": 15, "c": "low"}, "KAZ": {"v": 15, "c": "low"}
+      }
+    },
+    "q_export": {
+      "label": "Export-control exposure",
+      "unit": "/100 (inverted)",
+      "source": "ANALYST CONSTRUCT — no published index. Buckets from CSIS/BIS (US diffusion-rule tiers, RESCINDED May-2025; Country Group D:5; Wassenaar).",
+      "url": "https://www.csis.org/analysis/ai-diffusion-framework-securing-us-ai-leadership-while-preempting-strategic-drift",
+      "method": "Bucket is citable; the 0-100 number is an analyst mapping. Only CHN (~95, Group D:5 in force) is genuinely data-backed. Within-tier ordering is judgment. RECOMMEND demoting to a 3-band categorical flag, not a continuous score.",
+      "values": {
+        "CHN": {"v": 95, "c": "high", "note": "Group D:5 + presumption-of-denial, in force"},
+        "USA": {"v": 5, "c": "high"}, "EU": {"v": 8, "c": "med"}, "GBR": {"v": 8, "c": "high"}, "DEU": {"v": 8, "c": "high"},
+        "FRA": {"v": 8, "c": "high"}, "ITA": {"v": 8, "c": "high"}, "ESP": {"v": 8, "c": "high"}, "NLD": {"v": 10, "c": "high"},
+        "JPN": {"v": 10, "c": "high"}, "KOR": {"v": 12, "c": "high"}, "CAN": {"v": 8, "c": "high"}, "AUS": {"v": 8, "c": "high"},
+        "TWN": {"v": 15, "c": "med"}, "ISR": {"v": 30, "c": "med"}, "SGP": {"v": 35, "c": "med"}, "IND": {"v": 35, "c": "med"},
+        "ARE": {"v": 40, "c": "med"}, "SAU": {"v": 40, "c": "med"}, "QAT": {"v": 40, "c": "low"}, "MYS": {"v": 38, "c": "med"},
+        "THA": {"v": 35, "c": "low"}, "VNM": {"v": 38, "c": "low"}, "BRA": {"v": 33, "c": "low"}, "TUR": {"v": 35, "c": "low"}, "KAZ": {"v": 45, "c": "low"}
+      },
+      "warning": "Breaks the 'every number backed by data' promise except for CHN. Demote or fence off."
+    }
+  }
+}
