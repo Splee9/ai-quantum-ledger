@@ -22,6 +22,68 @@ subsets (e.g. "appropriated public outlays only").
 - **Not complete.** This is a Stage-1 **seed** (currently ~22 records / ~14 jurisdictions). The
   Stage-1 advance benchmark is **≥40 jurisdictions, ≥3 sourced records each**.
 
+## Announcement collection methodology
+
+The ledger aims to be **complete** over a precisely-scoped universe of announcements, gathered by a
+daily routine that is deliberately split into *propose* (automated) and *dispose* (human-reviewed).
+
+### Scope — what we try to be complete over
+
+**In scope:** every announcement that is **both** (a) about **AI, quantum, ai+quantum, AI-enabling
+compute, or AI-relevant semiconductor capacity**, **and** (b) **involves a country or bloc** — i.e. a
+government / government-adjacent commitment, **or** a private / mobilization commitment framed around a
+national jurisdiction (national AI champions, sovereign-AI data centers, summit pledges). **Both public
+and private money are collected** — kept in separate fields and never summed.
+
+**Out of scope:** pure private company funding rounds with no national/sovereign framing; product
+launches; opinion / market-size pieces; academic results without a funding commitment.
+
+**Public/private delineation** is preserved on *every* row via `actor_type` and the
+`public_outlay_usd` / `private_mobilized_usd` split — the same discipline as the rest of the ledger,
+applied uniformly as coverage expands. Target: all-time and append-only; the Stage-1 advance benchmark
+is **≥ 40 jurisdictions with ≥ 3 tier-≤2 sourced records each**.
+
+### Source-fidelity tiers — and the tier-2 gate
+
+Source **fidelity** (how authoritative the *outlet* is) is tracked on `source_tier`, a separate axis
+from `verification_status` (whether the *claim* has been traced to a primary doc). Full taxonomy in
+`data/schema.json#_source_tiers`:
+
+| Tier | Outlet class | Examples |
+|---|---|---|
+| **1** | Primary / official | gov budget docs, legislative appropriations, ministry/.gov/EC press releases, official program pages; for private, the official newsroom / primary filing |
+| **2** | Major established secondary | Reuters, AP, Bloomberg, FT, WSJ, NYT, Nikkei, The Economist; OECD.AI, Stanford HAI, McKinsey, WIPO, Epoch AI, CSIS |
+| **3** | Trade press / regional / aggregator | TechCrunch, The Register, smaller regional press, a bare Google-News surface — *discovery-grade only* |
+| **4** | Low fidelity | PR-wire distribution, social posts, anonymous blogs, content farms |
+
+**The tier-2 gate:** the daily sweep **keeps only `source_tier ≤ 2`.** A tier-3 source may reveal that
+an announcement *exists*, but the candidate's cited source must be tier ≤ 2 before it enters the review
+queue; tier-3/4-only items are dropped by the scanner (`scan.py … --min-tier 2`, the default) **and**
+rejected by the write-path (`ingest.py`), with `--allow-low-tier` as an explicit, auditable override for
+hand-curated rows. The current seed is 17 tier-1 / 5 tier-2 records — no row sits below the gate.
+
+### The routine
+
+```
+ ① discover   scan.py discover [--international]      Google News RSS, 20 AI/quantum queries,
+              ─────────────────────────────────────   optional global editions. No API key.
+                       │  headlines.jsonl
+ ② extract+tier  scan.py extract --min-tier 2         Claude structured-output extraction assigns
+              ─────────────────────────────────────   source_tier per record; the gate drops tier>2.
+                       │  candidates.jsonl  (tier ≤ 2 only)
+ ③ stage       ingest.py add                          validate (incl. tier gate) + dedup → review queue
+                       │  data/ingest-queue.jsonl
+ ④ review      ingest.py list  →  ingest.py promote   human checks sources, promotes vetted rows
+                       │  data/government-commitments.jsonl
+ ⑤ build       python3 build.py  &&  git commit       regenerate all viewers, commit the diff
+```
+
+`scan.py run --add` does ①+②+③ in one shot. The whole sweep is **idempotent on `id`**, so re-runs never
+duplicate. **Cadence:** wrap `scan.py run --add` in a daily cron / GitHub Action / Cowork task; a
+reviewer works the queue (`ingest.py list` → `promote`) and runs `build.py` + commit on whatever cadence
+they trust. The human-review gate between ③ and ④ is deliberate and stays. See `INGESTION.md` for the
+full field-by-field contract.
+
 ## The cardinal rule: headlines are not additive
 
 The single biggest integrity threat is **"announcement inflation"** — summing headline numbers that

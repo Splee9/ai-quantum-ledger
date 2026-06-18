@@ -44,26 +44,61 @@ from email.utils import parsedate_to_datetime
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCHEMA_FILE = os.path.join(HERE, "data", "schema.json")
 DEFAULT_MODEL = os.environ.get("LEDGER_SCAN_MODEL", "claude-opus-4-8")
-MAX_HEADLINES = 60  # cap a single extraction call so the response fits max_tokens
+MAX_HEADLINES = 60  # cap a SINGLE extraction call so the response fits max_tokens;
+                    # comprehensive sweeps are chunked into batches of this size.
+DEFAULT_MIN_TIER = 2  # the fidelity gate — drop candidates whose source_tier is worse
 
-# Search queries for the discovery stage. Broad enough to catch national AI/quantum
-# funding announcements; the extraction stage filters out the irrelevant ones.
+# Search queries for the discovery stage — aims for COMPLETE coverage of AI & quantum
+# announcements involving a country/bloc (see data/schema.json#_collection_scope), public
+# AND private. The extraction stage filters out the irrelevant ones and tiers each source.
 QUERIES = [
+    # --- public / government AI ---
     "national AI strategy government investment",
     "government artificial intelligence investment billion",
-    "quantum technology government funding",
-    "sovereign AI compute fund",
-    "semiconductor subsidy government billion",
     "AI infrastructure public investment announcement",
+    "sovereign AI compute fund",
+    "government AI supercomputer data center funding",
+    "public AI research institute funding launch",
+    "AI act funding budget allocation",
+    "ministry artificial intelligence program budget",
+    # --- private / mobilized AI involving a nation ---
+    "national AI champion private investment pledge",
+    "AI data center investment country billion",
+    "sovereign wealth fund AI investment",
+    "AI summit investment pledge mobilization",
+    # --- quantum (public + private) ---
+    "quantum technology government funding",
     "quantum computing national program funding",
+    "national quantum strategy initiative billion",
+    "quantum research center government investment",
+    "quantum private investment national program",
+    # --- enabling compute / semiconductor ---
+    "semiconductor subsidy government billion",
+    "chips act government semiconductor funding",
+    "GPU compute cluster national investment",
+]
+
+# Optional international reach: Google News editions (hl, gl, ceid) to sweep beyond the
+# US/English surface. Enabled with `--international`; the default run uses US-en only.
+EDITIONS = [
+    ("en-US", "US", "US:en"),   # default
+    ("en-GB", "GB", "GB:en"),
+    ("en-IN", "IN", "IN:en"),
+    ("fr",    "FR", "FR:fr"),
+    ("de",    "DE", "DE:de"),
+    ("ja",    "JP", "JP:ja"),
+    ("ko",    "KR", "KR:ko"),
+    ("zh-CN", "CN", "CN:zh-Hans"),
 ]
 
 # ---------------------------------------------------------------------------
 # Stage 1 — discovery (Google News RSS; stdlib only, no API key)
 # ---------------------------------------------------------------------------
-def _rss_url(query):
+def _rss_url(query, edition=("en-US", "US", "US:en")):
     q = urllib.parse.quote(query)
-    return f"https://news.google.com/rss/search?q={q}&hl=en-US&gl=US&ceid=US:en"
+    hl, gl, ceid = edition
+    return (f"https://news.google.com/rss/search?q={q}"
+            f"&hl={hl}&gl={gl}&ceid={urllib.parse.quote(ceid)}")
 
 
 def _ssl_context():
@@ -103,26 +138,29 @@ def _within_days(published, days, now):
     return dt >= now - timedelta(days=days)
 
 
-def discover(days=2, queries=QUERIES):
-    """Pull recent headlines across all queries, deduped by link."""
+def discover(days=2, queries=QUERIES, editions=None):
+    """Pull recent headlines across all queries (and editions), deduped by link."""
+    editions = editions or [EDITIONS[0]]
     now = datetime.now(timezone.utc)
     ctx = _ssl_context()
     seen, headlines = set(), []
-    for q in queries:
-        try:
-            req = urllib.request.Request(_rss_url(q), headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=30, context=ctx) as r:
-                items = parse_rss(r.read())
-        except Exception as e:  # network/parse errors per query shouldn't kill the run
-            print(f"  warn: query '{q}' failed: {e}", file=sys.stderr)
-            continue
-        for h in items:
-            key = h["link"]
-            if key in seen or not _within_days(h["published"], days, now):
+    for edition in editions:
+        for q in queries:
+            try:
+                req = urllib.request.Request(_rss_url(q, edition), headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req, timeout=30, context=ctx) as r:
+                    items = parse_rss(r.read())
+            except Exception as e:  # network/parse errors per query shouldn't kill the run
+                print(f"  warn: query '{q}' [{edition[1]}] failed: {e}", file=sys.stderr)
                 continue
-            seen.add(key)
-            h["query"] = q
-            headlines.append(h)
+            for h in items:
+                key = h["link"]
+                if key in seen or not _within_days(h["published"], days, now):
+                    continue
+                seen.add(key)
+                h["query"] = q
+                h["edition"] = edition[1]
+                headlines.append(h)
     return headlines
 
 
@@ -154,13 +192,17 @@ _REC = {
         "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
         "source_name": {"type": "string"},
         "source_url": {"type": ["string", "null"]},
+        "source_tier": {"type": "integer", "enum": [1, 2, 3, 4],
+                        "description": "fidelity of the cited outlet: 1 primary/official, 2 major secondary "
+                                       "(wire services, papers of record, established research trackers), "
+                                       "3 trade/regional/aggregator, 4 low (PR wire, social, blog)"},
         "event_key": {"type": "string", "description": "stable key grouping re-announcements of the SAME money"},
         "notes": {"type": ["string", "null"]},
     },
     "required": ["id", "jurisdiction", "iso3", "program", "domain", "currency", "usd_approx",
                  "headline_amount", "announced", "actor_type", "public_outlay_usd", "private_mobilized_usd",
                  "horizon_start_year", "horizon_end_year", "verification_status", "confidence",
-                 "source_name", "source_url", "event_key", "notes"],
+                 "source_name", "source_url", "source_tier", "event_key", "notes"],
 }
 OUTPUT_SCHEMA = {
     "type": "object", "additionalProperties": False,
@@ -168,20 +210,35 @@ OUTPUT_SCHEMA = {
     "required": ["candidates"],
 }
 
-SYSTEM = """You extract structured records for an all-time ledger of NATIONAL (or \
-government-adjacent) AI and quantum INVESTMENT COMMITMENTS, one row per announcement.
+SYSTEM = """You extract structured records for an all-time ledger of AI and quantum \
+INVESTMENT COMMITMENTS that INVOLVE A COUNTRY OR BLOC, one row per announcement.
 
-You are given recent news headlines. For each headline that describes a *new* government \
-or government-adjacent AI / quantum / semiconductor / compute investment commitment, emit \
-ONE candidate record. Skip everything else (company product launches, opinion pieces, \
-generic market-size articles, private-company funding rounds with no government role, \
-duplicates of the same announcement).
+You are given recent news headlines. Emit ONE candidate record for each headline that \
+describes a *new* commitment that is BOTH (a) about AI, quantum, ai+quantum, AI-enabling \
+compute, or AI-relevant semiconductor capacity, AND (b) involves a national jurisdiction — \
+either a government / government-adjacent commitment, OR a private / mobilization commitment \
+framed around a country (national AI champions, sovereign-AI data centers, summit pledges). \
+Collect BOTH public and private money. Skip everything else (pure company product launches, \
+opinion / market-size pieces, private funding rounds with no national framing, duplicates).
 
 Hard rules (this is a credibility-first ledger):
 - NEVER sum headline figures. Keep public and private money in SEPARATE fields \
   (public_outlay_usd vs private_mobilized_usd). Big "mobilization" headlines (private \
   capital, multi-year targets) are actor_type 'mobilization_target' or 'private', with \
   the genuine public portion (if any) in public_outlay_usd.
+- source_tier (FIDELITY of the cited outlet — judge it, this drives the collection gate):
+    1 = primary/official (government budget docs, ministry/.gov/European-Commission releases,
+        legislative appropriations, official program pages; for private, the official company
+        newsroom or a primary filing);
+    2 = major established secondary (Reuters, AP, Bloomberg, Financial Times, WSJ, NYT, Nikkei,
+        The Economist; established research trackers: OECD.AI, Stanford HAI, McKinsey, WIPO,
+        Epoch AI, CSIS);
+    3 = trade press / regional outlet / news aggregator (TechCrunch, The Register, smaller
+        regional press, a bare Google-News surface with no named outlet of record);
+    4 = low fidelity (PR-wire distribution, social posts, anonymous blogs, content farms).
+  Assign the tier of the ACTUAL outlet in 'source'. When the outlet is unknown or clearly a
+  blog/PR wire, use 3 or 4. Prefer the underlying primary source's tier if the headline \
+  clearly cites an official release. Do NOT inflate tiers — the downstream gate keeps only <= 2.
 - verification_status: use 'reported' (credible press) or 'unconfirmed'. NEVER 'verified' \
   or 'estimate' — a human assigns those after tracing a primary source.
 - confidence: 'low' or 'medium' for headline-derived rows. Prefer 'low' when unsure.
@@ -208,17 +265,8 @@ def build_user_content(headlines):
     return "\n".join(lines)
 
 
-def extract(headlines, model=DEFAULT_MODEL):
-    """Call Claude to extract candidate records. Returns a list of dicts."""
-    if not headlines:
-        return []
-    try:
-        import anthropic
-    except ImportError:
-        raise SystemExit("extract needs the Anthropic SDK: pip install anthropic")
-    if not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")):
-        raise SystemExit("extract needs ANTHROPIC_API_KEY (or an `ant auth login` profile).")
-    client = anthropic.Anthropic()
+def _extract_batch(client, headlines, model):
+    """One extraction API call over <= MAX_HEADLINES headlines."""
     resp = client.messages.create(
         model=model,
         max_tokens=16000,
@@ -228,9 +276,38 @@ def extract(headlines, model=DEFAULT_MODEL):
         output_config={"format": {"type": "json_schema", "schema": OUTPUT_SCHEMA}},
     )
     text = next((b.text for b in resp.content if b.type == "text"), None)
-    if not text:
+    return json.loads(text).get("candidates", []) if text else []
+
+
+def extract(headlines, model=DEFAULT_MODEL):
+    """Call Claude to extract candidate records, chunked into MAX_HEADLINES batches
+    so a comprehensive sweep doesn't overflow a single response. Returns a list of dicts."""
+    if not headlines:
         return []
-    return json.loads(text).get("candidates", [])
+    try:
+        import anthropic
+    except ImportError:
+        raise SystemExit("extract needs the Anthropic SDK: pip install anthropic")
+    if not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")):
+        raise SystemExit("extract needs ANTHROPIC_API_KEY (or an `ant auth login` profile).")
+    client = anthropic.Anthropic()
+    cands = []
+    batches = [headlines[i:i + MAX_HEADLINES] for i in range(0, len(headlines), MAX_HEADLINES)]
+    for n, batch in enumerate(batches, 1):
+        if len(batches) > 1:
+            print(f"  extract batch {n}/{len(batches)} ({len(batch)} headlines)…", file=sys.stderr)
+        cands.extend(_extract_batch(client, batch, model))
+    return cands
+
+
+def apply_tier_gate(cands, min_tier=DEFAULT_MIN_TIER):
+    """Split candidates on the source-fidelity gate. Returns (kept, dropped) where
+    kept have source_tier <= min_tier (a missing tier is treated as failing the gate)."""
+    kept, dropped = [], []
+    for c in cands:
+        t = c.get("source_tier")
+        (kept if isinstance(t, int) and t <= min_tier else dropped).append(c)
+    return kept, dropped
 
 
 # ---------------------------------------------------------------------------
@@ -252,30 +329,41 @@ def _read_jsonl(path):
     return out
 
 
+def _editions_for(args):
+    return EDITIONS if getattr(args, "international", False) else [EDITIONS[0]]
+
+
 def cmd_discover(args):
-    hs = discover(days=args.days)
+    hs = discover(days=args.days, editions=_editions_for(args))
     _write_jsonl(args.out, hs)
-    print(f"discover: {len(hs)} headlines -> {os.path.relpath(args.out, HERE)} (last {args.days}d)")
+    scope = "international" if args.international else "US-en"
+    print(f"discover: {len(hs)} headlines -> {os.path.relpath(args.out, HERE)} "
+          f"(last {args.days}d, {scope}, {len(QUERIES)} queries)")
     return 0
 
 
 def cmd_extract(args):
     headlines = _read_jsonl(args.headlines)
     cands = extract(headlines, model=args.model)
-    _write_jsonl(args.out, cands)
-    print(f"extract: {len(cands)} candidate(s) from {len(headlines)} headlines "
-          f"-> {os.path.relpath(args.out, HERE)} (model {args.model})")
+    kept, dropped = apply_tier_gate(cands, min_tier=args.min_tier)
+    _write_jsonl(args.out, kept)
+    print(f"extract: {len(kept)} candidate(s) kept (tier<={args.min_tier}), {len(dropped)} dropped "
+          f"below the gate, from {len(headlines)} headlines -> {os.path.relpath(args.out, HERE)} "
+          f"(model {args.model})")
     return 0
 
 
 def cmd_run(args):
-    hs = discover(days=args.days)
-    print(f"run: discovered {len(hs)} headlines (last {args.days}d)")
+    hs = discover(days=args.days, editions=_editions_for(args))
+    scope = "international" if args.international else "US-en"
+    print(f"run: discovered {len(hs)} headlines (last {args.days}d, {scope})")
     cands = extract(hs, model=args.model)
-    _write_jsonl(args.out, cands)
-    print(f"run: extracted {len(cands)} candidate(s) -> {os.path.relpath(args.out, HERE)}")
-    if args.add and cands:
-        print("run: handing candidates to ingest.py add (review queue)...")
+    kept, dropped = apply_tier_gate(cands, min_tier=args.min_tier)
+    _write_jsonl(args.out, kept)
+    print(f"run: extracted {len(cands)} candidate(s); kept {len(kept)} at tier<={args.min_tier}, "
+          f"dropped {len(dropped)} below the gate -> {os.path.relpath(args.out, HERE)}")
+    if args.add and kept:
+        print("run: handing tier-gated candidates to ingest.py add (review queue)...")
         return subprocess.call([sys.executable, os.path.join(HERE, "ingest.py"), "add", args.out])
     if args.add:
         print("run: nothing to add.")
@@ -289,18 +377,26 @@ def main(argv):
     d = sub.add_parser("discover", help="Stage 1: Google News RSS -> headlines.jsonl (no API key)")
     d.add_argument("--days", type=int, default=2)
     d.add_argument("--out", default=os.path.join(HERE, "headlines.jsonl"))
+    d.add_argument("--international", action="store_true",
+                   help="sweep all Google News editions (global reach), not just US-en")
     d.set_defaults(func=cmd_discover)
 
     e = sub.add_parser("extract", help="Stage 2: Claude -> candidates.jsonl (needs API key)")
     e.add_argument("--headlines", required=True)
     e.add_argument("--out", default=os.path.join(HERE, "candidates.jsonl"))
     e.add_argument("--model", default=DEFAULT_MODEL)
+    e.add_argument("--min-tier", type=int, default=DEFAULT_MIN_TIER, dest="min_tier",
+                   help="source-fidelity gate: keep candidates with source_tier <= this (default 2)")
     e.set_defaults(func=cmd_extract)
 
     r = sub.add_parser("run", help="Stage 1 + 2 (+ optional ingest)")
     r.add_argument("--days", type=int, default=2)
     r.add_argument("--out", default=os.path.join(HERE, "candidates.jsonl"))
     r.add_argument("--model", default=DEFAULT_MODEL)
+    r.add_argument("--international", action="store_true",
+                   help="sweep all Google News editions (global reach), not just US-en")
+    r.add_argument("--min-tier", type=int, default=DEFAULT_MIN_TIER, dest="min_tier",
+                   help="source-fidelity gate: keep candidates with source_tier <= this (default 2)")
     r.add_argument("--add", action="store_true", help="pipe candidates into ingest.py add")
     r.set_defaults(func=cmd_run)
 

@@ -26,8 +26,7 @@
     "confidence":       {"type": "string", "enum": ["high", "medium", "low"]},
     "source_name":      {"type": "string", "description": "Publisher / issuing body."},
     "source_url":       {"type": ["string", "null"], "description": "Primary-source URL. Empty/null = pending verification (verification_status should then be 'reported' at best)."},
-    "source_tier":      {"type": ["string", "null"], "enum": ["T1", "T2", "T3", "T4", null], "description": "Credibility tier of the best available source (the trust spine). T1 = primary government / audited (budget docs, official press, Commerce-OIG/NIST status reports); T2 = supranational (OECD/EU/IMF/EC); T3 = specialist tracker / think tank (CSET, ITIF, Stanford HAI, Bruegel, OECD.AI); T4 = tier-one press only (FT/Reuters/Bloomberg/Nikkei), no budgetary backing. Null = not yet tiered. Treat T4-only figures (esp. Gulf mandates, unconfirmed buildouts) as provisional."},
-    "status":           {"type": ["string", "null"], "enum": ["announced", "authorized", "obligated", "disbursed", "stalled", "cancelled", null], "description": "Lifecycle of the money, distinct from verification of the figure. announced = stated intent; authorized = legislated ceiling but NOT appropriated (e.g. US CHIPS Science Division — public_outlay_usd should be null); obligated = awarded/milestone-gated but not paid in cash; disbursed = cash actually out the door; stalled = announced then materially delayed; cancelled = withdrawn/never drawn down (e.g. Intel Magdeburg). Null = unknown (defaults to announced)."},
+    "source_tier":      {"type": ["integer", "null"], "enum": [1, 2, 3, 4, null], "description": "Fidelity of the CITED source, independent of verification_status. 1 = primary/official (gov budget docs, ministry/.gov/EC press releases, legislative appropriations, official program pages, primary corporate filings for private commitments); 2 = major established secondary (wire services + papers of record — Reuters/AP/Bloomberg/FT/WSJ/NYT/Nikkei/Economist — and established research trackers: OECD.AI, Stanford HAI, McKinsey, WIPO, Epoch AI, CSIS); 3 = trade press / regional outlet / news aggregator (discovery-grade, not citable on its own); 4 = low fidelity (PR wires, social posts, anonymous blogs, content farms). THE COLLECTION GATE keeps only tier <= 2 — see _collection_scope. Null = unassigned (legacy rows; scanned rows must carry a tier)."},
     "event_key":        {"type": "string", "description": "Stable key grouping re-announcements of the SAME money across summits, for dedup. Sum at most one record per event_key."},
     "tradable_share":   {"type": ["number", "null"], "description": "Fraction (0-1) of the commitment that is globally-priced tradable goods (compute/GPUs/hardware), converted at MARKET FX; the remainder (talent/operations/local construction) is non-tradable and converted at PPP in the blended view. Null = use the generator's domain-default map (compute 0.90, semiconductor 0.65, ai 0.55, ai+quantum 0.50, quantum 0.45). Per-record override when line-item detail is known."},
     "notes":            {"type": ["string", "null"], "description": "Caveats: bundling, overlap with other records, opacity, etc."}
@@ -67,5 +66,22 @@
       "expected_rate": "min(1, max(0, (as_of_year - horizon_start_year) / (horizon_end_year - horizon_start_year))) — fraction due by the observation date on a linear schedule. Null if the horizon is open-ended.",
       "pace_status": "pace_flag if set; else from realization_rate / expected_rate: >=1.1 ahead, >=0.9 on_track, >=0.5 behind, else stalled."
     }
+  },
+  "_source_tiers": {
+    "description": "Source-fidelity taxonomy for the source_tier field. Fidelity (how authoritative the OUTLET is) is a separate axis from verification_status (whether the CLAIM has been traced to a primary doc). A tier-1 official release can still be verification_status 'reported' until a human pins it; a tier-2 wire report is credible but secondary.",
+    "tiers": {
+      "1": "Primary / official — government budget documents, legislative appropriations, ministry/.gov/European-Commission press releases, official program/initiative pages, central-bank or treasury releases; for private commitments, the primary corporate filing or official newsroom (e.g. an SEC filing, an official company announcement).",
+      "2": "Major established secondary — international wire services and papers of record (Reuters, AP, Bloomberg, Financial Times, Wall Street Journal, New York Times, Nikkei, The Economist) and established research institutions / trackers (OECD.AI, Stanford HAI AI Index, McKinsey, WIPO, Epoch AI, CSIS, major national academies).",
+      "3": "Trade press / regional / aggregator — industry trade outlets, smaller regional press, editorially-staffed tech blogs (TechCrunch, The Register), and news aggregators (Google News surfacing). Useful for DISCOVERY but not citable on its own.",
+      "4": "Low fidelity — unvetted PR-wire distribution, social-media posts, anonymous blogs, SEO/content-farm sites, rumor."
+    },
+    "gate": "The daily collection routine keeps only source_tier <= 2 (the tier-2 fidelity gate). Tier-3 sources may surface that an announcement EXISTS, but the candidate's cited source must be tier <= 2 before it enters the review queue; tier-3/4-only items are dropped by the sweep and rejected by ingest.py (override: --allow-low-tier, for hand-curated rows)."
+  },
+  "_collection_scope": {
+    "description": "What the announcement collection aims to be COMPLETE over.",
+    "in_scope": "Every announcement that (a) concerns AI, quantum, ai+quantum, AI-enabling compute, or AI-relevant semiconductor capacity, AND (b) involves a country or bloc — i.e. is a government/government-adjacent commitment, OR a private/mobilization commitment whose locus is a national jurisdiction (national AI champions, sovereign-AI data centers, summit pledges). Public and private money are BOTH collected, kept in separate fields, and NEVER summed (the cardinal rule).",
+    "out_of_scope": "Pure private company funding rounds with no national/sovereign framing; product launches; opinion/market-size pieces; academic results without a funding commitment.",
+    "delineation": "Each record carries actor_type + the public_outlay_usd / private_mobilized_usd split so the public-vs-private boundary is explicit on every row, exactly as in the rest of the ledger.",
+    "target": "All-time, append-only; Stage-1 advance benchmark >= 40 jurisdictions with >= 3 tier<=2 sourced records each."
   }
 }
