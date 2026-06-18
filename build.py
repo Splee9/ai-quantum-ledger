@@ -940,6 +940,28 @@ document.getElementById('dl').onclick=()=>{{
 POWER_AI_DOMAINS = {"ai", "ai+quantum", "compute"}
 POWER_Q_DOMAINS = {"quantum", "ai+quantum"}
 POWER_LIVE_DIMS = ["ai_public", "ai_private", "q_public"]
+# The 7 dimensions sourced from external public datasets (data/power-index-dimensions.json),
+# wired alongside the 3 ledger-derived money dims. q_export was DROPPED (no published index;
+# only China defensible). Every value carries its source + confidence; absent jurisdictions
+# render as n/a (never imputed). q_qubits is rendered as an ordinal TIER (raw counts are
+# cross-modality non-comparable — a Canadian annealer's 4,400 is not a frontier gate-model).
+POWER_SOURCED_DIMS = ["ai_compute", "ai_talent", "ai_reg", "ai_labs",
+                      "q_patents", "q_qubits", "q_strategy"]
+POWER_DIMS_FILE = os.path.join(HERE, "data", "power-index-dimensions.json")
+# Qubit ordinal tier -> index score (0-100). Modality-aware judgment (documented in
+# data/power-index-dimensions.json q_qubits notes): leading = multiple 1000+ systems;
+# advanced = operating 100s-class gate (or major annealer); emerging = indigenous <100 or
+# quality-focused; access = deployed-foreign / under-construction; none = no hardware.
+POWER_QUBIT_TIER_SCORE = {"leading": 100, "advanced": 78, "emerging": 50,
+                          "access": 25, "none": 5}
+POWER_QUBIT_TIER = {
+    "USA": "leading", "CHN": "advanced", "JPN": "advanced", "CAN": "advanced",
+    "FRA": "advanced", "DEU": "advanced", "EU": "advanced", "GBR": "advanced",
+    "IND": "emerging", "KOR": "emerging", "TWN": "emerging", "ISR": "emerging",
+    "NLD": "emerging", "AUS": "emerging", "ESP": "emerging",
+    "ITA": "access", "SAU": "access", "ARE": "access", "BRA": "access",
+    "SGP": "none", "QAT": "none",
+}
 POWER_GOV_ORIGIN = {"government_appropriated", "government_outlay", "state_fund",
                     "sovereign_wealth", "public_private"}
 POWER_PRIV_ORIGIN = {"private", "mobilization_target"}
@@ -1016,23 +1038,52 @@ def _power_jurisdictions(denom):
     return J
 
 
+def _load_power_dims():
+    """Load the externally-sourced dimension data (data/power-index-dimensions.json).
+    Returns (dims, ok) — dims is {} when the file is absent so the build still runs."""
+    try:
+        with open(POWER_DIMS_FILE, encoding="utf-8") as fh:
+            return json.load(fh).get("dimensions", {}), True
+    except (OSError, ValueError):
+        return {}, False
+
+
 def build_power_index_data(recs, denom, generated):
-    """Live values (in $B) for the three derivable Power-Index dimensions plus the
-    full jurisdiction set, keyed by iso3, with per-dim provenance and contributing
-    programs. Shape matches power-index.html's buildData() overlay."""
+    """Live values for all Power-Index dimensions plus the full jurisdiction set, keyed
+    by iso3. Three money dims ($B) are derived from this ledger; seven more are sourced
+    from data/power-index-dimensions.json (each value carries source + confidence). Absent
+    jurisdiction/dimension pairs are null = n/a (never imputed). Shape matches
+    power-index.html's buildData() overlay."""
+    sdims, sok = _load_power_dims()
     isos = sorted({r["iso3"] for r in recs} | set(denom.keys()))
-    values, programs, contributions = {}, {}, {}
+    values, conf, programs, contributions = {}, {}, {}, {}
+    qubit_meta = {}   # iso -> {tier, raw, note} for the ordinal qubit cell
     for iso in isos:
         rs = [r for r in recs if r["iso3"] == iso]
         aip, aiv, ai_c = _power_capital(rs, POWER_AI_DOMAINS)
         qp, _, q_c = _power_capital(rs, POWER_Q_DOMAINS)
-        values[iso] = {"ai_public": round(aip / 1e9, 3),
-                       "ai_private": round(aiv / 1e9, 3),
-                       "q_public": round(qp / 1e9, 3)}
-        # the records that compose each live total (full provenance for the drill-down card)
+        row = {"ai_public": round(aip / 1e9, 3),
+               "ai_private": round(aiv / 1e9, 3),
+               "q_public": round(qp / 1e9, 3)}
+        crow = {d: "high" for d in POWER_LIVE_DIMS}   # ledger dims are directly computed
+        # merge the externally-sourced dims; null where a jurisdiction has no data
+        for dim in POWER_SOURCED_DIMS:
+            cell = (sdims.get(dim, {}).get("values", {}) or {}).get(iso)
+            if dim == "q_qubits":
+                tier = POWER_QUBIT_TIER.get(iso)
+                row[dim] = POWER_QUBIT_TIER_SCORE.get(tier) if tier else None
+                if tier:
+                    qubit_meta[iso] = {"tier": tier,
+                                       "raw": (cell or {}).get("v"),
+                                       "note": (cell or {}).get("note", "")}
+                crow[dim] = (cell or {}).get("c", "low" if tier else None)
+            else:
+                row[dim] = cell.get("v") if cell else None
+                crow[dim] = cell.get("c") if cell else None
+        values[iso] = row
+        conf[iso] = crow
         contributions[iso] = {"ai_public": ai_c["pub"], "ai_private": ai_c["priv"],
                               "q_public": q_c["pub"]}
-        # one-line program-name summary for the hover chip — derived from the same lists
         programs[iso] = {dim: [c["program"] for c in contributions[iso][dim]][:4]
                          for dim in POWER_LIVE_DIMS}
     sources = {
@@ -1040,13 +1091,26 @@ def build_power_index_data(recs, denom, generated):
         "ai_private": {"name": "Ledger — committed private / mobilized AI capital", "date": generated},
         "q_public": {"name": "Ledger — committed public / state quantum capital", "date": generated},
     }
+    # per-dim source label + url + method, lifted from the sourced-dims file
+    dim_meta = {}
+    for dim in POWER_SOURCED_DIMS:
+        d = sdims.get(dim, {})
+        sources[dim] = {"name": d.get("source", "—"), "date": d.get("as_of", "2026"),
+                        "url": d.get("url")}
+        dim_meta[dim] = {"unit": d.get("unit"), "method": d.get("method"),
+                         "proxy": dim == "ai_compute", "ordinal": dim == "q_qubits"}
+    sourced_dims = POWER_LIVE_DIMS + POWER_SOURCED_DIMS
+    if not sok:
+        print("  (data/power-index-dimensions.json not found — sourced dims render n/a)")
     return {"generated": generated, "live_dims": POWER_LIVE_DIMS,
+            "sourced_dims": sourced_dims, "dim_meta": dim_meta,
             "J": _power_jurisdictions(denom),
-            "values": values, "sources": sources, "programs": programs,
-            "contributions": contributions,
-            "note": ("Live dims = best-available committed capital by origin ($B), "
-                     "deduplicated by event_key, estimate/unconfirmed tiers excluded. "
-                     "Other dimensions in the viewer are illustrative placeholders.")}
+            "values": values, "confidence": conf, "qubit_meta": qubit_meta,
+            "sources": sources, "programs": programs, "contributions": contributions,
+            "note": ("AI/Quantum capital dims ($B) = best-available committed capital by "
+                     "origin from the ledger (dedup by event_key, estimate/unconfirmed "
+                     "excluded). The other dims are sourced from public datasets (see each "
+                     "column's source); blank cells are n/a — no data, never imputed.")}
 
 
 def write_power_index_data(data):
