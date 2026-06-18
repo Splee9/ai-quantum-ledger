@@ -70,6 +70,7 @@
    </div>
   </section>
   <main id="app-root"></main>
+  <section id="sources-root" style="margin-top:22px"></section>
   <footer style="margin-top:26px;border-top:1px solid var(--line);padding-top:16px;font-size:11.5px;line-height:1.6;color:var(--faint);max-width:98ch">
    <b id="footFlag" style="color:var(--mut)">Every figure is sourced.</b><span id="liveNote"></span> The three capital dimensions come from the project's commitment ledger; the rest are drawn from public datasets — Oxford Insights (AI governance), Stanford HAI / Zeki (AI talent), Epoch AI / Our World in Data (frontier models &amp; compute), TOP500 (HPC compute proxy), EPO/OECD (quantum patents), Qureca/OECD (quantum strategy), and per-vendor announcements (qubit tiers). Hover any figure for its source and confidence; <b>blank cells are n/a</b> — no data, never imputed. Compute is an HPC proxy (not AI-specific); qubits are an ordinal tier (raw counts are cross-modality non-comparable). Export-control exposure was removed (no published index). Normalization denominators (population, GDP) are approximate. Self-contained &mdash; no external data calls.
   </footer>
@@ -2437,7 +2438,7 @@ class PowerIndex {
   basis(dim){ const m=this.state.mode; if(!dim.norm)return dim.unit||'score'; if(m==='pc')return 'per M'; if(m==='gdp')return 'per $T'; return dim.unit||'#'; }
 
   /* ---- lifecycle (FLIP + tween) ---- */
-  componentDidMount(){ this.flip(); this._clear=()=>{ if(this.state.chip)this.setState({chip:null}); }; window.addEventListener('scroll',this._clear,true);
+  componentDidMount(){ this.flip(); this._clear=()=>this.hideChip(); window.addEventListener('scroll',this._clear,true);
     this._key=(e)=>{ if(e.key==='Escape'&&this.state.card)this.setState({card:null}); }; window.addEventListener('keydown',this._key); }
   componentDidUpdate(){ this.flip(); }
   flip(){ this._nodes.forEach((n,k)=>{ if(!n)return; const top=n.offsetTop; const old=this._pos[k]; if(old!=null&&Math.abs(old-top)>0.5){ n.style.transition='none'; n.style.transform='translateY('+(old-top)+'px)'; void n.offsetWidth; requestAnimationFrame(()=>{ n.style.transition='transform .52s cubic-bezier(.2,.8,.2,1)'; n.style.transform='translateY(0)'; }); } this._pos[k]=top; }); }
@@ -2455,6 +2456,7 @@ class PowerIndex {
     const root = document.getElementById('app-root');
     const tree = this.app();
     root.replaceChildren(tree);
+    if(this._chipShown)this.hideChip();  // any structural re-render (sort/view) clears a lingering chip
     PENDING_REFS.forEach(fn=>fn());     // nodes now in DOM → offsetTop valid
     // reflect theme + toggle label on the page chrome
     const wrap = document.getElementById('root');
@@ -2473,8 +2475,17 @@ class PowerIndex {
   toggleTheme(){ this.setState(s=>({dark:!s.dark})); }
   setWeight(id,v){ this.setState(s=>({weights:Object.assign({},s.weights,{[id]:v})})); }
   preset(kind){ const w={}; this.DIMS.forEach(d=>{ w[d.id]= kind==='ai'?(d.pillar==='ai'?3:1): kind==='q'?(d.pillar==='q'?3:1): 1; }); this.setState({weights:w}); }
-  showChip(iso,dimId,el){ if(this.state.card)return; const r=el.getBoundingClientRect(); this.setState({chip:{iso,dimId,x:r.left,y:r.top}}); }
-  hideChip(){ if(this.state.chip)this.setState({chip:null}); }
+  /* Chip is rendered IMPERATIVELY into a standalone element — hovering never calls
+     setState, so the table is not re-rendered (which previously destroyed the hovered
+     cell and left the chip stuck). Appended to #root so [data-theme=dark] vars resolve. */
+  showChip(iso,dimId,el){ if(this.state.card)return; const r=el.getBoundingClientRect(); this.renderChip({iso,dimId,x:r.left,y:r.top}); }
+  hideChip(){ if(this._chipEl)this._chipEl.style.display='none'; this._chipShown=false; }
+  renderChip(c){
+    if(!this._chipEl){ this._chipEl=document.createElement('div'); this._chipEl.style.cssText='position:fixed;width:260px;z-index:60;pointer-events:none;display:none';
+      (document.getElementById('root')||document.body).appendChild(this._chipEl); }
+    this._chipEl.replaceChildren(this.chipInner(c));
+    const vw=(typeof window!=='undefined')?window.innerWidth:1200; const left=Math.min(Math.max(8,c.x),vw-272);
+    this._chipEl.style.left=left+'px'; this._chipEl.style.top=(c.y-8)+'px'; this._chipEl.style.display='block'; this._chipShown=true; }
   openCard(iso){ this.setState({card:{iso},chip:null}); }
   closeCard(){ if(this.state.card)this.setState({card:null}); }
 
@@ -2632,8 +2643,37 @@ class PowerIndex {
     return h('svg',{style:{display:'block',marginTop:'8px',width:'100%',height:ht+'px'},viewBox:'0 0 '+w+' '+ht,preserveAspectRatio:'none'},
       h('path',{d:dpath,fill:'none',stroke:'var(--accent)',strokeWidth:1.6,strokeLinejoin:'round',strokeLinecap:'round'}),
       h('circle',{cx:last[0],cy:last[1],r:2.6,fill:'var(--accent)'})); }
-  chipNode(){ const c=this.state.chip; if(!c)return null; const h=this.h; const d=this.dimById[c.dimId]; const j=this.jByIso[c.iso]; const cell=this.CELLS[c.iso][c.dimId]; const src=this.SRC[c.dimId];
-    const vw=(typeof window!=='undefined')?window.innerWidth:1200; const left=Math.min(Math.max(8,c.x),vw-272);
+  /* ---- persistent citations panel (always visible, not hover-only) ---- */
+  sourcesSection(){ const h=this.h; const J=this.J, N=J.length;
+    const head=h('div',{style:{display:'flex',alignItems:'baseline',gap:'10px',flexWrap:'wrap',marginBottom:'2px'}},
+      h('h2',{style:{font:"700 18px/1.2 'Source Serif 4',Georgia,serif",color:'var(--ink)',margin:0}},'Sources & methodology'),
+      h('span',{style:{font:"500 11.5px/1.4 'IBM Plex Sans'",color:'var(--mut)'}},'Every figure traces to one public dataset — or renders n/a (no data, never imputed).'));
+    const tagPill=(d)=>h('span',{style:{font:"600 8px/1 'IBM Plex Mono'",letterSpacing:'.1em',color:d.live?'var(--accent)':'var(--mut)',border:'1px solid '+(d.live?'var(--accent)':'var(--line)'),borderRadius:'999px',padding:'2px 6px'}}, d.live?'LIVE':'SRC');
+    const rowFor=(d)=>{ const src=this.SRC[d.id]||{}; const cov=J.filter(j=>this.CELLS[j.iso][d.id].v!=null).length;
+      const lbl=(src.name||'—')+(src.date?' · '+src.date:'');
+      const srcCell = src.url
+        ? h('a',{href:src.url,target:'_blank',rel:'noopener',style:{color:'var(--ink2)',textDecoration:'underline',textDecorationColor:'var(--line)',textUnderlineOffset:'2px'}}, lbl)
+        : h('span',{style:{color:'var(--ink2)'}}, lbl);
+      return h('tr',{style:{borderBottom:'1px solid var(--line2)'}},
+        h('td',{style:{padding:'8px 10px',verticalAlign:'top'}}, h('div',{style:{display:'flex',alignItems:'center',gap:'7px'}}, h('span',{style:{font:"600 12.5px/1.3 'IBM Plex Sans'",color:'var(--ink)'}},d.short), tagPill(d))),
+        h('td',{style:{padding:'8px 10px',verticalAlign:'top',font:"500 11.5px/1.4 'IBM Plex Sans'",color:'var(--mut)'}}, d.full.replace(/ — .*/,'')),
+        h('td',{style:{padding:'8px 10px',verticalAlign:'top',font:"500 11.5px/1.4 'IBM Plex Mono'"}}, srcCell),
+        h('td',{style:{padding:'8px 10px',verticalAlign:'top',textAlign:'right',font:"500 11.5px/1 'IBM Plex Mono'",color:cov===N?'var(--pos)':'var(--mut)',whiteSpace:'nowrap'}}, cov+' / '+N)); };
+    const thS={padding:'8px 10px',textAlign:'left',font:"600 9.5px/1 'IBM Plex Sans'",letterSpacing:'.08em',textTransform:'uppercase',color:'var(--faint)',borderBottom:'1.5px solid var(--ink)'};
+    const table=h('div',{style:{overflowX:'auto'}}, h('table',{style:{width:'100%',borderCollapse:'collapse',marginTop:'12px',minWidth:'560px'}},
+      h('thead',null,h('tr',null, h('th',{style:thS},'Dimension'), h('th',{style:thS},'What it measures'), h('th',{style:thS},'Source'), h('th',{style:Object.assign({},thS,{textAlign:'right'})},'Coverage'))),
+      h('tbody',null, this.DIMS.map(rowFor))));
+    const note=(t)=>h('div',{style:{marginTop:'4px'}},t);
+    const notes=h('div',{style:{marginTop:'13px',font:"500 11px/1.6 'IBM Plex Sans'",color:'var(--faint)'}},
+      note('• LIVE dimensions are computed from this project’s commitment ledger (committed capital by origin, deduplicated by event; estimate/unconfirmed excluded).'),
+      note('• Compute is a TOP500 HPC proxy, not AI-specific — read as rank-order; China/Korea/France are understated vs their AI-cluster standing.'),
+      note('• Qubits is an ordinal tier (modality-aware): raw counts are not comparable across superconducting / trapped-ion / neutral-atom / annealing hardware.'),
+      note('• Export-control exposure was removed — no published index exists and the best framework (US AI-diffusion tiers) was rescinded May 2025.'),
+      note('• n/a cells are excluded from the Index, never imputed — a jurisdiction’s Index is the weighted mean over the dimensions it has data for.'));
+    const pan={background:'var(--panel)',border:'1px solid var(--line)',borderRadius:'12px',boxShadow:'0 1px 2px var(--shadow)',padding:'18px 20px'};
+    return h('div',{style:pan}, head, table, notes); }
+
+  chipInner(c){ const h=this.h; const d=this.dimById[c.dimId]; const j=this.jByIso[c.iso]; const cell=this.CELLS[c.iso][c.dimId]; const src=this.SRC[c.dimId];
     const live=!!cell.live; const meta=this.dimMeta[c.dimId]||{};
     const valStr = cell.v==null ? 'n/a'
       : (d.ordinal && cell.q) ? (cell.q.tier.charAt(0).toUpperCase()+cell.q.tier.slice(1)+(cell.q.raw!=null?' · '+(cell.q.raw>=1000?cell.q.raw.toLocaleString():cell.q.raw)+' qb':''))
@@ -2654,7 +2694,7 @@ class PowerIndex {
     else if(live) note='Live ledger aggregate'+(cell.programs?' · '+cell.programs.join(', '):'')+(this.generated?' · as of '+this.generated:'');
     else note=(cell.conf?cell.conf+'-confidence':'sourced')+(cell.q&&cell.q.note?' · '+cell.q.note:(meta.method?' · '+meta.method:''));
     kids.push(h('div',{style:{marginTop:'6px',font:"500 10px/1.3 'IBM Plex Sans'",color:'var(--faint)'}}, note));
-    return h('div',{style:{position:'fixed',left:left+'px',top:(c.y-8)+'px',transform:'translateY(-100%)',width:'260px',background:'var(--panel)',border:'1px solid var(--line)',borderRadius:'10px',boxShadow:'0 14px 36px -10px var(--shadow)',padding:'12px 14px',zIndex:60,pointerEvents:'none',animation:'chipIn .14s ease-out'}}, kids);
+    return h('div',{style:{transform:'translateY(-100%)',width:'100%',background:'var(--panel)',border:'1px solid var(--line)',borderRadius:'10px',boxShadow:'0 14px 36px -10px var(--shadow)',padding:'12px 14px',animation:'chipIn .14s ease-out'}}, kids);
   }
 
   /* ---- source drill-down card (click-pinned) ---- */
@@ -2702,13 +2742,16 @@ class PowerIndex {
 
   /* ---- assemble ---- */
   app(){ const h=this.h; const v=this.state.view; const view = v==='matrix'?this.matrix():v==='compare'?this.compare():v==='index'?this.index():this.map();
-    return h(FRAG,null, this.controls(), view, this.chipNode(), this.cardNode()); }
+    return h(FRAG,null, this.controls(), view, this.cardNode()); }
 }
 
 /* ---------- mount ---------- */
 const APP = new PowerIndex({ defaultView:'matrix', normalizeDefault:'abs', startDark:false });
 document.getElementById('themeBtn').addEventListener('click', ()=>APP.toggleTheme());
 APP.render();
+
+// Persistent citations panel (static — built once from the injected sources).
+try{ const sr=document.getElementById('sources-root'); if(sr) sr.replaceChildren(APP.sourcesSection()); }catch(e){}
 
 // Reflect the sourced-data state in the page chrome.
 if(APP.sourcedDims && APP.sourcedDims.length){
